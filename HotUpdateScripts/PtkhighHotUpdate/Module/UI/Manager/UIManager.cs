@@ -1,4 +1,5 @@
-﻿using HotUpdateScripts.PtkhighHotUpdate.Module.UI.Base;
+﻿using HotUpdateScripts.PtkhighHotUpdate.Module.EventData;
+using HotUpdateScripts.PtkhighHotUpdate.Module.UI.Base;
 using HotUpdateScripts.PtkhighHotUpdate.Module.UI.View;
 using JEngine.Core;
 using JEngine.Event;
@@ -14,7 +15,7 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.UI.Manager
 {
     public class UIManager : MonoBehaviour
     {
-        [HideInInspector] public static UIManager instance { get; private set; }
+        [HideInInspector] public static UIManager instance;
 
         [SerializeField] private RectTransform layerHidden;
         [SerializeField] private RectTransform layerBottom;
@@ -145,14 +146,6 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.UI.Manager
             ui.InitUICallBack(openCall, closeCall);
         }
 
-        public void RegisterJEvent(string uiName, JEvent jEvent)
-        {
-            UIBase ui = GetUI(uiName);
-            if (ui != null)
-            {
-                jEvent.Register(ui);
-            }
-        }
 
 
         public void Show(string uibaseName, bool isSaveShow = false, bool isClearAll = true)
@@ -270,6 +263,11 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.UI.Manager
         public bool HasUI(string uibaseName)
         {
             return GetUI(uibaseName) != null;
+        }
+
+        public void TestReceive(TabData data)
+        {
+            Log.PrintWarning("has receive " + data);
         }
     }
 

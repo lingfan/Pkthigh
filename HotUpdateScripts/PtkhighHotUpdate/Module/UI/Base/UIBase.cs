@@ -12,18 +12,28 @@ using static UIConfig;
 
 namespace HotUpdateScripts.PtkhighHotUpdate.Module.UI.Base
 {
-    [Subscriber(ThreadMode.Main)]
     public class UIBase : MonoBehaviour
     {
         [HideInInspector] public UIConfig config;
 
         public bool IsOpen => gameObject.activeSelf;
 
-        public static UIBase instance;
-
         public Action<UIBase> openCall { get; private set; }
 
         public Action<UIBase> closeCall { get; private set; }
+
+
+        public virtual void Awake()
+        {
+            Log.Print("UIBase Awake");
+        }
+
+        public virtual void Start()
+        {
+            Log.Print("UIBase Start");
+        }
+
+
 
         /// <summary>
         /// JUI绑定
@@ -32,12 +42,8 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.UI.Base
 
         public virtual void Init()
         {
-            if (instance == null)
-            {
-                instance = this;
-            }
             config = this.GetComponent<UIConfig>();
-            Log.PrintWarning("第一次初始化:" + config);
+
             if (config == null)
             {
                 Log.PrintError(gameObject.name + " UIConfig未挂载");

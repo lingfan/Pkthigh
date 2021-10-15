@@ -50,16 +50,12 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Game
 
         void TestEvent()
         {
-            JEvent tabEvent = new JEvent();
-
-            UIManager.instance.RegisterJEvent(nameof(Tabs), tabEvent);
-
             TabData data = new TabData
             {
                 text = "test",
             };
-
-            tabEvent.Post(data);
+            EventManager.DispatchEvent<TabData>(nameof(Tabs), data);
         }
+
     }
 }

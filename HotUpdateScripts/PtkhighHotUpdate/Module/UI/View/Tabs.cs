@@ -24,9 +24,25 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.UI.View
             EventManager.AddEvent<TabData>(nameof(Tabs), TestEvent);
         }
 
-        public void TestEvent(TabData data)
+        public override void Start()
+        {
+            base.Start();
+            button.onClick.AddListener(ChangeLanguage);
+        }
+
+        public async void TestEvent(TabData data)
         {
             tabText.text = data.text;
+            await Task.Delay(2000);
+            tabText.text = Localization.GetString("DemoText");
+
+        }
+
+        public async void ChangeLanguage()
+        {
+            await Task.Delay(1000);
+            Localization.ChangeLanguage("en-us");
+            tabText.text = Localization.GetString("DemoText");
         }
 
     }

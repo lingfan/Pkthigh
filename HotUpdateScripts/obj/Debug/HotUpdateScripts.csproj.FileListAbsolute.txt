@@ -1,0 +1,7 @@
+D:\WTCompany\Pkthigh\Assets\HotUpdateResources\Dll\Hidden~\HotUpdateScripts.dll
+D:\WTCompany\Pkthigh\Assets\HotUpdateResources\Dll\Hidden~\HotUpdateScripts.pdb
+D:\WTCompany\Pkthigh\HotUpdateScripts\obj\Debug\HotUpdateScripts.csproj.AssemblyReference.cache
+D:\WTCompany\Pkthigh\HotUpdateScripts\obj\Debug\HotUpdateScripts.csproj.CoreCompileInputs.cache
+D:\WTCompany\Pkthigh\HotUpdateScripts\obj\Debug\HotUpdateScripts.csproj.CopyComplete
+D:\WTCompany\Pkthigh\HotUpdateScripts\obj\Debug\HotUpdateScripts.dll
+D:\WTCompany\Pkthigh\HotUpdateScripts\obj\Debug\HotUpdateScripts.pdb

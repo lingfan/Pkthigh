@@ -19,9 +19,13 @@ namespace ILRuntime.Runtime.Generated
         public static void Register(ILRuntime.Runtime.Enviorment.AppDomain app)
         {
             BindingFlags flag = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly;
+            MethodBase method;
             FieldInfo field;
             Type[] args;
             Type type = typeof(JEngine.Net.JSocketConfig);
+            args = new Type[]{};
+            method = type.GetMethod("Default", flag, null, args, null);
+            app.RegisterCLRMethodRedirection(method, Default_0);
 
             field = type.GetField("eventOpenName", flag);
             app.RegisterCLRFieldGetter(field, get_eventOpenName_0);
@@ -43,10 +47,25 @@ namespace ILRuntime.Runtime.Generated
             app.RegisterCLRFieldGetter(field, get_eventErrorName_4);
             app.RegisterCLRFieldSetter(field, set_eventErrorName_4);
             app.RegisterCLRFieldBinding(field, CopyToStack_eventErrorName_4, AssignFromStack_eventErrorName_4);
+            field = type.GetField("debug", flag);
+            app.RegisterCLRFieldGetter(field, get_debug_5);
+            app.RegisterCLRFieldSetter(field, set_debug_5);
+            app.RegisterCLRFieldBinding(field, CopyToStack_debug_5, AssignFromStack_debug_5);
 
 
         }
 
+
+        static StackObject* Default_0(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
+        {
+            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
+            StackObject* __ret = ILIntepreter.Minus(__esp, 0);
+
+
+            var result_of_this_method = JEngine.Net.JSocketConfig.Default();
+
+            return ILIntepreter.PushObject(__ret, __mStack, result_of_this_method);
+        }
 
 
         static object get_eventOpenName_0(ref object o)
@@ -166,6 +185,32 @@ namespace ILRuntime.Runtime.Generated
             ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
             System.String @eventErrorName = (System.String)typeof(System.String).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
             ((JEngine.Net.JSocketConfig)o).eventErrorName = @eventErrorName;
+            return ptr_of_this_method;
+        }
+
+        static object get_debug_5(ref object o)
+        {
+            return ((JEngine.Net.JSocketConfig)o).debug;
+        }
+
+        static StackObject* CopyToStack_debug_5(ref object o, ILIntepreter __intp, StackObject* __ret, IList<object> __mStack)
+        {
+            var result_of_this_method = ((JEngine.Net.JSocketConfig)o).debug;
+            __ret->ObjectType = ObjectTypes.Integer;
+            __ret->Value = result_of_this_method ? 1 : 0;
+            return __ret + 1;
+        }
+
+        static void set_debug_5(ref object o, object v)
+        {
+            ((JEngine.Net.JSocketConfig)o).debug = (System.Boolean)v;
+        }
+
+        static StackObject* AssignFromStack_debug_5(ref object o, ILIntepreter __intp, StackObject* ptr_of_this_method, IList<object> __mStack)
+        {
+            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
+            System.Boolean @debug = ptr_of_this_method->Value == 1;
+            ((JEngine.Net.JSocketConfig)o).debug = @debug;
             return ptr_of_this_method;
         }
 

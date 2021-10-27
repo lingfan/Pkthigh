@@ -101,8 +101,8 @@ namespace JEngine.Editor
                          var name = file.Name;
                          var success = true;
                          if (!File.Exists(LibraryDirectory.FullName + "/" + name) && !name.Contains("netstandard") &&
-                             !name.Contains(HotProjectName) && !name.Contains("Unity") && !name.Contains("System")&& !name.Contains("Sirenix") &&
-                             ((name.Contains(".pdb") || name.Contains(".dll"))))
+                             !name.Contains(HotProjectName) && !name.Contains("Unity") && !name.Contains("System") &&
+                             (name.EndsWith(".pdb") || name.EndsWith(".dll")))
                          {
                              if (fileNames.Find(x => x.Contains(name)) == null) //不存在就添加
                              {
@@ -137,7 +137,6 @@ namespace JEngine.Editor
                                  DirectoryInfo newPath = new DirectoryInfo(file.Directory.FullName)?.Parent?.Parent?.Parent;
                                  if (newPath != null)
                                  {
-                                     Log.Print(file.FullName);
                                      File.Move(file.FullName, newPath.FullName + "/" + file.Name);
                                      Log.Print(String.Format(
                                          Setting.GetString(SettingString.DLLNewReferenceLog),

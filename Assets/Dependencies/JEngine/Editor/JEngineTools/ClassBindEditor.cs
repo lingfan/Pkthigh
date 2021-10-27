@@ -73,12 +73,22 @@ namespace JEngine.Editor
             }
         }
 
+        private static bool IsJBehaviourType(Type type)
+         {
+             Type jType = HotAssembly.GetType("JEngine.Core.JBehaviour");
+             if (jType == null)
+             {
+                 return false;
+             }
+             return type.IsSubclassOf(jType);
+         }
+
         public static async void GetGameObjectByFieldName(ClassBind instance, bool toast = true)
         {
             int affectCounts = 0;
             foreach (var data in instance.scriptsToBind) //遍历
             {
-                string className = $"{data.classNamespace}.{data.className}";
+                string className = $"{data.classNamespace + (string.IsNullOrEmpty(data.classNamespace) ? "" : ".")}{data.className}";
                 Type t = HotAssembly.GetType(className); //加载热更类
 
                 if (t == null)
@@ -137,7 +147,7 @@ namespace JEngine.Editor
             int affectCounts = 0;
             foreach (var data in instance.scriptsToBind) //遍历
             {
-                string className = $"{data.classNamespace}.{data.className}";
+                string className = $"{data.classNamespace + (string.IsNullOrEmpty(data.classNamespace) ? "" : ".")}{data.className}";
                 Type t = HotAssembly.GetType(className); //加载热更类
 
                 if (t == null)
@@ -199,7 +209,7 @@ namespace JEngine.Editor
             int affectCounts = 0;
             foreach (var data in instance.scriptsToBind) //遍历
             {
-                string className = $"{data.classNamespace}.{data.className}";
+                string className = $"{data.classNamespace + (string.IsNullOrEmpty(data.classNamespace) ? "" : ".")}{data.className}";
                 Type t = HotAssembly.GetType(className); //加载热更类
 
                 if (t == null)
@@ -249,7 +259,7 @@ namespace JEngine.Editor
             int affectCounts = 0;
             foreach (var data in instance.scriptsToBind) //遍历
             {
-                string className = $"{data.classNamespace}.{data.className}";
+                string className = $"{data.classNamespace + (string.IsNullOrEmpty(data.classNamespace) ? "" : ".")}{data.className}";
                 Type t = HotAssembly.GetType(className); //加载热更类
 
                 if (t == null)
@@ -340,7 +350,7 @@ namespace JEngine.Editor
 
                         SetType(cf, fieldType, HotAssembly);
                         SetVal(ref cf, field, HotAssembly, hotInstance, instance.gameObject);
-
+                        Log.Print($"+ {instance.name}->{data.className}->{field.Name}");
                         data.fields.Add(cf);
                         affectCounts++;
                     }
@@ -406,7 +416,7 @@ namespace JEngine.Editor
                 cf.fieldType = string.IsNullOrEmpty(cf.value) ? FieldType.GameObject : FieldType.HotUpdateResource;
             }
             else if (type == typeof(Component) || type.IsSubclassOf(typeof(MonoBehaviour)) ||
-                     type.IsSubclassOf(hotCode.GetType("JEngine.Core.JBehaviour")))
+                     IsJBehaviourType(type))
             {
                 cf.fieldType = FieldType.UnityComponent;
             }
@@ -444,6 +454,10 @@ namespace JEngine.Editor
                 else if (type == typeof(bool))
                 {
                     cf.fieldType = FieldType.Bool;
+                }
+                else if (type == typeof(Color))
+                {
+                    cf.fieldType = FieldType.Color;
                 }
                 else if (hotCode.GetTypes().Contains(type))
                 {
@@ -510,7 +524,7 @@ namespace JEngine.Editor
         private static void SetVal(ref ClassField cf, Type type, Assembly hotCode, object value, GameObject instance)
         {
             if (type != typeof(Object) ||
-                !type.IsSubclassOf(hotCode.GetType("JEngine.Core.JBehaviour")))
+                !IsJBehaviourType(type))
             {
                 try
                 {

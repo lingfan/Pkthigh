@@ -1,7 +1,4 @@
-﻿using libx;
-using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using Malee.List;
 using System.Linq;
 using UnityEngine;
@@ -156,8 +153,8 @@ namespace JEngine.Core
             classData.BoundData = false;
             var fields = classData.fields.ToArray();
             object obj = null;
-            const BindingFlags flag = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance |
-                                      BindingFlags.Static;
+            const BindingFlags bindingAttr = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance |
+                                             BindingFlags.Static;
 
             foreach (var field in fields)
             {
@@ -166,8 +163,10 @@ namespace JEngine.Core
                     Type fieldType = null;
                     if (field.fieldType != FieldType.Bool)
                     {
-                        fieldType = t.GetField(field.fieldName, flag
-                        ).FieldType ?? t.GetProperty(field.fieldName, flag).PropertyType;
+                        fieldType = t.GetField(field.fieldName, bindingAttr).FieldType ??
+                                    (t.BaseType.GetField(field.fieldName, bindingAttr).FieldType ??
+                                     (t.GetProperty(field.fieldName, bindingAttr).PropertyType ??
+                                      t.BaseType.GetProperty(field.fieldName, bindingAttr).PropertyType));
                     }
 
                     switch (field.fieldType)
@@ -242,6 +241,10 @@ namespace JEngine.Core
 
                             classData.BoundData = true;
                             break;
+                        case FieldType.Color:
+                            obj = field.color;
+                            classData.BoundData = true;
+                            break;
                         default:
                             throw new ArgumentOutOfRangeException();
                     }
@@ -254,31 +257,41 @@ namespace JEngine.Core
 
                 //如果有数据再绑定
                 if (!classData.BoundData) continue;
-                try
+
+                void SetField(MemberInfo mi)
                 {
-                    var fi = t.GetField(field.fieldName, flag);
-                    if (fi != null)
+                    try
                     {
-                        fi.SetValue(clrInstance.ILInstance, obj);
+                        switch (mi)
+                        {
+                            case null:
+                                throw new NullReferenceException();
+                            case FieldInfo info:
+                                info.SetValue(clrInstance.ILInstance, obj);
+                                break;
+                            case PropertyInfo inf:
+                                inf.SetValue(clrInstance.ILInstance, obj);
+                                break;
+                        }
                     }
-                    else
+                    catch (Exception e)
                     {
-                        //没FieldInfo尝试PropertyInfo
-                        var pi = t.GetProperty(field.fieldName, flag);
-                        if (pi != null)
-                        {
-                            pi.SetValue(clrInstance.ILInstance, obj);
-                        }
-                        else
-                        {
-                            Log.PrintError($"自动绑定{name}出错：{classType}不存在{field.fieldName}，已跳过");
-                        }
+                        Log.PrintError(
+                            $"自动绑定{name}出错：{classType}.{field.fieldName}赋值出错：{e.Message}，已跳过");
                     }
                 }
-                catch (Exception e)
+
+                var fi = t.GetField(field.fieldName, bindingAttr);
+                if (fi == null) fi = t.BaseType?.GetField(field.fieldName, bindingAttr);
+                if (fi != null)
                 {
-                    Log.PrintError(
-                        $"自动绑定{name}出错：{classType}.{field.fieldName}赋值出错：{e.Message}，已跳过");
+                    SetField(fi);
+                }
+                else
+                {
+                    var pi = t.GetProperty(field.fieldName, bindingAttr);
+                    if (pi == null) pi = t.BaseType?.GetProperty(field.fieldName, bindingAttr);
+                    SetField(pi);
                 }
             }
         }
@@ -325,6 +338,7 @@ namespace JEngine.Core
                     classData.Activated = true;
                 }
             }
+            Remove();
         }
 
         /// <summary>
@@ -374,7 +388,7 @@ namespace JEngine.Core
         public string fieldName;
 
         [HideLabel]
-        [FoldoutGroup("$fieldName")]
+        [BoxGroup("$fieldName",false)]
         [HorizontalGroup("$fieldName/Split", 150)]
         [BoxGroup("$fieldName/Split/Type", centerLabel: true)]
         public FieldType fieldType;
@@ -413,6 +427,13 @@ namespace JEngine.Core
         [ShowIf("@this.fieldType == FieldType.UnityObjectTypeList")]
         [ListDrawerSettings(ShowPaging = true, NumberOfItemsPerPage = 5)]
         public Object[] unityObjectTypeList;
+        
+        [HideLabel]
+        [Tooltip("颜色字段")]
+        [BoxGroup("$fieldName/Split/Value", centerLabel: true)]
+        [ShowIf(
+            "@this.fieldType == FieldType.Color")]
+        public Color color;
     }
 
     public enum FieldType
@@ -426,6 +447,7 @@ namespace JEngine.Core
         NotSupported,
         PrimitiveTypeList,
         UnityObjectTypeList,
+        Color
     }
 
     [Serializable]

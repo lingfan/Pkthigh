@@ -24,6 +24,12 @@ namespace ILRuntime.Runtime.Generated
         {
             System_Type_Binding.Register(app);
             ProtoBuf_PType_Binding.Register(app);
+            System_Collections_Generic_Dictionary_2_String_List_1_Delegate_Binding.Register(app);
+            System_Collections_Generic_List_1_Delegate_Binding.Register(app);
+            System_Collections_Generic_List_1_Delegate_Binding_Enumerator_Binding.Register(app);
+            System_Array_Binding.Register(app);
+            System_IDisposable_Binding.Register(app);
+            System_Object_Binding.Register(app);
             System_String_Binding.Register(app);
             JEngine_Core_Log_Binding.Register(app);
             JEngine_Core_BindableProperty_1_Int64_Binding.Register(app);
@@ -36,7 +42,6 @@ namespace ILRuntime.Runtime.Generated
             System_Collections_Generic_List_1_ILTypeInstance_Binding.Register(app);
             System_Collections_Generic_List_1_GameObject_Binding.Register(app);
             UnityEngine_Transform_Binding.Register(app);
-            System_Object_Binding.Register(app);
             UnityEngine_Component_Binding.Register(app);
             GenericExample_1_ProjectAdapter_GenericExampleAdapter2_Binding_Adapter_Binding.Register(app);
             GenericExample_1_ILTypeInstance_Binding.Register(app);
@@ -84,7 +89,6 @@ namespace ILRuntime.Runtime.Generated
             System_Collections_Generic_List_1_Object_Binding.Register(app);
             System_ValueTuple_2_String_ILTypeInstance_Binding.Register(app);
             JEngine_Core_Loom_Binding.Register(app);
-            System_IDisposable_Binding.Register(app);
             System_Reflection_MemberInfo_Binding.Register(app);
             System_Reflection_MethodBase_Binding.Register(app);
             System_Char_Binding.Register(app);
@@ -132,6 +136,17 @@ namespace ILRuntime.Runtime.Generated
             libx_Reference_Binding.Register(app);
             libx_Assets_Binding.Register(app);
             System_Action_2_Boolean_CoroutineAdapter_Binding_Adaptor_Binding.Register(app);
+            JEngine_Core_Localization_Binding.Register(app);
+            System_Collections_Generic_Dictionary_2_String_MonoBehaviourAdapter_Binding_Adaptor_Binding.Register(app);
+            UnityEngine_Resources_Binding.Register(app);
+            UnityEngine_LayerMask_Binding.Register(app);
+            UIConfig_Binding.Register(app);
+            System_Collections_Generic_Stack_1_MonoBehaviourAdapter_Binding_Adaptor_Binding.Register(app);
+            System_Collections_Generic_Dictionary_2_String_MonoBehaviourAdapter_Binding_Adaptor_Binding_ValueCollection_Binding.Register(app);
+            System_Collections_Generic_Dictionary_2_String_MonoBehaviourAdapter_Binding_Adaptor_Binding_ValueCollection_Binding_Enumerator_Binding.Register(app);
+            System_Action_1_GameObject_Binding.Register(app);
+            System_Action_1_MonoBehaviourAdapter_Binding_Adaptor_Binding.Register(app);
+            System_Byte_Binding.Register(app);
         }
 
         /// <summary>

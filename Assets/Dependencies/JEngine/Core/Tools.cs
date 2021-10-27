@@ -210,9 +210,15 @@ namespace JEngine.Core
                 go = (obj as Component)?.gameObject;
             }
 
+            if (go is null) return null;
+
+            if (fieldType == typeof(Transform))
+            {
+                return go.transform;
+            }
+
             if (fieldType is ILRuntimeType) //如果在热更中
             {
-                if (go is null) return null;
                 var components = go.GetComponents<CrossBindingAdaptorType>();
                 foreach (var c in components)
                 {
@@ -227,11 +233,8 @@ namespace JEngine.Core
                     fieldType = type.RealType;
                 }
 
-                if (!(go is null))
-                {
-                    return go.GetComponents<Component>().ToList()
-                        .Find(c => c.GetType() == fieldType);
-                }
+                return go.GetComponents<Component>().ToList()
+                    .Find(c => c.GetType() == fieldType);
             }
 
             return null;

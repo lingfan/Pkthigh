@@ -1,4 +1,5 @@
 ﻿using HotUpdateScripts.PtkhighHotUpdate.Module.EventData;
+using HotUpdateScripts.PtkhighHotUpdate.Module.Network;
 using HotUpdateScripts.PtkhighHotUpdate.Module.UI.Base;
 using HotUpdateScripts.PtkhighHotUpdate.Module.UI.Manager;
 using HotUpdateScripts.PtkhighHotUpdate.Module.UI.View;
@@ -17,11 +18,12 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Game
     {
         public static GameManager instance;
 
-        public Dictionary<string, JEvent> registedEvents = new Dictionary<string, JEvent>();
+        [HideInInspector] public Dictionary<string, JEvent> registedEvents = new Dictionary<string, JEvent>();
 
 
         void Awake()
         {
+
             instance = this;
             UnityEngine.Object.DontDestroyOnLoad(this);
         }
@@ -46,6 +48,8 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Game
                 UIManager.instance.Show(nameof(Tabs));
                 TestEvent();
             }).Execute(true);
+
+            NetworkManager.InitSocket();
         }
 
         void TestEvent()
@@ -56,6 +60,12 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Game
             };
             EventManager.DispatchEvent<TabData>(nameof(Tabs), data);
         }
+
+    }
+
+
+    public enum GameStatus
+    {
 
     }
 }

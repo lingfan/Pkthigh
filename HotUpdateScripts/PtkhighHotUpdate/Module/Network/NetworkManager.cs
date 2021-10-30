@@ -1,6 +1,8 @@
 ﻿using JEngine.Core;
 using JEngine.Net;
+using pbcmd;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -31,22 +33,26 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Network
         public const string URL_ENDPOINT_TEST_DEV3 = @"wss://poseidon-ws.teampkt.co/ws";
 
 
+
+
         public static void InitSocket()
         {
-            JSocketConfig config = JSocketConfig.Default();
+            JSocketConfig config = new JSocketConfig();
+            config.pingInterval = 5.0f;
+            config.pingTimeout = 10f;
+            config.reconnectDelay = 2;
             config.debug = true;
-            JWebSocket socket = new JWebSocket(URL_ENDPOINT_TEST_DEV3, config, (sender, eventArgs) =>
-            {
-                Log.Print(eventArgs);
 
+            JWebSocket socket = new JWebSocket(URL_ENDPOINT_TEST_DEV2, config, (sender, eventArgs) =>
+            {
+                Log.Print("收到服务端消息");
+                Log.Print(eventArgs);
+                
             }); //使用默认配置连接非基于socket-io（非nodeJS）实现的服务端，需要自己实现接收方法
 
             socket.OnConnect((e) =>
             {
                 Log.Print("服务端连接成功");
-
-                //发送hi到服务端
-                socket.SendToServer("hi");//同步
             });
 
             socket.OnError(e =>
@@ -71,6 +77,47 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Network
 
 
 
+        public static IEnumerator HeartBeatEnumerator()
+        {
+            DateTime last = DateTime.Now;
+
+            while (true)
+            {
+                yield return new WaitForSeconds(TIMER_HEARTBEAT);
+                var request = new PBHearBeat();
+                request.Timestamp = (ulong)DateTime.UtcNow.Ticks;
+                yield return EnumeratorSend<PBHearBeat, PBHearBeat>(
+                    PBMainCmd.MCmd_HeartBeat, PBMainCmdHeartBeatSubCmd.HB_Send,
+                    request, null, 0,
+                    null,
+                    (resp) =>
+                    {
+                        last = DateTime.UtcNow;
+                        Debug.Log("HeartBeat");
+                        Debug.Log(resp);
+                        //spanHeartBeat = DateTime.UtcNow - new DateTime((long)request.Timestamp);
+                        //if (spanHeartBeat.TotalSeconds > TIMEOUT_HEARTBEAT)
+                        //{
+                        //    OnHeartBeatTimeout?.Invoke(null, request);
+                        //}
+                    },
+                    (clienCtx) =>
+                    {
+                        //heartbeat timeout. should reconnect.
+                        //OnHeartBeatTimeout?.Invoke(null, request);
+                    });
+                spanHeartBeat = DateTime.UtcNow - last;
+                if (spanHeartBeat.TotalSeconds > TIMEOUT_HEARTBEAT)
+                {
+                    OnHeartBeatTimeout?.Invoke(null, request);
+                }
+                if (spanHeartBeat.TotalSeconds > TIMEOUT_HEARTBEAT_MAX_TOLERANT)
+                {
+                    OnHeartBeatTimeoutMaxTolerant?.Invoke(null, request);
+                }
+            }
+
+        }
 
 
         public static byte[] HexToByteArray(string hex)

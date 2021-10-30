@@ -1,0 +1,181 @@
+syntax = "proto2";
+package pbcmd;
+option go_package = "poker/pb/pbcmd;pbcmd";
+import "common.proto";
+
+// 对应 Union 客户端与服务器的交互
+// xxReq: 客户端请求
+// xxResp: 服务器回复客户端请求
+// xxPush: 服务器通知客户端
+enum Union {
+    Cmd_UnionInfoReq  = 1; // 获取联盟信息
+    Cmd_UnionInfoResp = 2;
+
+    Cmd_EditUnionInfoReq  = 3; // 编辑联盟信息
+    Cmd_EditUnionInfoResp = 4;
+
+    Cmd_SaveUnionBalanceReq  = 5; // 转入到联盟基金余额
+    Cmd_SaveUnionBalanceResp = 6;
+
+    Cmd_WithdrawUnionBalanceReq  = 7; // 提取联盟基金余额到钱包
+    Cmd_WithdrawUnionBalanceResp = 8;
+
+    Cmd_AddUnionAdminReq  = 9; // 添加联盟管理员
+    Cmd_AddUnionAdminResp = 10;
+
+    Cmd_RemoveUnionAdminReq  = 11; // 删除联盟管理员
+    Cmd_RemoveUnionAdminResp = 12;
+
+    Cmd_UserInfoReq  = 13; // 获取用户信息
+    Cmd_UserInfoResp = 14;
+
+    Cmd_ProcessClubJoinReq  = 15; // 处理俱乐部加入
+    Cmd_ProcessClubJoinResp = 16;
+
+    Cmd_RemoveUnionClubReq  = 17; // 联盟主删除已加入联盟的俱乐部
+    Cmd_RemoveUnionClubResp = 18;
+
+    Cmd_QuitUnionReq  = 19; // 俱乐部退出联盟
+    Cmd_QuitUnionResp = 20;
+}
+
+// 获取联盟信息
+message UnionInfoReq {
+    optional int32 unionId   = 1; // 根据 unionId 获取
+    optional int32 displayId = 2; // 根据 displayId 获取
+}
+
+message UnionInfoResp {
+    optional int32 code           = 1; // 1 成功
+    optional UnionInfo info       = 2; // 联盟信息
+    repeated UnionUserInfo admins = 3; // 联盟管理员信息
+    repeated ClubInfo clubInfos   = 4; // 联盟俱乐部信息
+}
+
+// 编辑联盟信息
+message EditUnionInfoReq {
+    optional int32 unionId = 1;
+    optional string desc   = 2; // 介绍
+}
+
+message EditUnionInfoResp {
+    optional int32 code     = 1; // 1 成功
+    optional UnionInfo info = 2;
+}
+
+// 转入到联盟基金余额
+message SaveUnionBalanceReq {
+    optional int32 unionId = 1;
+    optional int64 amount  = 2;
+    optional uint32 coinType = 3; // 币种: 0 时间币, 1 扑克币
+}
+
+message SaveUnionBalanceResp {
+    optional int32 code         = 1; // 1 成功
+    optional int32 unionId      = 2;
+    optional int64 amount       = 3;
+    optional int64 unionIdBalance = 4;
+    optional uint32 coinType      = 5; // 币种: 0 时间币, 1 扑克币
+}
+
+// 提取联盟基金余额到钱包
+message WithdrawUnionBalanceReq {
+    optional int32 unionId = 1;
+    optional int64 amount  = 2;
+    optional uint32 coinType = 3; // 币种: 0 时间币, 1 扑克币
+}
+
+message WithdrawUnionBalanceResp {
+    optional int32 code         = 1; // 1 成功
+    optional int32 unionId      = 2;
+    optional int64 amount       = 3;
+    optional int64 unionBalance = 4;
+    optional uint32 coinType    = 5; // 币种: 0 时间币, 1 扑克币
+}
+
+// 获取联盟管理员
+message UnionAdminsReq {
+    optional int32 UnionId = 1;
+}
+
+message UnionAdminsResp {
+    optional int32 code      = 1; // 1 成功
+    optional int32 unionId   = 2;
+    repeated UserInfo admins = 3;
+}
+
+// 添加联盟管理员
+message AddUnionAdminReq {
+    optional int32 userId  = 1;
+    optional int32 unionId = 2;
+}
+
+message AddUnionAdminResp {
+    optional int32 code    = 1; // 1 成功
+    optional int32 userId  = 2;
+    optional int32 unionId = 3;
+    repeated UnionUserInfo admins = 4;
+}
+
+// 删除联盟管理员
+message RemoveUnionAdminReq {
+    optional int32 userId  = 1;
+    optional int32 unionId = 2;
+}
+
+message RemoveUnionAdminResp {
+    optional int32 code    = 1; // 1 成功
+    optional int32 userId  = 2;
+    optional int32 unionId = 3;
+    repeated UnionUserInfo admins = 4;
+}
+
+// 获取用户信息
+message UserInfoReq {
+    optional int32 userId = 1;
+}
+
+message UserInfoResp {
+    optional int32 code    = 1; // 1 成功
+    optional UserInfo info = 2;
+}
+
+// 处理俱乐部加入
+message ProcessClubJoinReq {
+    optional int32 unionId = 1;
+    optional int32 clubId  = 2;
+    optional int32 option  = 3; // 见 common.proto:joinOption
+}
+
+message ProcessClubJoinResp {
+    optional int32 code = 1; // 1 成功
+}
+
+// 删除已加入联盟的俱乐部
+message RemoveUnionClubReq {
+    optional int32 unionId = 1;
+    optional int32 clubId  = 2;
+}
+
+message RemoveUnionClubResp {
+    optional int32 code     = 1; // 1 成功
+    optional int32 unionId  = 2;
+    optional int32 clubId   = 3;
+    repeated ClubInfo infos = 4;
+}
+
+// 退出联盟
+message QuitUnionReq {
+    optional int32 clubId   = 1;
+    optional int32 unionId  = 2;
+}
+
+message QuitUnionResp {
+    optional int32 code     = 1; // 1 成功
+}
+
+// 更新联盟管理员级别
+message UnionAdminLevelPush {
+    optional int32 code            = 1; // 1 成功
+    optional UnionAdminLevel level = 2;
+}

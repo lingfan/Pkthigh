@@ -25,12 +25,12 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.UI.Base
 
         public virtual void Awake()
         {
-            Log.Print("UIBase Awake");
+            
         }
 
         public virtual void Start()
         {
-            Log.Print("UIBase Start");
+            
         }
 
 

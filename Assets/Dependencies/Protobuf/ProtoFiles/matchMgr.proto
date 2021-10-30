@@ -1,0 +1,404 @@
+syntax = "proto2";
+package pbcmd;
+option go_package = "poker/pb/pbcmd;pbcmd";
+import "cmd.proto";
+import "common.proto";
+
+// 比赛管理
+// service:MatchMgr
+
+///////房间费定义#start#///////////////
+// 底池费配置
+message PotFeeConf {
+    optional uint32 rate      = 1; // 底池费比例(分母为10000)
+    optional uint64 handLimit = 2; // 底池费封顶, 0 代表不封顶
+}
+
+// 房间费配置: 买入、战绩(盈利)、底池
+message RoomFeeConf {
+    optional uint32 buyInFeeRate   = 1; // 买入费比例(分母为10000)
+    optional uint32 profitFeeRate  = 2; // 战绩(盈利)费比例(分母为10000)
+    optional PotFeeConf potFeeConf = 3; // 底池费配置
+}
+
+// 房间费数值
+message RoomFeeNum {
+    optional uint64 buyInFeeNum  = 1; // 买入费数值
+    optional uint64 profitFeeNum = 2; // 战绩(盈利)费数值
+    optional uint64 potFeeNum    = 3; // 底池费数值
+}
+////////////记录费定义#end#////////////
+
+// 比赛的额外属性
+message MatchProp {
+    optional int32 category   = 1; // 1 私局, 2 俱乐部局, 3 联盟局, 4 超盟局
+    optional uint32 createUID = 2; // 创建者id 私局必填
+    optional uint32 clubID    = 3; // 俱乐部id
+    optional uint32 unionID   = 4; // 联盟id (联盟联结局则为超级联盟id)
+
+    //以下为服务器自动生成
+    optional uint32 roomID      = 5; // 私局的房间标识(创建时无需传)
+    optional uint32 matchLevel  = 6; // 比赛场次: 1 微，2 小，3 中，4 大
+    optional string clubName    = 7; // 俱乐部名称
+    optional string clubIcon    = 8; // 俱乐部图标
+    optional string creatorIcon = 9; // 创建者的头像
+    optional bool entered       = 10; // 是否进入过
+    optional bool settled       = 11; // 是否已结算
+    optional uint32 totalBuyIn  = 12; // 总买入
+}
+
+//比赛信息
+message MatchInfo {
+    optional string name       = 1; // 比赛名称
+    optional uint64 ante       = 2; // 前注
+    optional uint64 sb         = 3; // 小盲
+    optional uint64 bb         = 4; // 大盲
+    optional uint64 minCarry   = 5; // 最小带入(钓鱼显示最小带入)
+    optional uint64 maxCarry   = 6; // 最大带入
+    optional uint32 seatNum    = 7; // 座位数
+    optional int32 actionTime  = 8; // 行动时间
+    optional bool straddle     = 9; // 是否开启抓头
+    optional bool gpsLimit     = 10; // 是否开启定位限制
+    optional bool ipLimit      = 11; // ip限制开关
+    optional bool insurance    = 12; // 保险开关
+    optional bool showAllHands = 13; // 强制亮手牌开关
+    optional uint32 matchTime  = 14; // 比赛时长
+    optional uint32 startTime  = 15; // 比赛开始的时间戳 0:表示尚未开始
+    optional uint32 remainTime = 16; // 剩余时间
+    optional uint32 pnum       = 17; // 在玩人数
+    optional MatchProp prop    = 18; // 比赛的额外属性
+    optional PBMatchIndex idx  = 19; // 比赛的id信息
+    optional bool friendLimit  = 20; // 防伙牌
+    optional bool luckyCard    = 21; // Lucky Card
+    optional bool closeChat    = 22; // 关闭聊天: true 关闭、false 开启
+    optional VpipConf vpipConf = 23; // 入池标准 vpipConf.vpip = 0 表示普通桌
+    optional uint32 kind       = 24; // 玩法类型，1-德州，2-短牌 
+    optional uint32 unloadTimes= 25; //自动卸码倍数(短牌为ante倍数) 0或无:表示关闭
+    optional int64 createTime  = 26; // 比赛创建的时间戳
+    optional int32 autoEndTime = 27; // 自动结束时长
+    optional uint32 coinType   = 28; // 币种: 0 时间币, 1 扑克币
+    optional bool faceVip      = 29; // 是否人脸认证
+}
+
+//玩家的盈亏
+message PlayerBalance {
+    optional uint32 uid     = 1; // 玩家id
+    optional uint64 buyin   = 2; // 总买入
+    optional int64 balance  = 3; // 盈亏
+    optional string clientDefine = 4;
+    optional bool isStanding  = 5; // 是否站起
+    optional bool settled     = 6; // 已结算
+    optional uint32 vpip      = 7; // 玩家本局入池率(万分比)
+    optional uint32 handCount = 8; // 手数
+    optional int64 adjusted   = 9; // 调整的战绩
+}
+
+//私局保证金
+message Deposit {
+    optional uint64 buyin = 1; //买入的金额
+    optional uint64 num = 2;   //当前的保证金
+}
+
+//保险盈亏 （MatchBalanceResp）
+message InsuranceBalance {
+    optional int64 total = 1;  //所有的保险盈亏
+    optional int64 sys = 2; //系统保险盈亏 
+    optional int64 adqq = 3; //保险基金盈亏
+    optional Deposit deposit = 4; //保证金信息(私局)
+}
+
+//盲注选择
+message Blinds {
+    optional uint64 sb = 1;  //小盲
+    optional uint64 bb = 2;   //大盲  
+    repeated uint64 antes = 3; //可选前注
+}
+
+//创建比赛的默认值
+message DefaultArgs {
+    optional uint32 matchTime  = 1; //默认局时
+    optional uint32 buyinMin   = 2; //默认的买入的最小bb数
+    optional uint32 buyinMax   = 3; //默认的买入的最小bb数
+    optional uint64 sb         = 4; //默认盲注
+    optional uint64 bb         = 5; //默认大盲
+    optional uint64 ante       = 6; //默认前注
+    optional uint32 actionTime = 7; // 默认行动时间(秒)
+    optional uint32 buyInFeeRate  = 8; // 默认带入费比例分子(分母为10000)
+    optional uint32 profitFeeRate = 9; // 默认战绩费比例分子(分母为10000)
+    optional uint32 potFeeRate    = 10; // 默认底池费比例分子(分母为10000)
+    optional uint32 vpip          = 11; // 默认的入池率分子(分母为10000)
+    optional uint32 penaltyRate   = 12; // 默认的没收比例分子(分母为10000)
+    optional uint64 shortAnte     = 13; // 默认的的短牌ante
+    optional uint32 unloadTimes  = 14; // 默认自动卸码倍数
+}
+
+//创建比赛的配置
+message MatchConfig {
+    repeated uint32 matchTimes  = 1; // 可选局时
+    repeated uint32 buyins      = 2; // 可选的买入的(德州:bb数 短牌:ante数)
+    repeated Blinds blinds      = 3; // 可选盲注 (德州)
+    repeated uint32 actionTimes = 4; // 可选行动时间(秒s)
+    repeated uint32 buyInFeeRates    = 5; // 带入费比例分子(分母为10000)
+    repeated uint32 profitFeeRates   = 6; // 战绩费比例分子(分母为10000)
+    repeated uint32 potFeeRates      = 7; // 底池费比例分子(分母为10000)
+    repeated uint32 potFeeHandLimitSbs = 8; // 底池费封顶sb数(德州)
+    optional DefaultArgs default  = 9;  // 默认值
+    repeated uint32 texasUserNums = 10; // 德州人数列表
+    repeated uint32 shortUserNums = 11; // 短牌人数列表
+    repeated uint32 vpips         = 12; // 入池率分子(分母为10000)
+    repeated uint32 penaltyRates  = 13; // 没收比例分子(分母为10000)
+    repeated uint32 potFeeHandLimitAntes = 14; // 底池费封顶ante数(短牌)
+    repeated uint64 shortAntes = 15;   // 可选Ante (短牌)
+    repeated uint32 unloadTimes = 16;  // 可选的自动卸码倍数
+}
+//////////////////////////////////////////////////////////////////////////////////////
+
+//获取创建比赛的配置信息
+message GetMatchConfigReq {
+    optional uint32 ver  = 1; //客户端配置的版本号(没有传0)
+    optional uint32 kind = 2; //玩法类型 1:德州 2:短牌 4:奥马哈
+    optional uint32 coinType = 3; // 币种: 0 时间币, 1 扑克币
+}
+
+message GetMatchConfigResp {
+    optional uint32 ver = 1; //服务器配置版本号 当与客户端版本一致时 无config项
+    optional MatchConfig config = 2; //配置
+    optional uint32 kind = 3; // 玩法类型 1:德州 2:短牌 4:奥马哈
+    optional uint32 coinType = 4; // 币种: 0 时间币, 1 扑克币
+}
+
+//请求创建比赛
+message CreateMatchReq {
+    optional string name         = 1; // 比赛名称
+    optional uint64 ante         = 2; // 前注
+    optional uint64 sb           = 3; // 小盲
+    optional uint64 bb           = 4; // 大盲
+    optional uint64 minCarry     = 5; // 最小带入
+    optional uint64 maxCarry     = 6; // 最大带入
+    optional uint32 seatNum      = 7; // 座位数
+    optional uint32 actionTime   = 8; // 行动时间
+    optional uint32 matchTime    = 9; // 比赛时长
+    optional bool straddle       = 10; // 是否开启抓头
+    optional bool gpsLimit       = 11; // 是否开启定位限制
+    optional bool ipLimit        = 12; // ip限制开关
+    optional bool buyinAuth      = 13; // 买入授权开关
+    optional bool insurance      = 14; // 保险开关
+    optional bool showAllHands   = 15; // 强制亮手牌开关
+    optional RoomFeeConf roomFeeConf = 16; // 房间费配置
+    optional MatchProp prop      = 17; // 比赛的额外属性(创建者的信息)
+    optional bool friendLimit    = 18; // 防伙牌
+    optional uint32 autoStartUserNum = 19; // 自动开始人数
+    optional bool autoCreateMatch    = 20; // 自动重建比赛
+    optional bool closeChat          = 21; // 关闭聊天: true 关闭、false 开启
+    optional VpipConf vpipConf       = 22; // 入池标准 vpipConf.vpip = 0 表示普通桌
+    optional uint32 kind             = 23; // 玩法类型 1:德州 2:短牌 4:奥马哈 (不传认为是德州)
+    optional uint32 unloadTimes      = 24; // 自动卸码倍数(短牌为ante倍数) 0或无:表示关闭
+    optional uint32 coinType         = 25; // 币种: 0 时间币, 1 扑克币
+    optional bool faceVip            = 26; // 是否人脸认证
+}
+
+// 创建房间的回复
+message CreateMatchResp {
+    optional int32 code      = 1; // 1:成功 2:参数错误 3:创建房间已达上限 4:服务器错误 5:创建失败 6:没有权限 7:不支持vip桌创建
+    optional MatchInfo match = 2; // 比赛信息
+}
+
+// 根据(私局)房间号码获取比赛信息
+message SearchMatchReq {
+    optional uint32 roomid = 1;
+}
+
+message SearchMatchResp {
+    optional int32 code      = 1; // 1:成功 2:没找到
+    optional MatchInfo match = 2; // 找到的比赛信息
+}
+
+// 获取牌局列表信息
+// 全部 kinds = [1, 2, 3, 4]
+// 单独获取钓鱼房间 kinds = [3]
+message GetMatchListReq {
+    optional uint32 clubID   = 1; // 空或为 0 则为拉取所有可见牌局
+    optional uint32 unionId  = 2; // (联盟管理员有权限)
+    repeated uint32 kinds    = 3; // 1: 德州 2: 短牌 3: 钓鱼 4:奥马哈
+    optional uint32 coinType = 4; // 币种: 0 时间币, 1 扑克币
+}
+
+// 回复创建的牌局列表
+message GetMatchListResp {
+    repeated MatchInfo list   = 1;
+    repeated uint32 kinds     = 2; // 1: 德州 2: 短牌 3: 钓鱼 4:奥马哈
+    optional uint32 coinType  = 3; // 币种: 0 时间币, 1 扑克币
+}
+
+// 比赛的盈亏信息(战绩信息、买入历史)
+message MatchBalanceReq {
+    optional uint32 mid      = 1;
+    optional uint32 coinType = 2; // 币种: 0 时间币, 1 扑克币
+}
+
+// 比赛盈亏回复
+message MatchBalanceResp {
+    optional int32  code = 1; //1: 成功 2:比赛不存在
+    optional uint32 mid = 2; //比赛id
+    repeated PlayerBalance plist = 3; //玩家的盈亏列表  
+    optional InsuranceBalance insurance = 4;  //保险的盈亏情况
+    optional uint32 leftTime = 5; //剩余时间 秒 
+    optional uint32 totalTime = 6; //总时间 秒
+    optional uint32 coinType  = 7; // 币种: 0 时间币, 1 扑克币
+}
+
+// 比赛结算信息
+message MatchOverPush {
+    optional uint32 mid = 1;    //比赛号
+    optional uint32 totalHands = 2;  //总手数
+    optional uint64 totalBuyin = 3;  //总买入
+    optional uint32 mvpuid = 4;
+    optional uint32 fishuid = 5; 
+    optional uint32 richuid = 6;
+    repeated PlayerBalance plist = 7; //玩家盈亏
+    optional InsuranceBalance insurance = 8; //保险盈亏 
+    optional uint32 duration = 9; //比赛时长 
+    optional RoomFeeConf roomFeeConf = 10; // 房间费配置
+    optional RoomFeeNum roomFeeNum   = 11; // 房间费数值
+    optional PBMatchIndex idx        = 12; // 比赛的id信息
+    optional VpipConf vpipConf       = 13; // 入池标准 vpipConf.vpip = 0 表示普通桌
+    optional uint32 unloadTimes      = 14; // 自动卸码倍数
+    optional uint32 coinType         = 15; // 币种: 0 时间币, 1 扑克币
+    optional bool faceVip            = 16; // 是否人脸认证
+}
+
+// 买入筹码
+message BuyinReq {
+    optional uint32 mid   = 1;
+    optional uint64 buyin = 2;
+    optional uint32 coinType = 3; // 币种: 0 时间币, 1 扑克币
+}
+
+message BuyinResp {
+    optional int32 code = 1; // 1:成功 2:时间币不足 3:状态错误 4:找不到比赛 5:已结算 6:买入范围错误 7:扑克币不足
+    optional int32 mid  = 2; // 比赛id
+    optional uint64 costMoney = 3; // 花费的币
+    optional uint64 leftMoney = 4; // 剩余的币
+    optional uint32 coinType  = 5; // 币种: 0 时间币, 1 扑克币
+}
+
+// 解散比赛
+message CloseMatchReq {
+    optional uint32 mid      = 1;
+    optional uint32 coinType = 2; // 币种: 0 时间币, 1 扑克币
+}
+
+message CloseMatchResp {
+    optional int32 code = 1; // 1: 成功 2: 权限不足 3: 比赛不存在 4: 服务器错误 5: 已开启入池标准
+    optional uint32 mid = 2;
+    optional uint32 coinType = 3; // 币种: 0 时间币, 1 扑克币
+}
+
+//通知当前比赛所有玩家 比赛被管理员关闭 提示比赛在本手后结束
+message CloseMatchPush {
+    optional uint32 mid = 1;
+    optional int32 state = 2; //游戏状态 @see poker.proto/GSTATE
+}
+
+//比赛结束倒计时提醒
+message CloseMatchRemindPush {
+    optional uint32 mid = 1; //
+    optional uint32 remindSecond = 2; //还剩多少秒结束赛
+}
+
+// 实时数据
+message RealtimeData {
+    optional MatchInfo match         = 1;// 牌局
+    optional RoomFeeConf roomFeeConf = 2;// 房间费配置
+    optional int32 buyInUserNum    = 3;// 上桌人数
+    optional int32 playingUserNum  = 4;// 当前在玩人数
+    optional int64 totalBuyIn      = 5;// 总买入
+    optional int64 totalProfit     = 6;// 战绩总和
+    optional int64 totalProfitPositive = 7;// 战绩正盈利总和
+    optional int64 totalProfitNegative = 8;// 战绩负盈利总和
+    optional int64 totalBuyInsurance   = 9;// 保险总投入
+    optional int64 totalPayInsurance   = 10;// 保险总赔付
+}
+
+// 获取俱乐部在联盟中的实时数据
+message GetRealtimeDataReq {
+    optional int32 clubId  = 1;
+    optional int32 unionId = 2;
+    optional uint32 kind   = 3; // 玩法类型 1:德州 2:短牌 4:奥马哈
+}
+
+message GetRealtimeDataResp {
+    optional int32 code    = 1;
+    optional int32 clubId  = 2;
+    optional int32 unionId = 3;
+    repeated RealtimeData list = 4;
+    optional uint32 kind       = 5; // 玩法类型 1:德州 2:短牌 4:奥马哈
+}
+
+//开始比赛
+message StartMatchReq {
+    optional uint32 mid      = 1; // 比赛id
+    optional uint32 coinType = 2; // 币种: 0 时间币, 1 扑克币
+}
+
+//开始比赛
+message StartMatchResp {
+    optional int32 code = 1; // 1:成功 2:权限不足 3:比赛不存在 4:服务器错误
+    optional uint32 mid = 2; // 比赛id
+    optional uint32 coinType = 3; // 币种: 0 时间币, 1 扑克币
+}
+
+// 通知所有玩家比赛开始
+message StartMatchPush {
+    optional uint32 mid      = 1;
+    optional uint32 coinType = 2; // 币种: 0 时间币, 1 扑克币
+}
+
+//获取结算明细
+message SettlementDeTailReq {
+    optional uint32 mid      = 1; // 比赛id
+    optional uint32 coinType = 2; // 币种: 0 时间币, 1 扑克币
+}
+
+message SettlementDeTailResp {
+    optional int32 code = 1; // 1: 成功 2: 找不到比赛 3: 已结算 4: 没有买入过 5: 一手牌未结束不能提前结算 6: 请先站起
+    optional uint32 mid = 2; // 比赛id
+    optional uint64 profit   = 3; // 战绩费
+    optional uint64 checkout = 4; // 返还的币
+    optional uint64 penalty  = 5; // 需扣除的盈利(为 0 不显示)
+    optional uint32 coinType = 6; // 币种: 0 时间币, 1 扑克币
+}
+
+//结算请求
+message SettlementReq {
+    optional uint32 mid      = 1; // 比赛id
+    optional uint32 coinType = 2; // 币种: 0 时间币, 1 扑克币
+}
+
+//结算回复
+message SettlementResp {
+    optional int32 code = 1; // 1: 成功 2: 找不到比赛 3: 已结算 4: 没有买入过 5: 本手牌完成后自动结算 6: 不能结算站起 7: 一手牌未结束不能提前结算 8: 正在人脸随机检测
+    optional uint32 mid = 2; // 比赛id
+    optional uint32 coinType = 3; // 币种: 0 时间币, 1 扑克币
+}
+
+//真正结算通知玩家的结算结果
+message SettlementPush {
+    optional uint32 mid = 1;   //比赛id
+    optional uint64 checkout  = 2; // 返还的时间币
+    optional uint64 leftMoney = 3; // 结算后身上的币
+    optional uint32 coinType  = 4; // 币种: 0 时间币, 1 扑克币
+}
+
+// 检查用户在该牌局提前结算是否需要扣除盈利（入池标准桌使用）
+message CheckPenaltyReq {
+    optional uint32 mid      = 1; // 比赛 id
+    optional uint32 coinType = 2; // 币种: 0 时间币, 1 扑克币
+}
+
+message CheckPenaltyResp {
+    optional int32 code    = 1; // 1 是, 2 否, 3 内部错误, 4 找不到比赛, 5 已结算, 6 未买入, 7 本手牌完成后自动结算, 8 不是入池标准桌
+    optional uint32 mid    = 2; // 比赛 id
+    optional int64 penalty = 3; // 需扣除的盈利
+    optional uint32 coinType = 4; // 币种: 0 时间币, 1 扑克币
+}

@@ -1,0 +1,153 @@
+syntax = "proto2";
+package pbcmd;
+option go_package = "poker/pb/pbcmd;pbcmd";
+import "cmd.proto";
+import "common.proto";
+
+// 对应 Profile 客户端与服务器的交互
+// xxReq: 客户端请求
+// xxResp: 服务器回复客户端请求
+// xxPush: 服务器通知客户端
+enum Profile {
+    getMoneyReq  = 1; // 获取 资产 相关信息
+    getMoneyResp = 2;
+
+    moneyExchangeReq = 3;   // 资产兑换
+    moneyExchangeResp = 4;
+
+    moneyExchangeRecordReq = 5; // 资产兑换记录
+    moneyExchangeRecordResp = 6;
+
+    activityInfoReq = 7; // 获取活动信息
+    activityInfoResp = 8;
+
+    activityHandsProgressReq = 9; // 获取手牌活动手数
+    activityHandsProgressResp = 10;
+
+    dangerPackageListReq = 11; // 危险包列表请求
+    dangerPackageListResp = 12;
+
+    useDangerPackageReq = 13; // 使用危险包请求
+    useDangerPackageResp = 14;
+
+    snapshotInfoReq = 15; // 截屏信息请求
+    snapshotInfoResp = 16;
+
+    skipUserGuideMarkReq = 17; // 新手引导请求
+    skipUserGuideMarkResp = 18;
+}
+
+enum MoneyExchangeType {
+    TC2PKC  = 1;    // 时间币 -> 扑克币
+    PKC2TC  = 2;    // 扑克币 -> 时间币
+}
+
+// 获取用户 资产 相关信息
+message ProfileGetMoneyReq {
+}
+message ProfileGetMoneyResp {
+    optional PBCommResult ret       = 1; // 1 成功、2 失败
+    optional int64 timeCoin         = 2; // 时间币
+    optional int64 pktCoin          = 3; // 扑克币
+}
+
+// 资产兑换
+message ProfileMoneyExchangeReq {
+    optional MoneyExchangeType exchangeType = 1;    // 兑换类型，参照 MoneyExchangeType
+    optional int64 amount = 2;          // 兑换数量
+}
+message ProfileMoneyExchangeResp {
+    optional PBCommResult ret       = 1; // 1 成功、2 失败
+    optional int64 timeCoin         = 2; // 时间币余额
+    optional int64 pktCoin          = 3; // 扑克币余额
+}
+
+// 资产兑换记录
+message ProfileMoneyExchangeRecordReq {
+    optional MoneyExchangeType exchangeType = 1;   // 兑换类型，参照 MoneyExchangeType
+    optional uint32 page                    = 2;   // 页码
+}
+message ProfileMoneyExchangeRecordResp {
+    optional PBCommResult ret       = 1; // 1 成功、2 失败
+    optional uint32 total = 2; // 总数
+    optional uint32 page  = 3; // 页码
+    optional uint32 pagesize = 4; // 页面大小
+    repeated ProfileMoneyExchangeRecordInfo recordList = 5; // 记录列表
+}
+message ProfileMoneyExchangeRecordInfo {
+    optional uint32 id = 1;             // 兑换流水ID
+    optional uint32 status = 2;         // 兑换状态(1成功 2失败)
+    optional MoneyExchangeType exchangeType = 3;   // 兑换类型，参照 MoneyExchangeType
+    optional int64  fromAmount = 4;     // 兑换数量
+    optional int64  toAmount = 5;       // 被兑换数量
+    optional int64  createdAt = 6;      // 时间
+}
+
+// 获取用户活动信息
+message ProfileActivityInfoReq {
+}
+message ProfileActivityInfoResp {
+    optional uint32 code = 1; // 1 成功
+    repeated ProfileActivityInfo activityInfos = 2; // 抽奖活动信息
+}
+message ProfileActivityInfo {
+    optional uint32 id = 1; // 活动Id
+    optional string imgUrlCn = 2; // 活动背景图片url
+    optional string imgUrlEng = 3; // 活动背景图片url 英文版
+    optional string url = 4; // 活动地址
+    optional uint32 activityType = 5; // 活动类型 (1. 抽奖红包活动)
+    optional ProfileDrawActivityInfo drawActivityInfo = 6; // 抽奖活动信息
+    optional string startTime = 7; // 开始时间
+    optional string endTime = 8; // 结束时间
+}
+message ProfileDrawActivityInfo {
+    optional uint32 handsNum = 1; // 满多少手可以抽奖
+    optional bool canDraw = 2; // 是否可以抽奖
+}
+
+// 获取当前活动手数
+message ProfileActivityHandsProgressReq {
+    optional uint32 id = 1; // 活动id
+}
+
+message ProfileActivityHandsProgressResp {
+    optional uint32 playedHandsNum = 1; // 当前进行的手数
+    optional uint32 drawHandsNum = 2; // 抽奖需要的手数
+}
+
+// 危险包列表请求
+message ProfileDangerPackageListReq {
+}
+message ProfileDangerPackageListResp {
+    repeated string packageList = 1; // 包列表
+}
+
+// 使用危险包列表请求
+message ProfileUseDangerPackageReq {
+    message PkgInfo {
+        optional string name = 1; // 名称
+        optional uint32 status = 2; // 0:未启用 1:启用
+    }
+    repeated string packageList = 1; // 包列表(v2版本需求弃用,使用下面代替)
+    repeated PkgInfo pkgInfoList = 2; // 包列表
+}
+message ProfileUseDangerPackageResp {
+    optional uint32 code = 1; // 1 成功
+}
+
+// 截屏信息请求
+message ProfileSnapshotInfoReq {
+    optional string imgUrl = 1; // 图片地址
+    optional string errorMsg = 2; // 截屏不成功原因, 如(没有权限, 系统不支持, 上传失败)
+}
+message ProfileSnapshotInfoResp {
+    optional uint32 code = 1; // 1 成功
+}
+
+// 跳过新手引导请求
+message SkipUserGuideMarkReq {
+    repeated UserGuideMark skipInfo = 1; // 跳过区域
+}
+message SkipUserGuideMarkResp {
+    optional uint32 code = 1; // 1 成功, 其他失败
+}

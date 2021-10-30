@@ -1,0 +1,33 @@
+syntax = "proto2";
+package pbcmd;
+option go_package = "poker/pb/pbcmd;pbcmd";
+import "cmd.proto";
+
+message PBReqMallGetPracticeGoodsList{ // 获取练习币商城列表
+    required PBCommParam    comm                = 1;
+}
+
+message PBPracticeGoodsList{
+    optional uint32         id                   	= 1; // 商品ID
+    optional string         name                    = 2; // 名称
+    optional string         pic                  	= 3; // ICON 商品图片
+    optional uint32         practice                = 4; // 练习币数量
+    optional uint32         give                    = 5; // 赠送数量
+    optional uint32         price                   = 6; // 时间币价格
+    optional uint32         status                  = 7; // 请忽略此字段
+    optional uint32         deletedAt              = 8; // 请忽略此字段
+}
+
+message PBRespMallGetPracticeGoodsList{
+    required PBCommResult   		ret         = 1;
+    repeated PBPracticeGoodsList   	list        = 2;
+}
+
+message PBReqMallBuyPracticeProp{ // 购买练习币道具
+    required PBCommParam    comm                = 1;
+    optional uint32         propId              = 2; // 商品ID
+}
+
+message PBRespMallBuyPracticeProp{
+    required PBCommResult   ret         = 1;
+}

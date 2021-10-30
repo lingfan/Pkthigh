@@ -1,0 +1,149 @@
+syntax = "proto2";
+package pbcmd;
+option go_package = "Poseidon/proto/pb/pbcmd;pbcmd";
+import "cmd.proto";
+
+
+// 现有推送类型
+// 1.实时在线推，不需要查看。比如：金币刷新，创建比赛
+// 2.实时在线推，需要看，不需要处理。比如：buyin申请结果
+// 3.必须看，不需要处理。比如，战队申请结果
+// 4.必须看，需要处理。比如，战队申请，buyin申请
+
+// 拉取方式
+// 1.从推送服拉取
+// 2.从业务拉：1.房间，2，战队
+
+enum PBNotifyMsgType{
+    BuyinRequest        = 1;    //buyin申请
+    JoinClubRequet      = 2;    //加入战队申请
+    JoinClubResponse    = 3;    //战队处理结果通知
+    NotifyClubMatch     = 4;    //战队创建比赛通知
+    GuessNewNotify      = 5;    //现场有新通知
+    WeiboPraiseNotify   = 6;    //扑克圏有新点赞
+    WeiboReviewNotify   = 7;    //扑克圏有新评论
+    WeiboRelayNotify    = 8;    //扑克圏有新转发
+    WeiboFansNotify     = 9;    //扑克圏有粉丝关注
+    NotifyMultiUser     = 10;   //一条通知发给多个用户(如轮播通知)
+    WeiboNewFeedNotify  = 11;   //扑克圏有新动态
+    PromoActivityDone   = 12;   //活动任务完成通知
+    PromoPayDoneAward   = 13;   //充值发货完成通知(含附加奖励)
+    PromoCommNotify     = 14;   //通用通知提醒
+    ClubUpdateUserRole  = 15;   // 通知更新用户角色
+    StopServerNotify    = 16;   // 通知用户停服
+    NoticeUpdateNotify  = 17;   // 通知用户更新跑马灯
+
+    JoinUnionRequest  = 18; // 加入联盟申请
+    JoinUnionResponse = 19; // 处理加入联盟结果通知
+
+    UnionUpdateAdminLevel = 20; // 更新用户所在联盟的管理员级别
+    ActivityNotify        = 21; // 活动通知
+    MoneyNotify           = 22; // 资产更新
+    MidnightNotify        = 23; // 0点通知
+    ActivityStatusNotify  = 24; // 活动上下线通知,客户端重新拉取
+    SnapshotNotify        = 25; // 截屏通知
+    RechargeNotify        = 26; // recharge order notify
+
+    FaceRecognitionVIPBonusNotify  = 27; // 获得人脸识别VIP限时福利奖金
+    FaceRecognitionBindPassNotify  = 28; // 人脸识别通过
+    FaceRecognitionRepeatFaceNotify  = 29; // 人脸识别绑定失败-重复人脸
+    GiveMoneyCurrencyNotify          = 30; // 转币币种绑定的通知
+    GiveMoneyNotify                  = 31; // 转币详情通知
+}
+
+//消息通用结构
+message PBNotifyMsg{
+    required uint32 type        = 1;
+    optional bytes  data        = 2;
+    optional uint32 time        = 3;
+}
+
+message PBNotifyMsgData{
+    optional string     text    = 1;
+}
+
+//消息
+message PBNotifyMsgToClient{
+    repeated PBNotifyMsg msgs = 1;
+}
+
+message PBNotifyMsgCountToClient{
+    required uint32 count = 1;
+}
+
+//客户端获取消息
+message PBReqFetchNotifys{}
+
+message PBRespFetchNotifys{
+    required PBCommResult ret = 1;
+    repeated PBNotifyMsg msgs = 2;
+}
+
+// 请求公告
+message PBReqBulletin{
+    optional string versionCode = 1; // 版本号
+}
+
+message Bulletin {
+    optional int32 bulletinType = 1; // 0 图文、1 内跳、2 图文轮播、3 内跳轮播、4 外链、5 外链轮播
+    optional string title       = 2;
+    optional string content     = 3;
+    optional string link        = 4; // 跳转链接，默认为空字符串
+    optional string contentEn   = 5; // 英文内容
+    optional string titleEn     = 6; // 英文标题
+}
+
+message PBRespBulletin{
+    optional PBCommResult ret   = 1;
+    repeated Bulletin bulletins = 2;
+}
+
+message PBActivityInfo {
+    message ActivityHandsProgress {
+        optional uint32 playedHandsNum = 1; // 当前进行的手数
+        optional uint32 drawHandsNum = 2; // 抽奖需要的手数
+        optional bool canDraw = 3; // 是否可以抽奖
+    }
+
+    optional uint32 activityId      = 1; // 活动Id
+    optional uint32 activityType    = 2; // 活动类型(1: 抽奖红包活动)
+    optional ActivityHandsProgress handsProgress = 3; // 手数活动进度
+}
+
+message PBMoneyNotifyInfo {
+    optional uint64 timeCoin    = 1; // 时间币余额
+    optional uint64 pktCoin     = 2; // 扑克币余额
+}
+
+// 充值订单回调通知客户端
+message PBRespRechargeCallback {
+    required PBCommResult ret = 1;
+    optional string oid       = 2; // 订单号
+    optional uint32 uid       = 3; // 用户ID
+    optional string address   = 4; // 支付地址
+    optional int64  orderTime = 5; // 订单时间
+    optional string moneyType = 6; // 币种
+    required uint32 status    = 7; // 订单状态 2-成功 3-失败 4-后台取消
+    optional uint64 amount    = 8; // 到账的时间币数量 单位（1毫 = 0.01分）
+}
+
+message PBFaceRecognitionVIPBonusNotify {
+    required int64 bonus = 1;
+}
+
+// 用户币种确定通知客户端
+message PBRespGiveMoneyCurrency {
+    required int64  currencyTime = 1; // 时间
+    required string currency    = 2; // 币种
+    required string nickname    = 3; // 昵称
+    required uint32 uid         = 4; // 用户ID
+}
+
+// 用户转币确定通知客户端
+message PBRespGiveMoney {
+    required string head      = 1;// 头像
+    required string nickname  = 2;// 昵称
+    required int32  uid       = 3;// 用户ID
+    required double money     = 4;// 时间币
+    required int64  giveTime  = 5;// 转币时间
+}

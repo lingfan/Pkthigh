@@ -1,0 +1,101 @@
+syntax = "proto2";
+package pbcmd;
+option go_package = "poker/pb/pbcmd;pbcmd";
+
+//聊天服务器
+//service:Chat
+
+//Chat_RegisterChannelReq		    = 0x0001;	//注册频道请求
+//Chat_RegisterChannelResp	    = 0x0002;	//注册频道回复
+//
+//Chat_UnRegisterChannelReq	    = 0x0003;	//退出频道请求
+//Chat_UnRegisterChannelResp	    = 0x0004;	//退出频道回复
+//
+//Chat_SendChatReq			    = 0x0005;	//发送文字或语音聊天请求
+//Chat_SendChatResp			    = 0x0006;	//发送文字或语音聊天回复
+//Chat_SendChatPush			    = 0x0007;	//发送文字或语音聊天通知
+//
+//Chat_SendInteractivePropReq		= 0x0008;	//发送互动表情请求
+//Chat_SendInteractivePropResp	= 0x0009;	//发送互动表情回复
+//Chat_SendInteractivePropPush	= 0x000A;	//发送互动表情通知
+
+enum ChatType {
+    ChatType_PC = 0; // 私聊, private chat.
+    ChatType_GC = 1; // 群聊, group chat.
+}
+
+enum ContentType {
+    ContentType_Text = 0; // 文字
+    ContentType_Voice = 1; // 语音
+}
+
+// 道具配置
+message InteractiveItemConf {
+    message Item {
+        required uint32 id = 1; // 道具ID
+        optional uint32 cost = 2; // 道具消耗
+        optional uint32 coinType = 3; // 0时间币 1扑克币
+    }
+    repeated Item items = 1;
+}
+
+//注册频道请求
+message RegisterChannelReq {
+    optional uint32 channel_id = 1; //频道ID
+}
+//注册频道回复
+message RegisterChannelResp {
+    optional uint32 code = 1; //1:成功 2:失败
+    optional uint32 channel_id = 2; //频道ID
+    optional InteractiveItemConf itemConf = 3; // 道具配置
+}
+
+//退出频道请求
+message UnRegisterChannelReq {
+    optional uint32 channel_id = 1; //频道ID
+}
+//退出频道回复
+message UnRegisterChannelResp {
+    optional uint32 code = 1; //1:成功 2:失败
+    optional uint32 channel_id = 2; //频道ID
+}
+
+//发送文字语音聊天请求
+message SendChatReq {
+    optional uint32 recv_uid = 1; // 接收者uid
+    optional uint32 channel_id = 2; // 频道id
+    optional ChatType chat_type = 3; // 聊天类型
+    optional ContentType content_type = 4; // 内容类型
+    optional string content = 5; // 聊天内容
+}
+//发送文字语音聊天回复
+message SendChatResp {
+    optional uint32 code = 1; //1:成功 2:失败
+}
+//发送文字语音聊天通知
+message SendChatPush {
+    optional uint32 send_uid = 1; // 发送者uid
+    optional uint32 channel_id = 2; // 频道id
+    optional ContentType content_type = 3; // 内容类型
+    optional string content = 4; // 聊天内容
+}
+
+//发送互动道具请求
+message SendInteractivePropReq {
+    optional uint32 recv_uid = 1; // 接收者uid
+    optional uint32 channel_id = 2; // 频道id
+    optional uint32 prop_id = 3; // 道具id
+}
+//发送互动道具回复
+message SendInteractivePropResp {
+    optional uint32 code = 1; //1:成功 2:失败
+    optional uint64 leftMoney = 2; // 剩余时间币
+    optional uint32 coinType = 3; // 币种: 0 时间币, 1 扑克币
+}
+//发送互动道具通知
+message SendInteractivePropPush {
+    optional uint32 send_uid = 1; // 发送者uid
+    optional uint32 recv_uid = 2; // 接收者uid
+    optional uint32 channel_id = 3; // 频道id
+    optional uint32 prop_id = 4; // 道具id
+}

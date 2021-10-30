@@ -1,0 +1,477 @@
+syntax = "proto2";
+package pbcmd;
+option go_package = "poker/pb/pbcmd;pbcmd";
+import "common.proto";
+
+// 对应 ClubNew 客户端与服务器的交互
+// xxReq: 客户端请求
+// xxResp: 服务器回复客户端请求
+// xxPush: 服务器通知客户端
+enum ClubNew {
+    Cmd_CreateClubReq  = 1; // 新建俱乐部
+    Cmd_CreateClubResp = 2;
+
+    Cmd_JoinClubReq  = 3; // 加入俱乐部
+    Cmd_JoinClubResp = 4;
+
+    Cmd_SetClubInfoReq  = 5; // 编辑信息
+    Cmd_SetClubInfoResp = 6;
+
+    Cmd_SaveClubBalanceReq  = 7; // 转入到余额
+    Cmd_SaveClubBalanceResp = 8;
+
+    Cmd_WithdrawClubBalanceReq  = 9; // 提取到钱包
+    Cmd_WithdrawClubBalanceResp = 10;
+
+    Cmd_SetClubInsurancePayMethodReq  = 11; // 每次保险赔付限制
+    Cmd_SetClubInsurancePayMethodResp = 12;
+
+    Cmd_SetClubUserRemarkReq  = 13; // 修改备注
+    Cmd_SetClubUserRemarkResp = 14;
+
+    Cmd_RemoveClubUserReq  = 15; // 移除用户
+    Cmd_RemoveClubUserResp = 16;
+
+    Cmd_SetClubUserLevelReq  = 17; // 管理员设置/取消
+    Cmd_SetClubUserLevelResp = 18;
+
+    Cmd_SetClubRebateRatioReq  = 19; // 提现免手续费返利设置
+    Cmd_SetClubRebateRatioResp = 20;
+
+    Cmd_SetClubSettingReq  = 21; // 开关
+    Cmd_SetClubSettingResp = 22;
+
+    Cmd_DismissClubReq  = 23; // 解散俱乐部
+    Cmd_DismissClubResp = 24;
+
+    Cmd_QuitClubReq  = 25; // 退出俱乐部
+    Cmd_QuitClubResp = 26;
+
+    Cmd_ClubInfoReq  = 27; // 查询俱乐部
+    Cmd_ClubInfoResp = 28;
+
+    Cmd_ClubListReq  = 29; // 获取用户加入的俱乐部列表(包含创建)
+    Cmd_ClubListResp = 30;
+
+    Cmd_ClubUsersReq  = 31; // 获取俱乐部用户
+    Cmd_ClubUsersResp = 32;
+
+    Cmd_ProcessUserJoinReq  = 33; // 处理用户加入
+    Cmd_ProcessUserJoinResp = 34;
+
+    Cmd_FetchMsgReq  = 35; // 请求俱乐部消息
+    Cmd_FetchMsgResp = 36;
+
+    Cmd_UnionListReq  = 37; // 获取俱乐部加入的联盟列表
+    Cmd_UnionListResp = 38;
+
+    Cmd_JoinUnionReq  = 39; // 加入联盟
+    Cmd_JoinUnionResp = 40;
+
+    Cmd_RecommendUnionListReq  = 41; // 获取推荐的联盟列表
+    Cmd_RecommendUnionListResp = 42;
+
+    Cmd_ViewNotOfferedBillReq  = 43;
+    Cmd_ViewNotOfferedBillResp = 44;
+
+    Cmd_ViewNotRepaidBillReq  = 45;
+    Cmd_ViewNotRepaidBillResp = 46;
+
+    Cmd_RepayReq  = 47;
+    Cmd_RepayResp = 48;
+
+    Cmd_ClubGainInfoReq  = 49; // 获取俱乐部基金流水
+    Cmd_ClubGainInfoResp = 50;
+}
+
+// 新建俱乐部
+message CreateClubReq {
+    optional string icon = 1; // 头像
+    optional string name = 2; // 名称
+    optional string desc = 3; // 描述
+}
+
+message CreateClubResp {
+    optional int32 code   = 1; // 1 成功
+    optional int32 clubId = 2;
+}
+
+// 加入俱乐部
+message JoinClubReq {
+    optional int32 clubId = 1;
+    optional string desc  = 2;
+}
+
+message JoinClubResp {
+    optional int32 code   = 1; // 1 成功
+    optional int32 clubId = 2;
+}
+
+// 编辑信息
+message SetClubInfoReq {
+    optional int32 clubId   = 1;
+    optional int32 editType = 2; // 编辑类型, 见 common.proto:editInfoType
+    optional string icon  = 3; // 头像
+    optional string name  = 4; // 名称
+    optional string desc  = 5; // 介绍
+}
+
+/*
+ 1001 俱乐部名称已存在
+
+ 1021 修改俱乐部头像失败
+ 1022 修改俱乐部名称失败
+ 1023 修改俱乐部介绍失败
+ 1024 俱乐部头像不能为空
+
+ 1034 微级币余额不足
+*/
+message SetClubInfoResp {
+    optional int32 code    = 1; // 1 成功
+    optional ClubInfo info = 2;
+}
+
+// 转入到余额
+message SaveClubBalanceReq {
+    optional int32 clubId    = 1;
+    optional int64 amount    = 2;
+    optional uint32 coinType = 3; // 币种: 0 时间币, 1 扑克币
+}
+
+message SaveClubBalanceResp {
+    optional int32 code        = 1; // 1 成功
+    optional int32 clubId      = 2;
+    optional int64 amount      = 3;
+    optional int64 clubBalance = 4;
+    optional uint32 coinType   = 5; // 币种: 0 时间币, 1 扑克币
+}
+
+// 提取到钱包
+message WithdrawClubBalanceReq {
+    optional int32 clubId    = 1;
+    optional int64 amount    = 2;
+    optional uint32 coinType = 3; // 币种: 0 时间币, 1 扑克币
+}
+
+message WithdrawClubBalanceResp {
+    optional int32 code         = 1; // 1 成功
+    optional int32 clubId       = 2;
+    optional int64 amount       = 3;
+    optional int64 clubBalance  = 4;
+    optional int64 balanceLimit = 5;
+    optional uint32 coinType    = 6; // 币种: 0 时间币, 1 扑克币
+}
+
+enum insurancePayMethod {
+    system    = 1; // 由平台承担
+    unlimited = 2; // 不设限制, 默认
+    limited   = 4; // 设限
+}
+
+// 每次保险赔付限制
+message SetClubInsurancePayMethodReq {
+    optional int32 clubId    = 1;
+    optional int32 payMethod = 2; // 赔付方式, 见 insurancePayMethod
+    optional int64 payLimit  = 3; // 最小为 100
+}
+
+message SetClubInsurancePayMethodResp {
+    optional int32 code      = 1; // 1 成功
+    optional int32 clubId    = 2;
+    optional int32 payMethod = 3;
+    optional int64 payLimit  = 4;
+}
+
+// 修改备注
+message SetClubUserRemarkReq {
+    optional int32 clubId  = 1;
+    optional int32 userId  = 2;
+    optional string remark = 3; // 备注
+}
+
+message SetClubUserRemarkResp {
+    optional int32 code    = 1; // 1 成功
+    optional int32 clubId  = 2;
+    optional int32 userId  = 3;
+    optional string remark = 4;
+}
+
+// 移除用户
+message RemoveClubUserReq {
+    optional int32 clubId  = 1;
+    repeated int32 userIds = 2;
+}
+
+message RemoveClubUserResp {
+    optional int32 code    = 1; // 1 成功
+    optional int32 clubId  = 2;
+    repeated int32 userIds = 3;
+}
+
+// 管理员设置
+message SetClubUserLevelReq {
+    optional int32 clubId         = 1;
+    repeated ClubUserLevel levels = 2;
+}
+
+message SetClubUserLevelResp {
+    optional int32 code             = 1; // 1 成功
+    repeated ClubUserInfo userInfos = 2; // 俱乐部所有的用户信息
+}
+
+// 更新俱乐部用户级别
+message ClubUserLevelPush {
+    optional int32 code           = 1; // 1 成功
+    optional ClubUserLevel level  = 2;
+}
+
+// 提现免手续费返利设置
+message SetClubRebateRatioReq {
+    optional int32 clubId    = 1;
+    optional int32 roomFee   = 2; // 房间费返利比例分子, 分母为 10000
+    optional int32 insurance = 3; // 保险返利比例分子, 分母为 10000
+}
+
+message SetClubRebateRatioResp {
+    optional int32 code      = 1; // 1 成功
+    optional int32 clubId    = 2;
+    optional int32 roomFee   = 3; // 房间费返利比例分子, 分母为 10000
+    optional int32 insurance = 4; // 保险返利比例分子, 分母为 10000
+}
+
+enum clubSetting {
+    allOff          = 0; // 全关
+    adminStartMatch = 1; // 只允许创始人和管理员开局
+    clubSearchable  = 2; // 允许他人搜索到该俱乐部
+    adminStartMatch_clubSearchable = 3; // 只允许创始人和管理员开局、允许他人搜索到该俱乐部, 默认选项
+    autoJoin = 4; // 创始人邀请自动加入俱乐部
+    adminStartMatch_autoJoin = 5; // 只允许创始人和管理员开局、创始人邀请自动加入俱乐部
+    clubSearchable_autoJoin  = 6; // 允许他人搜索到该俱乐部、创始人邀请自动加入俱乐部
+    adminStartMatch_clubSearchable_autoJoin = 7; // 只允许创始人和管理员开局、允许他人搜索到该俱乐部、创始人邀请自动加入俱乐部
+    autoJoin_autoJoinReview = 12; // 创始人邀请自动加入俱乐部、邀请自动加入需要审核
+    adminStartMatch_autoJoin_autoJoinReview = 13; // 只允许创始人和管理员开局、创始人邀请自动加入俱乐部、邀请自动加入需要审核
+    clubSearchable_autoJoin_autoJoinReview = 14; // 允许他人搜索到该俱乐部、创始人邀请自动加入俱乐部、邀请自动加入需要审核
+    allOn = 15; // 全开
+}
+
+// 开关
+message SetClubSettingReq {
+    optional int32 clubId  = 1;
+    optional int32 setting = 2; // 见 clubSetting
+}
+
+message SetClubSettingResp {
+    optional int32 code    = 1; // 1 成功
+    optional int32 clubId  = 2;
+    optional int32 setting = 3; // 见 clubSetting
+}
+
+// 解散俱乐部
+message DismissClubReq {
+    optional int32 clubId = 1;
+}
+
+message DismissClubResp {
+    optional int32 code = 1; // 1 成功
+}
+
+// 退出俱乐部
+message QuitClubReq {
+    optional int32 clubId = 1;
+}
+
+message QuitClubResp {
+    optional int32 code = 1; // 1 成功
+}
+
+// 查询俱乐部
+message ClubInfoReq {
+    optional int32 clubId = 1;
+}
+
+message ClubInfoResp {
+    optional int32 code             = 1; // 1 成功
+    optional ClubInfo info          = 2;
+    repeated ClubUserInfo userInfos = 3;
+}
+
+// 获取俱乐部列表
+message ClubListReq {
+    optional int32 userId = 1;
+}
+
+message ClubListResp {
+    optional int32 code         = 1; // 1 成功
+    repeated ClubInfo infos     = 2;
+    optional int32 createNum    = 3; // 玩家创建的俱乐部数量
+    optional int32 maxCreateNum = 4; // 最大可创建的俱乐部数量
+
+}
+
+// 获取俱乐部用户
+message ClubUsersReq {
+    optional int32 clubId = 1;
+    optional int32 page   = 2; // 页码
+}
+
+message ClubUsersResp {
+    optional int32 code         = 1; // 1 成功
+    optional int32 total        = 2; // 总数
+    optional int32 page         = 3; // 页码
+    optional int32 pagesize     = 4; // 页面大小
+    repeated ClubUserInfo infos = 5;
+}
+
+// 处理用户加入
+message ProcessUserJoinReq {
+    optional int32 clubId = 1;
+    optional int32 userId = 2;
+    optional int32 option = 3; // 见 common.proto:joinOption
+}
+
+message ProcessUserJoinResp {
+    optional int32 code = 1; // 1 成功
+}
+
+// 获取俱乐部加入的联盟列表
+message UnionListReq {
+    optional int32 clubId = 1;
+}
+
+message UnionListResp {
+    optional int32 code        = 1; // 1 成功
+    repeated UnionInfo infos   = 2;
+    optional int32 maxUnionNum = 3; // 俱乐部可以加入联盟的数量
+    repeated UnionInfo hasQuit = 4; // 退出的联盟
+}
+
+// 加入联盟
+message JoinUnionReq {
+    optional int32 clubId  = 1;
+    optional int32 unionId = 2;
+    optional string desc   = 3;
+}
+
+message JoinUnionResp {
+    optional int32 code    = 1; // 1 成功
+    optional int32 clubId  = 2;
+    optional int32 unionId = 3;
+}
+
+// 获取推荐的联盟列表
+message RecommendUnionListReq {
+    optional int32 clubId = 1;
+}
+
+message RecommendUnionListResp {
+    optional int32 code      = 1; // 1 成功
+    repeated UnionInfo infos = 2;
+}
+
+// 加入联盟消息
+message JoinUnionMsg {
+    optional int32 clubId  = 1;
+    optional int32 unionId = 2;
+    optional int64 time    = 3;
+    optional string msg    = 4;
+}
+
+// 加入联盟处理结果
+message JoinUnionResult {
+    optional int32 option     = 1; // 见 common.proto:joinOption
+    optional int32 unionId    = 2;
+    optional string unionName = 3; // 联盟名称
+    optional string userName  = 4; // 处理消息的用户名称
+}
+
+// 查看未下发账单
+message ViewNotOfferedBillReq {
+    optional int32 clubId    = 1;
+    optional int32 unionId   = 2;
+    optional uint32 coinType = 3; // 币种: 0 时间币, 1 扑克币
+}
+
+message ViewNotOfferedBillResp {
+    optional int32 code             = 1; // 1 成功
+    optional double totalNotOffered = 2; // 未下发总额
+    optional double totalNotRepaid  = 3; // 未还款总额
+    repeated BillInfo infos         = 4;
+    optional uint32 coinType        = 5; // 币种: 0 时间币, 1 扑克币
+}
+
+// 查看未还款账单
+message ViewNotRepaidBillReq {
+    optional int32 clubId    = 1;
+    optional int32 unionId   = 2;
+    optional uint32 coinType = 3; // 币种: 0 时间币, 1 扑克币
+}
+
+message ViewNotRepaidBillResp {
+    optional int32 code             = 1; // 1 成功
+    optional double totalNotOffered = 2; // 未下发总额
+    optional double totalNotRepaid  = 3; // 未还款总额
+    repeated BillInfo infos         = 4;
+    optional uint32 coinType        = 5; // 币种: 0 时间币, 1 扑克币
+}
+
+// 还款
+message RepayReq {
+    optional int32 clubId    = 1;
+    optional int32 unionId   = 2;
+    optional int32 billId    = 3; // -1 表示全部
+    optional uint32 coinType = 4; // 币种: 0 时间币, 1 扑克币
+}
+
+message RepayResp {
+    optional int32 code      = 1; // 1 成功
+    optional int32 clubId    = 2;
+    optional int32 unionId   = 3;
+    optional int32 billId    = 4; // -1 表示全部
+    optional uint32 coinType = 5; // 币种: 0 时间币, 1 扑克币
+}
+
+// 获取俱乐部基金流水
+// 子命令字 Cmd_ClubGainInfoReq
+message ClubGainInfoReq {
+    optional int32 clubId    = 1;
+    optional int32 page      = 2; // 页码
+    optional uint32 coinType = 3; // 币种: 0 时间币, 1 扑克币
+}
+
+// 子命令字 Cmd_ClubGainInfoResp
+message ClubGainInfoResp {
+    optional int32 code         = 1; // 1 成功
+    optional int32 clubId       = 2;
+    optional int32 total        = 3; // 总数
+    optional int32 page         = 4; // 页码
+    optional int32 pagesize     = 5; // 页面大小
+    repeated ClubGainInfo infos = 6;
+    optional uint32 coinType    = 7; // 币种: 0 时间币, 1 扑克币
+}
+
+// 俱乐部基金流水
+/*
+    reason 定义
+    transfer_in: 转入
+	transfer_out: 提取
+	room_fee: 房间费收益
+	insurance_freeze: 保险冻结
+	insurance_unfreeze: 保险解冻
+	insurance_win: 保险盈亏
+	insurance_lose: 保险盈亏
+	item_fee: 道具费收益
+	offer_in: 下发
+	repay_out: 还款
+	admin_inc: 管理员增加
+	admin_dec: 管理员扣除
+*/
+message ClubGainInfo {
+    optional int32 id        = 1; // 流水 id
+    optional int32 clubId    = 2;
+    optional double amount   = 3; // 金额
+    optional string reason   = 4; // 见 reason 定义
+    optional int64 timestamp = 5;
+    optional string desc     = 6; // 附加信息: {"bill":[567,568]}、{"mid":10749}
+    optional int64 mid       = 7; // 牌局 id
+    optional uint32 coinType = 8; // 币种: 0 时间币, 1 扑克币
+}

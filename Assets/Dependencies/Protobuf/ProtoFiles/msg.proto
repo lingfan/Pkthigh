@@ -1,0 +1,28 @@
+syntax = "proto2";
+package pbcmd;
+option go_package = "poker/pb/pbcmd";
+import "cmd.proto";
+
+//
+message PBReqPromoNotifyList {
+  required PBCommParam    comm      = 1;
+  optional string         offset    = 2; //
+  optional uint32         type      = 3; //
+  optional uint32         clear     = 4; //
+}
+
+//
+message PBRespPromoNotifyList {
+  required PBCommResult   ret     = 1;
+  required PBPromoNotify  list    = 2; //
+  optional string         offset  = 3; //
+}
+
+//
+message PBPromoNotify {
+  required uint32     id                = 1;
+  required string     title             = 2; //
+  optional uint32     ctime             = 3; //
+  optional string     content           = 4; //
+  optional string     pic               = 5; //
+}

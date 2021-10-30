@@ -1,0 +1,290 @@
+syntax = "proto2";
+package pbcmd;
+option go_package = "poker/pb/pbcmd;pbcmd";
+
+// 对应 Fish 客户端与服务器的交互
+// xxReq: 客户端请求
+// xxResp: 服务器回复客户端请求
+// xxPush: 服务器通知客户端
+enum Fish {
+    fishLoginReq        = 1; // 请求登录钓鱼房间
+    fishLoginResp       = 2;
+
+    fishLogoutReq       = 3; // 请求离开钓鱼房间
+    fishLogoutResp      = 4;
+
+    fishPlayInfoReq     = 5; // 请求钓鱼游戏信息(登录房间成功后获取)
+    fishPlayInfoResp    = 6;
+
+    fishActionReq       = 7; // 请求下注
+    fishActionResp      = 8;
+
+    fishHandHistoryReq  = 9; // 最近十手发牌数据
+    fishHandHistoryResp = 10;
+
+    fishRepeatedActionReq  = 11; // 续投（多投）
+    fishRepeatedActionResp = 12;
+
+    fishRichListReq  = 13; // 最近二十手富豪榜数据
+    fishRichListResp = 14;
+
+    // Server 主动推送
+    fishLoginPush       = 1001; // 登录钓鱼房间
+    fishLogoutPush      = 1002; // 离开钓鱼房间
+
+    fishPreparePush     = 1003; // 钓鱼准备
+    fishHandStartPush   = 1004; // 钓鱼一手牌开始, 发手牌、公共牌
+    fishActionStartPush = 1005; // 开始下注
+    fishActionPush      = 1006; // 下注推送
+    fishActionEndPush   = 1007; // 下注结束, 更新每个下注区的下注总额、玩家在各个下注区的下注额
+    fishShowHandsPush   = 1008; // 亮手牌、公共牌
+    fishHandEndPush     = 1009; // 钓鱼一手牌结束
+}
+
+// 请求登录钓鱼房间
+message FishLoginReq {
+    optional uint32 tid = 1; // 桌子 id
+    optional uint32 uid = 2;
+    optional string clientDefined = 3; // 客户端透传的信息(json 字符串)
+    optional bool lite  = 4; // 精简版
+}
+
+message FishLoginResp {
+    optional uint32 code = 1; // 1: 成功 2: 桌子不存在 3: 正在维护 4: 人数已满
+    optional uint32 tid  = 2;
+    optional bool lite   = 3; // 精简版
+}
+
+// 登录钓鱼房间推送
+message FishLoginPush {
+    optional uint32 tid = 1;
+    optional uint32 uid = 2;
+    optional string clientDefined = 3; // 客户端透传的信息(json 字符串)
+    optional bool lite  = 4; // 精简版
+}
+
+// 请求离开钓鱼房间
+message FishLogoutReq {
+    optional uint32 tid = 1; // 桌子id
+}
+
+message FishLogoutResp {
+    optional uint32 code = 1; // 1: 成功 2: 桌子不存在 3: 离开失败
+    optional uint32 tid  = 2;
+    optional bool lite   = 3; // 精简版
+}
+
+// 离开钓鱼房间
+message FishLogoutPush {
+    optional uint32 tid    = 1;
+    optional uint32 uid    = 2;
+    optional uint32 reason = 3; // 1: 主动 2: 被T 3: 长时间未下注 4: 维护
+    optional bool lite     = 4; // 精简版
+}
+
+// 获取游戏的信息(登录房间成功后获取)
+message FishPlayInfoReq {
+    optional uint32 tid = 1;
+}
+
+/*
+    State 定义
+    1 准备开始阶段
+    2 发牌阶段(发手牌、公共牌)
+	3 行动阶段(玩家下注)
+	4 亮牌阶段(赔付)
+	5 暂停阶段
+*/
+// 公共牌: [0,0,0,0,0], 手牌: [0,0] 表示牌被盖住; 公共牌: [], 手牌: [] 表示没有牌
+message FishPlayInfoResp {
+    optional int32 code         = 1; // 1: 需要刷新 2: 无需刷新
+    optional uint32 tid         = 2;
+    optional uint32 state       = 3; // 游戏状态, 见 State 定义
+    repeated uint32 publicCards = 4; // 公共牌
+    repeated uint32 sharkCards  = 5; // 鲨鱼手牌
+    repeated uint32 fisherCards = 6; // 渔夫手牌
+    repeated FishPot pots       = 7; // 底池标识、下注总额、赔率、玩家下注额、未出的手数、最大下注总额
+    optional uint32 countdown   = 8; // 行动阶段的倒计时(秒)
+    repeated FishPotBead beads  = 9; // 走珠数据
+    optional uint32 winner      = 10; // 赢家: 0 平、1 鲨鱼、2 渔夫
+    optional uint32 cardType    = 11; // 赢家牌型, 见 CardType 定义
+    repeated uint32 handType    = 12; // 任一人手牌类型: 1 对子、2 同花/连牌/同花连牌、3 对A
+    repeated uint32 bestFive    = 13; // 最大五张牌
+    optional uint32 handId      = 14; // 当前第几手牌
+}
+
+// 走珠数据(底池 4 至 11 的走珠数据)
+// 10x 赔率显示 N 手未出, 对子区显示 9 手, 同花/连牌/同花连牌下注区显示 15 手
+// 高牌/一对和两对下注区显示 17 手, 三条/顺子/同花下注区显示 11 手
+message FishPotBead {
+    optional uint32 Id       = 1; // 底池标识, 见 Id 定义
+    repeated uint32 showStat = 2; // 显示统计, 0 未出、1 出现
+}
+
+// 请求下注(单投)
+message FishActionReq {
+    optional uint32 tid   = 1;
+    optional uint32 potId = 2; // 底池标识
+    optional uint64 chips = 3; // 下注金额(微级币): [1, 10, 20, 50, 100, 200, 500, 1000] x 100
+}
+
+message FishActionResp {
+    optional uint32 code       = 1; // 1: 成功 2: 时机不对 3: 余额不足 4: 超过本手限红
+    optional uint32 tid        = 2;
+    optional uint64 pkcBalance = 3; // 微级币余额
+}
+
+// 续投（多投）
+message FishRepeatedActionReq {
+    optional uint32 tid             = 1;
+    repeated FishUserAction actions = 2; // 传递 uid、potId、chips
+}
+
+message FishRepeatedActionResp {
+    optional uint32 code       = 1; // 1: 成功 2: 时机不对 3: 余额不足 4: 超过本手限红
+    optional uint32 tid        = 2;
+    optional uint64 pkcBalance = 3; // 微级币余额
+}
+
+// 玩家下注推送
+// 自己的下注实时推送, 其他玩家的下注间隔几秒推送
+message FishActionPush {
+    optional uint32 tid             = 1;
+    optional uint32 uid             = 2; // uid=0 表示其他玩家
+    repeated FishUserAction actions = 3;
+}
+
+// 玩家下注
+message FishUserAction {
+    optional uint32 uid           = 1;
+    optional uint32 potId         = 2; // 底池标识
+    repeated uint64 chips         = 3; // 下注金额数组(微级币)
+    optional string clientDefined = 4; // 客户端透传的信息(json 字符串)
+}
+
+// 最近十手发牌数据
+message FishHandHistoryReq {
+
+}
+
+message FishHandHistoryResp {
+    optional uint32 code             = 1; // 1: 成功 2: 牌局未开始 3: 其他错误
+    repeated FishHandHistory history = 2;
+}
+
+// 手牌历史
+message FishHandHistory {
+    repeated uint32 publicCards = 1; // 公共牌
+    repeated uint32 sharkCards  = 2; // 鲨鱼手牌
+    repeated uint32 fisherCards = 3; // 渔夫手牌
+    repeated FishPot pots       = 4; // 底池标识、玩家下注额、玩家赔付额
+    optional uint32 handNum     = 5; // 手数
+}
+
+// 底池信息
+/*
+    Id 定义, 0-11 对应 12 个底池
+    0 鲨鱼赢
+    1 平局
+    2 渔夫对2或高牌赢
+    3 渔夫赢
+    4 对子
+    5 同花/连牌/同花连牌
+    6 对A
+    7 高牌/一对
+    8 两对
+    9 三条/顺子/同花
+    10 葫芦
+    11 金刚/同花顺/皇同
+*/
+message FishPot {
+    optional uint32 id          = 1; // 底池标识, 见 Id 定义
+    optional uint64 totalBet    = 2; // 下注总额(微级币)
+    optional uint32 odds        = 3; // 赔率百分比, 100=1x, 166=1.66x
+    optional uint64 userBet     = 4; // 玩家下注额(微级币)
+    optional uint64 userPay     = 5; // 玩家赔付额(微级币)
+    optional uint32 disappear   = 6; // 未出的手数
+    optional bool show          = 7; // 是否出现
+    optional uint64 maxTotalBet = 8; // 最大下注总额
+    optional string disappearTxt = 9; // 未出的手数(字符串)
+}
+
+// 游戏准备开始
+message FishPreparePush {
+    optional uint32 tid       = 1;
+    optional uint32 state     = 2; // 游戏状态, 见 State 定义
+    optional uint32 countdown = 3; // 准备开始阶段的倒计时(秒)
+}
+
+// 钓鱼一手牌开始, 发手牌、公共牌
+message FishHandStartPush {
+    optional uint32 tid    = 1;
+    optional uint32 handId = 2; // 当前第几手牌
+}
+
+// 玩家开始下注
+message FishActionStartPush {
+    optional uint32 tid       = 1;
+    optional uint32 state     = 2; // 游戏状态, 见 State 定义
+    optional uint32 countdown = 3; // 下注阶段的倒计时(秒)
+}
+
+// 下注结束, 更新每个下注区的下注总额、玩家在各个下注区的下注额
+message FishActionEndPush {
+    optional uint32 tid   = 1;
+    repeated FishPot pots = 2; // 底池标识、下注总额、玩家下注额
+}
+
+// 亮手牌、公共牌
+/*
+    CardType 定义
+	1  高牌
+	2  一对
+	3  两对
+	4  三条
+	5  顺子
+	6  同花
+	7  葫芦
+	8  四条(金刚)
+	9  同花顺
+	10 皇家同花顺
+*/
+message FishShowHandsPush {
+    optional uint32 tid         = 1;
+    optional uint32 state       = 2; // 游戏状态, 见 State 定义
+    repeated uint32 publicCards = 3; // 公共牌
+    repeated uint32 sharkCards  = 4; // 鲨鱼手牌
+    repeated uint32 fisherCards = 5; // 渔夫手牌
+    optional uint32 winner      = 6; // 赢家: 0 平、1 鲨鱼、2 渔夫
+    optional uint32 cardType    = 7; // 赢家牌型, 见 CardType 定义
+    repeated uint32 handType    = 8; // 任一人手牌类型: 1 对子、2 同花/连牌/同花连牌、3 对A
+    repeated uint32 bestFive    = 9; // 最大五张牌
+}
+
+// 钓鱼一手牌结束
+/*
+ * 注意: 赔率和最大下注总额是下一手的,需要客户端在下一手开始时更新
+*/
+message FishHandEndPush {
+    optional uint32 tid   = 1;
+    repeated FishPot pots = 2; // 底池标识、赔率(下一手)、玩家赔付额、未出的手数、是否出现、最大下注总额(下一手)
+    repeated FishPotBead beads = 3; // 走珠数据
+}
+
+// 最近二十手富豪榜数据
+message FishRichListReq {
+
+}
+
+message FishRichListResp {
+    optional uint32 code     = 1; // 1: 成功 2: 牌局未开始 3: 其他错误
+    repeated FishRich riches = 2;
+}
+
+// 富豪榜
+message FishRich {
+    optional uint32 uid  = 1;
+    optional string name = 2;
+    optional uint64 pkcBalance = 3; // 微级币余额
+    optional uint32 richType   = 4; // 玩家类型 0: 大富豪 1: 神算子
+}

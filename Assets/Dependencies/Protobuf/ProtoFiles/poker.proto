@@ -1,0 +1,822 @@
+syntax = "proto2";
+package pbcmd;
+option go_package = "poker/pb/pbcmd;pbcmd";
+
+import "common.proto";
+
+//德州扑克
+//service:Poker
+
+/////////////////////////##新的德州协议##////////////////////////////
+
+////////////////////////##PB结构##//////////////////////////////////
+//德州游戏桌子的各个阶段
+enum GSTATE {
+    IDLE     = 0;  //空闲阶段
+    READY    = 1;  //游戏开始倒计时阶段
+    PREFLOP  = 2;  //发完手牌的第一轮行动阶段
+    FLOP     = 3;  //发完三张牌的翻牌行动阶段
+    TURN     = 4;  //发完第四张牌的转牌行动阶段
+    RIVER    = 5;  //发完第5张牌的河牌行动阶段
+    OVER     = 6;  //游戏结算阶段 亮牌及分池的展示阶段
+}
+
+//行动的选项
+enum ACTIONTYPE {
+    AT_FLOP   = 0;    //弃牌
+    AT_CHECK  = 1;    //过 无需下注
+    AT_BET    = 2;    //下注
+}
+
+//行动展示名词
+enum ACTIONTIPS {
+    TIPS_NONE     = 0;   //无
+    TIPS_SB       = 1;   //小盲
+    TIPS_BB       = 2;   //大盲
+    TIPS_CHECK    = 3;   //过
+    TIPS_BET      = 4;   //下注
+    TIPS_CALL     = 5;   //跟注
+    TIPS_RAISE    = 6;   //加注
+    TIPS_ALLIN    = 7;   //全下
+    TIPS_FOLD     = 8;   //弃牌
+    TIPS_ANTE     = 9;   //前注
+    TIPS_STRADDLE = 10;  //抓头
+}
+
+//地理位置
+message Geo {
+    optional string longitude = 1; // 经度
+    optional string latitude  = 2; // 纬度
+}
+
+//ante的信息 (AntePush)
+message AnteInfo {
+    optional uint32 sid  = 1; // 下ante的座位号
+    optional uint64 ante = 2; // 下ante的筹码数
+    optional uint64 left = 3; // 下完ante后设剩余的筹码数
+}
+
+//每轮结束时，奖次的变化信息 id从0开始 (AntePush、RoundEndPush)
+message ChangePot {
+    optional uint32 potid = 1;   //奖池id
+    optional int64 num = 2;     //变化的数量
+    optional uint64 total = 3;  //变化后的值
+}
+
+//亮的手牌信息 (GameOverPush)  
+message ShowHands {
+    optional uint32 sid = 1;
+    repeated int32 cards = 2; //手牌数组 0:表示背面
+    optional uint32 userId = 3; //玩家的用户id
+}
+
+//奖池的赢取玩家 (GameOverPush)  
+message PotWinner  {
+    optional uint32 sid = 1;
+    optional uint32 uid = 2;
+    optional uint64 num = 3;
+}
+
+//分池情况 (GameOverPush)  
+message PotInfo {
+    optional uint32 potid = 1;
+    optional uint64 total = 2;
+    repeated PotWinner winners = 3;
+}
+
+//一手牌结束 每个玩家的盈亏(GameOverPush)  
+message BalanceInfo {
+    optional uint32 sid = 1;
+    optional uint32 uid = 2;
+    optional uint64 coin = 3;  //一手牌结束后的剩余筹码值
+    optional int64 balance = 4;  //玩家这手牌的盈亏
+}
+
+message TableInfo {
+    optional uint64 mincarry = 1; // 最小带入
+    optional uint64 maxcarry = 2; // 最大带入
+    optional uint32 seatnum  = 3; // 座位数
+    optional uint64 ante = 4;  // 前注
+    optional uint64 sb = 5;    // 小盲
+    optional uint64 bb = 6;    // 大盲
+    optional uint32 bettime = 7; // 下注思考时间
+    optional GSTATE state = 8;   // 当前游戏阶段 [PREFLOP-RIVER]阶段需要同步在玩信息
+    optional bool straddleFlag = 9; // 开启抓头开关
+	  optional bool gpsLimitFlag = 10; // 定位限制开关
+	  optional bool ipLimitFlag  = 11; // IP限制开关
+	  optional bool insuranceFlag    = 12; // 保险开关
+    optional bool showAllHandsFlag = 13; // 强制亮手牌开关
+    optional bool friendLimitFlag  = 14; // 防伙牌
+    optional uint32 startTime         = 15; // 第一手牌的开始的时间戳 0:表示尚未开始
+    optional uint32 autoStartUserNum  = 16; // 自动开始人数:为0则表示不会自动开始
+    optional bool luckyCard           = 17; // 是否有 Lucky Card
+    optional bool closeChat           = 18; // 关闭聊天: true 关闭、false 开启
+    optional VpipConf vpipConf        = 19; // 入池标准 vpipConf.vpip = 0 表示普通桌
+    optional uint32 showOtherVpipCost = 20; // 查看他人入池数据费用
+    optional uint32 kind             = 21; // 玩法类型 1:德州 2:短牌 4:奥马哈
+    optional uint32 unloadTimes      = 22; // 自动卸码倍数
+    optional int64 createTime        = 23; // 比赛创建的时间戳
+    optional int32 autoEndTime       = 24; // 自动结束时长
+    optional uint32 coinType         = 25; // 币种: 0 时间币, 1 扑克币
+    optional uint32 createUid        = 26; // 创建者UID
+    optional uint32 createClubId     = 27; // 创建者俱乐部ID
+    optional uint32 createUnionId    = 28; // 创建者联盟或者超盟ID
+    optional uint32 randFaceCheckStatus   = 29; // 人脸抽查状态 (0无需抽查 1下一手待抽查 2抽查中)
+    optional uint32 randFaceCheckingNum   = 30; // 未完成人脸抽查人数
+    optional int64 randFaceCheckLeftTime  = 31; // 人脸抽查倒计时(秒)
+    optional bool faceVip                 = 32; // 是否人脸认证
+}
+
+//有玩家的座位信息
+message SeatInfo {
+    optional uint32 sid = 1;
+    optional uint32 uid = 2;
+    optional uint64 coin = 3; //身上的筹码
+    optional string clientDefined = 4; //透传信息
+    optional int32 leaveStatus = 5;  //离开状态 0:普通状态 1:超时未操作状态(下局开始会站起) 2:强制离开状态(下局开始会站起并离开) 3:结算离开状态(下局会站起并结算)
+    optional uint32 buyInCountdown = 6; // 买入倒计时时间(秒)
+    optional uint64 totalBuyIn     = 7; // 用户总买入
+    optional uint32 faceCheckCountdown = 8; // 人脸验证倒计时
+}
+
+//奖池信息
+message Pot {
+    optional uint32 potid = 1;  //奖池id
+    optional uint64 num = 2;    //奖池大小
+}
+
+//可下注的筹码数值
+message BetInfo {
+    optional uint64 check = 1;  //跟注所需筹码
+    optional uint64 raisemin = 2; //最小加注的筹码数(0:表示不能加注)
+    optional uint64 raisemax = 3; //可以下注时的最大下注额(一般情况为座位上还剩的筹码数)
+}
+
+//正在行动的座位
+message ActionSeat {
+    optional uint32 sid = 1;
+    optional int32 timeout = 2;  //剩余操作时间
+    optional BetInfo bet = 3;    //可下注的信息
+}
+
+//正在购买保险的座位
+message BuyInsSeat {
+    optional uint32 sid = 1;   //座位号
+    optional uint32 potid = 2;  //底池id
+    optional uint64 totalPot = 3;  //底池筹码量
+    repeated int32 overOuts = 4; //反超outs
+    repeated int32 deuceOuts = 5; //平分outs
+    optional uint64 avgPot = 6; //保本池(赔付额)
+    optional uint64 lackChips = 7;  //上次输掉的投保额(赔付额，用于背回 0:表示无须背回)
+    optional uint64 buyMax = 8;  //本次最高购买(投保额)
+    repeated OddsUnit odds = 9;  //赔率表
+    optional int32 timeout = 10; //操作超时时间(s)
+    optional bool select  = 11;  //是否可选outs
+    repeated ShowHands potUserCards = 12; //该底池其它玩家的手牌信息
+    optional uint64 maxBuyPot = 13; //最大可买底池 （满池/赔付额）
+    optional bool disableDeuce= 14; //不可购买平分outs
+}
+
+//玩家购买保险的信息
+message BuyInsInfo {
+    optional uint32 sid = 1; //购买保险的座位号
+    optional int32 potid = 2;//购买的是哪个池的保险
+    optional uint64 num = 3; //玩家的投保额 为0表示没买
+    optional int32 outsCount = 4; //购买的outs数
+}
+
+//正在玩牌的座位信息
+message PlaySeat {
+    optional uint32 sid = 1;     //座位id
+    optional uint64 coin = 2;    //身上筹码
+    optional uint64 chips = 3;  //本轮下注的筹码
+    optional bool   fold = 4;   //是否弃牌
+    optional bool   allin = 5;  //是否全下
+    optional ACTIONTIPS actionTips = 6;  //当前操作名词提示
+    repeated int32  cards = 7;  //座位上对玩家可见的牌
+}
+
+//赔率单元
+message OddsUnit {
+    optional int32 count = 1; //outs个数
+    optional int32 rate = 2;//赔率百分比% 100表示100% 表示赔1倍 320表示3.2倍
+}
+
+////////////////////////////##与客户端交流数据##////////////////////////////////////
+//玩家登陆请求
+message LoginReq {
+    optional uint32 tid = 1; //桌子id
+    optional uint32 uid = 2;
+    optional string clientDefined = 3;  //json字符串 客户端自定义透传的信息
+}
+
+//玩家登陆回复
+message LoginResp {
+    optional int32 code = 1;  //1:成功  2:桌子不存在
+    optional uint32 tid  = 2;  //桌子id
+    optional TableInfo tableInfo = 3; //桌子信息
+    repeated SeatInfo seatInfo = 4;   //有玩家的座位信息
+    optional Extra extra = 5; // 额外信息
+}
+
+message Extra {
+    optional string name          = 1; // 牌局名称
+    optional uint32 creatorUserId = 2; // 创建者 userId
+    optional uint32 roomId        = 3; // 房间标识
+    optional string clubName      = 4; // 俱乐部名称
+    optional bool isAdmin         = 5; // 是否是俱乐部/联盟的管理员，牌局的创建者
+    optional bool settled         = 6; // 是否已结算
+    optional uint64 totalBuyIn    = 7; // 用户总买入
+    optional uint32 randFaceCheckStatus = 8; // 人脸抽查状态(0无需抽查 1抽查中 2抽查完成)
+}
+
+//通知有玩家登陆
+message LoginPush {
+    optional uint32 tid = 1;
+    optional uint32 uid = 2;
+    optional string clientDefined = 3; //json字符串 客户端自定义透传的信息
+}
+
+// 离开房间请求及确认
+message LogoutReq {
+    optional uint32 tid = 1;        // 桌子id
+}
+
+message LogoutResp {
+    optional int32 code    = 1;  // 1: 成功 2: 桌子不存在 3: 下局会自动站起并离开 4: 离开失败 5: 正在人脸随机检测
+    optional uint32 tid    = 2;  //桌子id
+}
+
+//通知某玩家离开房间
+message LogoutPush {
+    optional uint32 tid = 1;
+    optional uint32 uid = 2;
+    optional int32 reason = 3; //1:主动离开 2:被T
+}
+
+//获取正在玩牌的信息(登陆后处于玩牌状态需要)
+message PlayInfoReq {
+    optional uint32 tid = 1;
+}
+//获取正在玩牌的信息
+message PlayInfoResp {
+    optional int32 code = 1;  //1：成功 2:无须同步
+    optional uint32 tid = 2;
+    optional GSTATE state = 3;
+    optional uint32 buttonsid = 4; //庄家位
+    repeated int32  publicCards = 5; //公共牌
+    repeated Pot    pots = 6;   //当前奖池的信息
+    optional ActionSeat actionSeat = 7; //当前正在行动的座位
+    repeated PlaySeat playSeats = 8;  //本手玩牌的信息
+    optional bool insMode = 9;  //是否已进入保险模式
+    optional BuyInsSeat buyInsSeat = 10; //正在买保险的座位信息
+    repeated BuyInsInfo buyInsHistory = 11; //已买保险的信息
+    optional ExtendTimeUnit extendTime = 12;//加时信息
+    optional uint32 coinType           = 13; // 币种: 0 时间币, 1 扑克币
+}
+
+// 玩家坐下请求
+message SitdownReq {
+    optional uint32 tid  = 1;
+    optional uint32 sid  = 2; //座位号id
+    optional uint64 coin = 3; //坐下要带入的筹码 0为不带入
+    optional Geo    geo  = 4; //geo位置信息
+    optional uint32 coinType = 5; // 币种: 0 时间币, 1 扑克币
+}
+
+// 坐下回复
+/* code 定义
+ * 1 成功
+ * 2 座位已经有人
+ * 3 重复入座
+ * 4 钱不够
+ * 5 ip限制
+ * 6 gps限制(无)
+ * 7 非法座位号
+ * 8 gps限制(距离短)
+ * 9 已结算
+ * 10 用户所在的俱乐部没有加入联盟
+ * 11 被管理员T出
+ * 12 时间币不够最小买入
+ * 13 扑克币不够最小买入
+ * 14 需要进行人脸认证
+ * 15 人脸vip等级不足
+ * 16 人脸审核中
+ */
+message SitdownResp {
+    optional int32 code = 1;
+    optional uint32 tid = 2;
+    optional uint32 coinType = 5; // 币种: 0 时间币, 1 扑克币
+}
+
+//通知玩家坐下信息
+message SitdownPush {
+    optional uint32 uid = 1;
+    optional uint32 tid = 2;
+    optional uint32 sid = 3;    //座位号id
+    optional uint64 coin = 4;   //玩家坐下时的筹码
+    optional string clientDefined = 5;
+    optional uint32 coinType      = 6; // 币种: 0 时间币, 1 扑克币
+}
+
+// 玩家站起请求及确认
+message StandupReq {
+    optional uint32 tid        = 1;
+}
+
+//站起回复
+message StandupResp {
+    optional int32 code    = 1; // 1: 成功 2: 没有坐下 3: 非法座位号 4: 不可站起 5: 正在人脸随机检测
+    optional uint32 tid    = 2; // 桌子id
+}
+//通知玩家站起
+message StandupPush {
+    optional uint32 tid = 1;
+    optional uint32 uid = 2;
+    optional uint32 sid = 3;
+    optional uint64 coin = 4;  //站起时的筹码数
+    optional int32  reason   = 5; //1:主动 2:操作超时 3:筹码不够 4:被管理员T起 5:游戏结束 6:同 ip
+    optional uint32 coinType = 6; // 币种: 0 时间币, 1 扑克币
+}
+
+//游戏准备开始倒计时
+message GameReadyPush {
+    optional uint32 tid = 1;
+    optional GSTATE state = 2; //游戏状态 @see poker.proto/GSTATE
+    optional int32  timeout = 3; //倒计时时间(单位:秒s)
+}
+
+//游戏开始,确定button与发手牌
+message GameStartPush {
+    optional uint32 tid = 1;
+    optional GSTATE state = 2;  //游戏阶段 进入preflop
+    optional uint32 buttonsid = 3;  //庄家位座位号
+    repeated uint32 playsids = 4;   //本局玩牌的座位号
+}
+
+//通知所有玩家下前注的信息 
+message AntePush {
+    optional uint32 tid      = 1;
+    repeated AnteInfo antes  = 2;//玩家的ante信息
+    repeated ChangePot pots  = 3; //下完ante后奖池的变化情况
+    optional uint32 coinType = 4; // 币种: 0 时间币, 1 扑克币
+}
+
+//发玩家手牌
+message DealPush {
+    optional uint32 tid  = 1;
+    repeated int32 cards = 2; //手牌 取 cards[0]&0xFF,  cards[1]&0xFF
+}
+
+//通知玩家开始行动
+message StartActionPush {
+    optional uint32 tid = 1; //桌子id
+    optional uint32 sid = 2;  //座位号
+    optional BetInfo bet  = 3; //可下注的信息
+    optional ExtendTimeUnit extendTime = 4; // 加时信息
+    optional uint32 coinType           = 5; // 币种: 0 时间币, 1 扑克币
+}
+
+//玩家请求下注
+message ActionReq {
+    optional uint32 tid = 1;
+    optional ACTIONTYPE actionType = 2;
+    optional uint64 chips    = 3; // 下注筹码 flop 和 check 无此项
+    optional uint32 coinType = 4; // 币种: 0 时间币, 1 扑克币
+}
+
+//玩家下注回复
+message ActionResp {
+    optional int32 code = 1; //1:成功 2:时机不对 3:下注筹码错误
+    optional uint32 tid = 2;
+    optional uint32 coinType = 3; // 币种: 0 时间币, 1 扑克币
+}
+
+//玩家下注通知
+message ActionPush {
+    optional uint32 tid = 1;
+    optional uint32 sid = 2;
+    optional ACTIONTYPE actionType = 3;
+    optional uint64 chips = 4;  //下注的筹码 flop 和 check 无此项
+    optional uint64 roundChips = 5;  //当前轮的总下注
+    optional uint64 coin = 6;   //操作后身上剩余筹码值
+    optional ACTIONTIPS actionTips = 7; // 操作名词提示
+    optional uint32 coinType       = 8; // 币种: 0 时间币, 1 扑克币
+}
+
+//系统将多余的筹码返回给玩家
+message RefundPush {
+    optional uint32 tid = 1;
+    optional uint32 sid = 2;
+    optional uint64 chips = 3;    // 返回的筹码
+    optional uint64 coin  = 4;    // 返回后身上剩余筹码值
+    optional uint32 coinType = 5; // 币种: 0 时间币, 1 扑克币
+}
+
+//回合结束,通知奖池变化
+message RoundEndPush {
+    optional uint32 tid      = 1;
+    repeated ChangePot pots  = 2; //一轮结束后奖池的变化情况
+    optional uint32 coinType = 3; // 币种: 0 时间币, 1 扑克币
+}
+
+//发翻牌
+message FlopPush {
+    optional uint32 tid   = 1;
+    optional GSTATE state = 2;
+    repeated int32  cards = 3; //三张公共牌
+}
+
+//发转牌
+message TurnPush {
+    optional uint32 tid   = 1;
+    optional GSTATE state = 2;
+    optional int32  card  = 3; //转牌
+}
+
+//发河牌
+message RiverPush {
+    optional uint32 tid   = 1;
+    optional GSTATE state = 2;
+    optional int32  card  = 3; //河牌
+}
+
+//游戏结束结算信息
+message GameOverPush {
+    optional uint32 tid = 1;
+    optional int32  timeout = 2; //倒计时时间(单位:秒s)
+    repeated ShowHands show = 3; //游戏结束比牌产生的亮牌信息
+    repeated PotInfo pots = 4;   //分池情况
+    repeated BalanceInfo balances = 5; //玩家盈亏
+    optional uint32 coinType      = 6; // 币种: 0 时间币, 1 扑克币
+}
+
+//亮手牌设置请求
+message ShowHandsReq {
+    optional uint32 tid = 1;
+    repeated bool sets = 2; //俩张牌的亮牌设置
+}
+//亮牌设置请求回复
+message ShowHandsResp {
+    optional int32 code = 1;  //1:成功 2:失败
+    optional uint32 tid = 2;
+    repeated bool sets = 3;  //设置后的值
+}
+//亮牌通知
+message ShowHandsPush {
+    optional uint32 tid = 1;
+    optional ShowHands show = 2;
+}
+
+//所有玩家Allin 提前亮手牌
+message PreShowHandsPush {
+    optional uint32 tid = 1;
+    repeated ShowHands show = 2;
+}
+
+//玩家买入筹码到帐通知
+message BuyinPush {
+    optional uint32 tid = 1; //桌子id
+    optional uint32 sid = 2; //座位id
+    optional uint64 buyin = 3; //买入的筹码量
+    optional uint64 coin = 4;  //买入后身上的筹码量
+    optional uint32 coinType = 5; // 币种: 0 时间币, 1 扑克币
+}
+
+//通知客户端进入保险模式
+message EnterInsPush {
+    optional uint32 tid = 1;
+}
+
+// 通知某玩家开始购买保险
+// 投保的两个准则：1.投保额不得超过底池 2.最高赔付额(投保额*赔率)不得超过底池
+message StartBuyInsPush {
+    optional uint32 tid = 1;
+    optional BuyInsSeat buyInsSeat     = 2; // 可以购买保险的座位信息
+    optional ExtendTimeUnit extendTime = 3; // 加时信息
+    optional uint32 coinType           = 4; // 币种: 0 时间币, 1 扑克币
+}
+
+//玩家买保险请求
+message BuyInsReq {
+    optional uint32 tid = 1; // 桌子id
+    optional uint64 buy = 2; // 买入的保险额 0为不买
+    repeated int32 outs = 3; // 购买的 outs 不买则不传
+    optional uint32 coinType = 4; // 币种: 0 时间币, 1 扑克币
+}
+
+//回复玩家买保险
+message BuyInsResp {
+    optional int32 code = 1; //购买结果 1:成功 2:失败
+    optional uint32 tid = 2; //所在桌子
+    optional uint32 coinType = 3; // 币种: 0 时间币, 1 扑克币
+}
+
+//通知玩家买保险操作
+message BuyInsPush {
+    optional uint32 tid = 1; //桌子号
+    optional BuyInsInfo info = 2;
+    optional uint32 coinType = 3; // 币种: 0 时间币, 1 扑克币
+}
+
+//通知爆保险时的赔付信息
+message PayInsPush {
+    optional uint32 tid = 1;
+    optional uint32 sid = 2;
+    optional uint64 pay = 3; // 赔付额
+    optional uint64 coin = 4;// 赔完后的座位上的筹码
+    optional uint32 coinType = 5; // 币种: 0 时间币, 1 扑克币
+}
+
+//不触发保险提示
+message DisableInsPush {
+    optional uint32 tid = 1;
+    optional int32 tips = 2;  // 1:人数多于3个不激活保险 2:没有outs不触发保险 3:反超outs过多 4:无反超outs,平分outs过多 5:底池太小不触发保险
+}
+
+//设置离开状态()
+message SetLeaveStatusReq {
+    optional uint32 tid = 1;
+    optional int32 leaveStatus = 2;  //目前只能传0,表示恢复  离开状态 0:普通状态 1:超时未操作状态(下局开始会站起) 2:强制离开状态(下局开始会站起并离开)
+}
+
+message SetLeaveStatusResp {
+    optional uint32 tid = 1;
+    optional int32 code = 2; //1:成功 2：失败
+}
+
+message SetLeaveStatusPush {
+    optional uint32 tid = 1;
+    optional uint32 sid = 2;  //座位号
+    optional int32 leaveStatus = 3;  //目前只能传0,表示恢复  离开状态 0:普通状态 1:超时未操作状态(下局开始会站起) 2:强制离开状态(下局开始会站起并离开)  3:结算离开状态(下局会站起并结算)
+}
+
+// 每一轮所有玩家的操作
+message ActionProc {
+	optional uint32		uid = 1;			// 玩家id
+    optional int32		actionTips = 2;  	//当前操作名词提示
+	optional uint32		raiseFreq = 3;		// 加注次数，从第3次开始显示3B,第4次显示4B,以此类推
+	optional uint64		chips = 4;			// 操作筹码数量
+	optional uint64		totalPot = 5;		// 操作后总底池数
+}
+
+// 每一轮(preflop\flop\turn\river)流程信息
+message RoundProc {
+	optional int32			gstate = 1;			// 阶段，preflop-2,flop-3,turn-4,river-5, showndown-6
+	optional int64			roundTime = 2;		// 每一轮开始时间
+	optional uint64			totalPot = 3;		// 本轮总底池
+	repeated ActionProc		actions = 4;		// 本轮所有玩家操作流程
+}
+
+// 单个玩家在一手牌中的输赢信息
+message HandPlayerInfo {
+	optional uint32		uid = 1;			// 玩家id
+	repeated uint32		holeCards = 2;		// 玩家手牌，2张
+	optional int32		handValue = 3;		// 成牌类型
+	optional int64		result = 4;			// 本手牌输赢
+	optional int64		insurance = 5;		// 本手牌玩家保险
+	optional string		position = 6;		// 玩家位置信息
+	optional string		payload = 7;		// 玩家信息
+}
+
+//历史牌局发发看和强制亮牌的信息
+message HandLookCardsInfo {
+    optional uint64 showPublicCardsFee = 1; // 发发看的费用
+    optional uint64  showAllHandsFee    = 2; // 强制亮牌费用
+    optional int32    showState        = 3; // 看哪个游戏状态的公共牌, 参看  GSTATE 3：翻牌（3张） 4:转牌(1张) 5:和牌(1张) (其它状态都不可看牌)
+    optional bool   showAllHands       = 4; // 是否已强制亮牌(如果没有, 需要显示"强制亮牌"按钮)
+}
+
+// 请求单手牌局历史
+message HandHistoryReq {
+	optional uint32		handNum = 1;		// 请求第几手牌, 0-为最后一手牌
+}
+
+// 单手牌局历史返回
+message HandHistoryResp {
+	optional int32 code              = 1; // 1-成功，2-牌局未开始，3-其他错误
+	optional uint32	handNum          = 2; // 第几手牌，从1开始
+	optional uint32	totalHands       = 3; // 总手数
+	optional HandHistory handHistory = 4; // 手牌历史详情
+    optional bool favorite           = 5; // 是否收藏
+    optional HandLookCardsInfo lookInfo = 6; //发发看和强制亮牌的信息
+    optional uint32 coinType            = 7; // 币种: 0 时间币, 1 扑克币
+}
+
+// 单手牌局历史详情
+message HandHistory {
+	optional int64				handTime = 1;	// 手牌开始时间
+	optional int64				insurance = 2;	// 本手保险盈亏
+	repeated uint32				boardcards = 3;	// 公共牌
+	repeated RoundProc			rounds = 4;		// 每轮流程信息
+	repeated HandPlayerInfo		players = 5;	// 参与玩家信息
+    optional uint64             showdownPot = 6;// 牌局结束时的底池
+}
+
+//旁观者
+message Onlooker {
+    optional uint32 uid = 1; // 玩家id
+    optional string clientDefined = 2; // 玩家名称
+    optional bool online  = 3; // 是否在线
+    optional int64 lookAt = 4; // 旁观时间
+}
+
+//玩家获取旁观者列表请求
+message GetOnlookerListReq {
+    optional uint32 tid = 1; //桌子id
+}
+
+//玩家获取旁观者列表请求
+message GetOnlookerListResp {
+    optional int32 code = 1;  //1:成功  2:桌子不存在
+    optional uint32 tid  = 2;  //桌子id
+    repeated Onlooker list = 3; //旁观者列表
+    optional int32 onlookerNum = 4; // 旁观人数
+}
+
+///////看公共牌
+//通知玩家可以执行看公共牌操作 
+message CanShowPublicCardsPush{
+    optional GSTATE  state    = 1; // 看哪个游戏状态的牌, 参看 GSTATE 3：翻牌（3张） 4:转牌(1张) 5:和牌牌(1张)
+    optional uint32 leftTime  = 2; // 剩余可操作时间，单位是秒
+    optional uint64 costMoney = 3; // 需要消耗的币
+    optional uint32 coinType  = 4; // 币种: 0 时间币, 1 扑克币
+}
+
+//请求看公共牌
+message ShowPublicCardsReq {
+    optional uint32		handNum = 1;		// 请求第几手牌(历史牌局), 0(或不传)-为当前正在玩的牌局
+}
+
+//回复看公共牌 
+message ShowPublicCardsResp{
+    optional int32 code         = 1; // 是否成功 1:成功 2:不可看牌 3:时间币不够 4:扑克币不足
+    repeated int32 cards        = 2; // 公共牌
+    optional GSTATE state       = 3; // 发哪个游戏状态的牌, 参看 GSTATE 3：翻牌（3张） 4:转牌(1张) 5:和牌牌(1张)
+    optional uint64 remainMoney = 4; // 操作后剩余币 失败时无此信息
+    optional uint32 handNum     = 5; // 请求第几手牌, (server透传)
+    optional uint32 coinType    = 6; // 币种: 0 时间币, 1 扑克币
+}
+
+//广播房间所有人，谁看了公共牌 
+message WhoShowPublicCardsPush{
+    optional uint32 uid           = 1;     // 玩家id
+    optional string clientDefined = 2;    // 玩家名字
+}
+
+////////看手牌
+//通知玩家可以执行看所有人手牌操作  
+message CanShowAllHandsPush{
+    optional uint32 leftTime  = 1; // 剩余可操作时间，单位是秒
+    optional uint64 costMoney = 2; // 需要消耗的币
+    optional uint32 coinType  = 3; // 币种: 0 时间币, 1 扑克币
+}
+
+//请求看所有人手牌
+message ShowAllHandsReq {
+    optional uint32		handNum = 1;		// 请求第几手牌, 0(或不传)-为当前正在玩的牌局
+}
+
+//回复看所有人手牌  Texas_ResphowAllHands = 0x1063
+message ShowAllHandsResp{
+    optional int32 code         = 1; // 是否成功 1:成功 2:不可看牌 3:时间币不够 4:扑克币不够
+    repeated ShowHands hands    = 2; // 所有玩家的手牌
+    optional uint64 remainMoney = 3; // 操作后剩余金币 失败时无此信息
+    optional uint32 handNum     = 4; // 请求第几手牌, (server透传)
+    optional uint32 coinType    = 5; // 币种: 0 时间币, 1 扑克币
+}
+
+// 买入倒计时推送
+message BuyInCountdownPush {
+    optional uint32 sid        = 1;
+    optional uint32 countdown  = 2; // 买入倒计时时间(秒)
+    optional uint64 totalBuyIn = 3; // 用户总买入
+    optional uint32 coinType   = 4; // 币种: 0 时间币, 1 扑克币
+}
+
+// 人脸检测倒计时推送
+message FaceCheckCountdownPush {
+    optional uint32 sid        = 1;
+    optional uint32 countdown  = 2; // 倒计时时间(秒)
+}
+
+//获取房间费明细
+message GetRoomFeeReq {
+}
+
+//返回房间费明细
+message GetRoomFeeResp {
+    optional int32 code = 1;           // 1成功
+    optional uint32 buyinFeeProp  = 2; // 买入费比例(万分比)
+    optional uint32 profitFeeProp = 3; // 战绩费比例(万分比)
+    optional uint32 potFeeProp = 4;  // 底池费比例(万分比)
+    optional uint32 buyinFee = 5;    // 买入费
+    optional uint32 profitFee = 6;   // 战绩费
+    optional uint32 potFee = 7;      // 底池费
+    optional uint32 potFeeLimit = 8; // 底池费封顶
+    optional uint32 coinType    = 9; // 币种: 0 时间币, 1 扑克币
+}
+
+//加时操作的信息
+message ExtendTimeUnit {
+    optional uint64 costMoney = 1;
+    optional uint32 addTime  = 2;
+    optional int32 addType   = 3; //操作类型 1：下注操作 2：保险操作
+}
+
+// 加时操作请求
+message ExtendTimeReq {
+    optional int32 addType   = 1; //操作类型 1：下注操作 2：保险操作
+}
+
+//加时操作回复
+message ExtendTimeResp {
+    optional int32 code = 1; //1:成功 2:状态错误 3:时间币不足 4:扑克币不足
+    optional uint64 costMoney = 2; //成功之后,扣除的币
+    optional uint64 leftMoney = 3; //成功之后
+    optional ExtendTimeUnit extendTime = 4; //下一次可加时的信息
+    optional uint32 coinType           = 5; // 币种: 0 时间币, 1 扑克币
+}
+
+//加时操作推送
+message ExtendTimePush {
+    optional uint32 sid = 1; //座位号
+    optional uint32 addTime = 2; //本次增加的时间(秒)
+    optional uint32 leftTime = 3; //剩余总时间(秒)
+    optional int32 addType = 4; //操作类型 1：下注操作 2：保险操作
+}
+
+// [收藏/取消收藏]历史一手牌局
+message KeepHistoryHandReq {
+    optional uint32 userId       = 1;
+    optional int32 matchId       = 2;
+    optional int32 handId        = 3; // 手数
+    optional bool keep           = 4; // true: 收藏, false: 取消收藏
+    optional uint32 coinType     = 5; // 币种: 0 时间币, 1 扑克币
+}
+
+message KeepHistoryHandResp {
+    optional int32 code          = 1; // 1 成功，2 失败, 3 收藏已达上限
+    optional uint32 userId       = 2;
+    optional int32 matchId       = 3;
+    optional int32 handId        = 4; // 手数
+    optional bool keep           = 5; // true: 收藏, false: 取消收藏
+    optional uint32 coinType     = 6; // 币种: 0 时间币, 1 扑克币
+}
+
+// 牌局内刷新 Lucky Card 推送
+message LuckyCardPush {
+    repeated int32 cards        = 1; // 幸运牌
+}
+
+//获取当前的积分(已撤回的筹码)
+message GetPointsReq {
+    //参数为空
+}
+message GetPointsResp {
+    optional int32 code      = 1; // 1 成功, 2 失败
+    optional uint64 points   = 2; // 当前积分
+    optional uint32 coinType = 3; // 币种: 0 时间币, 1 扑克币
+}
+
+// 加载积分( 已撤回的筹码 转换成 筹码)
+message LoadPoinstReq  {
+    optional uint64 num      = 1; //买入的积分数量
+}
+
+//
+message LoadPointsResp  {
+    optional int32 code          = 1; // 1 成功，2 数量不足, 3 不在座位, 4 买入范围错误
+}
+
+//某玩家的积分变化
+message PointChangePush {
+    optional uint32 uid = 1; // 玩家的id
+    optional uint32 sid = 2; // 座位id
+    optional int64 changePoints = 3; // 本次变化的积分(负为减少)
+    optional uint64 points = 4;     // 变化后的总积分
+    optional int64 changeChips = 5; // 变化的筹码量
+    optional uint64 chips = 6;    // 变化后的筹码量
+    optional uint32 coinType = 7; // 币种: 0 时间币, 1 扑克币
+}
+
+//下手进行人脸验证
+message PreFaceCheckPush {
+}
+
+//通知开始人脸认证, 通知给桌内所有人
+message FaceCheckStartPush {
+    optional uint32 countdown = 1; // 倒计时时间(秒)
+    optional uint32 randFaceCheckingNum = 2; // 人脸抽查人数
+    optional bool needCheck = 3; // 自己是否需要检查
+}
+
+//通知人脸结束认证
+message FaceCheckEndPush {
+    optional uint32 standNum = 1; // 站起人数
+}
+
+// 人脸随机验证人数变化
+message FaceCheckLeftChangePush {
+    optional uint32 randFaceCheckingNum = 1; // 人脸抽查人数
+}

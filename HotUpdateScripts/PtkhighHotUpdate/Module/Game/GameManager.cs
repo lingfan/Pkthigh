@@ -23,31 +23,30 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Game
 
         void Awake()
         {
-
             instance = this;
             UnityEngine.Object.DontDestroyOnLoad(this);
         }
 
         void Start()
         {
-            JAction jAction = new JAction();
-            jAction.Delay(1).Do(() =>
-            {
-                UIManager.instance.Show(nameof(Tabs));
-            }).Delay(2).Do(() =>
-            {
-                UIManager.instance.Show(nameof(PopupTemplate));
-            }).Delay(2).Do(() =>
-            {
-                UIManager.instance.Close(nameof(PopupTemplate));
-            }).Delay(2).Do(() =>
-            {
-                UIManager.instance.Show(nameof(DirectoryTreeView));
-            }).Delay(2).Do(() =>
-            {
-                UIManager.instance.Show(nameof(Tabs));
-                TestEvent();
-            }).Execute(true);
+            //JAction jAction = new JAction();
+            //jAction.Delay(1).Do(() =>
+            //{
+            //    UIManager.instance.Show(nameof(Tabs));
+            //}).Delay(2).Do(() =>
+            //{
+            //    UIManager.instance.Show(nameof(PopupTemplate));
+            //}).Delay(2).Do(() =>
+            //{
+            //    UIManager.instance.Close(nameof(PopupTemplate));
+            //}).Delay(2).Do(() =>
+            //{
+            //    UIManager.instance.Show(nameof(DirectoryTreeView));
+            //}).Delay(2).Do(() =>
+            //{
+            //    UIManager.instance.Show(nameof(Tabs));
+            //    TestEvent();
+            //}).Execute(true);
 
             NetworkManager.InitSocket();
         }
@@ -66,6 +65,6 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Game
 
     public enum GameStatus
     {
-
+        Start,
     }
 }

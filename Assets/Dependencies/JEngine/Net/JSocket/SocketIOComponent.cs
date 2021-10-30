@@ -259,6 +259,8 @@ namespace JEngine.Net
 
 		private void _OnMessage(object sender, MessageEventArgs e)
 		{
+			Debug.LogError("--OnMessage--");
+			Debug.LogError(e.Data);
 			debugMethod.Invoke("[SocketIO] Raw message: " + e.Data);
 
 			Packet packet = decoder.Decode(e);

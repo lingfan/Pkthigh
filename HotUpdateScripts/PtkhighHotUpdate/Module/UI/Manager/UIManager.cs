@@ -111,8 +111,6 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.UI.Manager
         private void Register(UIBase ui, Action<UIBase> openCall = null, Action<UIBase> closeCall = null)
         {
             RectTransform parent = layerHidden;
-
-            Log.Print("Register ui in UIManager " + ui.name);
             //初始化
             ui.gameObject.layer = LayerMask.NameToLayer("UI");
             ui.transform.SetParent(parent, false);

@@ -1,0 +1,13 @@
+syntax = "proto2";
+package pbcmd;
+option go_package = "poker/pb/pbcmd;pbcmd";
+import "cmd.proto";
+
+message PBReqAutoRestart{ // 自动重启
+    required uint32			mid		  = 1;  // 牌局id
+    optional int32         type      = 2;  // 牌局类型
+}
+
+message PBRespAutoRestart{
+    required PBCommResult   ret       = 1;
+}

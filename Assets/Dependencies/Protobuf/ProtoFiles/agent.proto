@@ -1,0 +1,319 @@
+syntax = "proto2";
+package pbcmd;
+option go_package = "poker/pb/pbcmd";
+import "cmd.proto";
+
+enum PBMainCmdAgentSubCmd {
+    PBReqInvitation = 1; // 请求邀请
+    PBRespInvitation = 2;
+
+    PBReqIncomeSummary = 3; // 请求收益汇总
+    PBRespIncomeSummary = 4;
+
+    PBReqConsumptionIncomeInfo = 5; // 请求分成奖励明细
+    PBRespConsumptionIncomeInfo = 6;
+
+    PBReqInsuranceIncomeInfo = 7; // 请求保险奖励明细
+    PBRespInsuranceIncomeInfo = 8;
+
+    PBReqIncomeWithdraw = 9; // 请求收益提现
+    PBRespIncomeWithdraw = 10;
+
+    PBReqIncomeWithdrawInfo = 11; // 请求收益提现明细
+    PBRespIncomeWithdrawInfo = 12;
+
+    PBReqRedEnvelopeIncomeDetails = 13; // 请求红包收益详情
+    PBRespRedEnvelopeIncomeDetails = 14;
+
+    PBReqDownlineInfo = 15; // 下属查询
+    PBRespDownlineInfo = 16;
+
+    PBReqIncomeProportion = 17; // 请求奖励比例配置
+    PBRespIncomeProportion = 18;
+
+    PBReqPrivateIncomeInfo = 19; // 请求私局奖励明细
+    PBRespPrivateIncomeInfo = 20;
+
+    PBReqUpdateDownlineInfo = 21; // 更新下属信息
+    PBRespUpdateDownlineInfo = 22;
+
+    PBReqUpdateProportion = 23; // 更新分成比例
+    PBRespUpdateProportion = 24;
+
+    PBReqAgentList = 25; // 获取一级代理
+    PBRespAgentList = 26;
+
+    PBReqSearchAgent = 27; // 查询一级代理
+    PBRespSearchAgent = 28;
+}
+
+enum PBAgentRole {
+    SuperAgent = 1;
+    Agent = 2;
+    Player = 3;
+    SysAgent = 4;
+}
+
+// 请求邀请
+message PBAgentReqInvitation {
+}
+
+// 返回邀请
+message PBAgentRespInvitation {
+    optional PBCommResult ret = 1;
+    required string InvitationCode = 2; // 邀请码
+    required string InvitationUrl = 3; // 邀请链接
+}
+
+// 请求收益汇总
+message PBAgentReqIncomeSummary {
+}
+
+// 返回收益汇总
+message PBAgentRespIncomeSummary {
+    optional PBCommResult ret = 1;
+    required double gameIncomeBalance = 2; // 奖励
+    required double totalGameIncome = 3; // 累计
+    required double consumptionIncomeBalance = 4; // 大厅分成奖励
+    required double insuranceIncomeBalance = 5; // 大厅保险奖励
+    required uint64 redEnvelopeIncomeBalance = 6; // 红包奖励
+    required int64 settlementDate = 7; // 结算日期时间戳
+    required double consumptionIncomeYesterday = 8; // 昨日分成奖励
+    required double unsettlementInsuranceIncome = 9; // 未结算保险收益
+    required double lastSettlementInsuranceIncome = 10; // 上次结算保险收益
+    required uint32 level1AgentConsumptionIncomeProportion = 11; // 一级代理分成奖励比例(1.6.0已废弃)
+    required uint32 level2AgentConsumptionIncomeProportion = 12; // 二级代理分成奖励比例(1.6.0已废弃)
+    required uint32 level1AgentInsuranceIncomeProportion = 13; // 一级代理保险奖励比例(1.6.0已废弃)
+    required uint32 level2AgentInsuranceIncomeProportion = 14; // 二级代理保险奖励比例(1.6.0已废弃)
+    optional double privateIncomeBalance = 15; // 私局奖励(1.5.0已废弃)
+    optional uint32 clubPrivateIncomeProportion = 16; // 俱乐部私局分成比例(1.5.0已废弃)
+    optional uint32 personalPrivateIncomeProportion = 17; // 个人私局分成比例(1.5.0已废弃)
+    optional uint32 level3AgentConsumptionIncomeProportion = 18; // 3 级代理分成奖励比例(1.6.0已废弃)
+    optional uint32 level4AgentConsumptionIncomeProportion = 19; // 4 级代理分成奖励比例(1.6.0已废弃)
+    optional uint32 level3AgentInsuranceIncomeProportion = 20; // 3 级代理保险奖励比例(1.6.0已废弃)
+    optional uint32 level4AgentInsuranceIncomeProportion = 21; // 4 级代理保险奖励比例(1.6.0已废弃)
+    optional PBAgentRole agentRole = 22; // 玩家代理角色状态
+    optional uint32 superAgentTotalProportion = 23; // 超级代理总返利
+    optional uint32 superAgentFirstLevelProportionMin = 24; // 超级代理一级返利最小值
+    optional uint32 superAgentFirstLevelProportionMax = 25; // 超级代理一级返利最大值
+    optional uint32 agentProportion = 26; // 当前代理一级返利百分比
+    optional uint32 redEnvelopeIncomeProportion = 27; // 红包奖励比例
+}
+
+// 请求分成奖励明细
+message PBAgentReqConsumptionIncomeInfo {
+    required uint32 page = 1; // 页码
+}
+
+// 返回分成奖励明细
+message PBAgentRespConsumptionIncomeInfo {
+    optional PBCommResult ret = 1;
+    optional uint32 total = 2; // 总数
+    optional uint32 page = 3; // 页码
+    optional uint32 pagesize = 4; // 页面大小
+    repeated IncomeInfo info = 5; // 明细
+}
+
+// 收益明细
+message IncomeInfo {
+    optional string userName = 1; // 用户名
+    optional int64 date = 2; // 日期时间戳
+    optional double amount = 3; // 金额
+}
+
+// 请求保险收益明细
+message PBAgentReqInsuranceIncomeInfo {
+    required uint32 page = 1; // 页码
+}
+
+// 返回保险收益明细
+message PBAgentRespInsuranceIncomeInfo {
+    optional PBCommResult ret = 1;
+    optional uint32 total = 2; // 总数
+    optional uint32 page = 3; // 页码
+    optional uint32 pagesize = 4; // 页面大小
+    repeated IncomeInfo info = 5; // 明细
+}
+
+// 请求收益提现
+message PBAgentReqIncomeWithdraw {
+}
+
+// 返回收益提现结果
+/*
+ * ret code 定义
+ * 1 操作成功
+ * 2 内部错误
+ * 3 余额不足
+ * 4 您当日提取已达上限，请明日尝试或联系客服
+ * 5 达到系统最大限额
+ * 6 请等待上一笔交易完成
+ * 7 生成订单出错
+ * 8 更新订单出错
+*/
+message PBAgentRespIncomeWithdraw {
+    optional PBCommResult ret = 1;
+    optional uint64 withdraw = 2; // 提现金额
+}
+
+// 请求收益提现记录
+message PBAgentReqIncomeWithdrawInfo {
+    required uint32 page = 1; // 页码
+}
+
+// 返回收益提现记录
+message PBAgentRespIncomeWithdrawInfo {
+    optional PBCommResult ret = 1;
+    optional uint32 total = 2; // 总数
+    optional uint32 page = 3; // 页码
+    optional uint32 pagesize = 4; // 页面大小
+    repeated IncomeWithdrawInfo info = 5; // 明细
+}
+
+// 收益提现明细
+message IncomeWithdrawInfo {
+    optional int32 status = 1; // 状态 0 成功 1 失败 2 处理中
+    optional string order = 2; // 订单号
+    optional int64 date = 3; // 日期时间戳
+    optional uint64 withdraw = 4; // 提现金额
+    optional string remark = 5; // 备注
+}
+
+// 请求红包收益详情
+message PBAgentReqRedEnvelopeIncomeDetails {
+}
+
+// 返回红包收益详情
+message PBAgentRespRedEnvelopeIncomeDetails {
+    optional PBCommResult ret = 1;
+    required uint64 remainingRedEnvelope = 2; // 剩余红包
+    required int64 expirydate = 3; // 有效期时间戳
+    required double currentRedEnvelope = 4; // 当前红包金额
+    required uint32 minRedEnvelop = 5; // 最小红包金额
+}
+
+// 下属查询
+message PBAgentReqDownlineInfo {
+    required uint32 page = 1; // 页码
+    optional uint32 order = 2; // 排序方式(0:等级升序 1:等级降序)
+}
+
+// 返回下属查询
+message PBAgentRespDownlineInfo {
+    optional PBCommResult ret = 1;
+    optional uint32 total = 2; // 总数
+    optional uint32 page = 3; // 页码
+    optional uint32 pagesize = 4; // 页面大小
+    repeated DownlineInfo info = 5; // 明细
+    optional bool disabledSetProp = 6; // 是否禁用设置比例
+}
+
+// 下属明细
+message DownlineInfo {
+    optional string userName = 1; // 用户名
+    optional uint32 userId = 2; // 用户 Id
+    optional uint32 level = 3; // 分级
+    optional uint32 incomeProportion = 4; // 分成比例
+    optional string avatar = 5; // 头像
+    optional bool isAgent = 6; // 是否是代理
+}
+
+// 下属修改
+message PBAgentReqUpdateDownlineInfo {
+    message UpdateInfo {
+        required uint32 uid = 1; // 用户ID
+        optional bool isAgent = 2; // 是否设为代理
+    }
+    repeated UpdateInfo updateInfo = 1; // 修改信息
+}
+
+// 下属修改返回
+message PBAgentRespUpdateDownlineInfo {
+    // 0 失败
+    // 1 成功
+    // 2 用户不存在
+    // 3 代理数量超过限制
+    // 4 不是一级成员不能设为代理
+    // 5 不是超级代理
+    required PBCommResult ret = 1;
+}
+
+// 修改一级代理比例
+message PBAgentReqUpdateProportion {
+    required uint32 proportion = 1; // 一级代理比例
+}
+
+// 修改一级代理比例返回
+message PBAgentRespUpdateProportion {
+    // 0 失败
+    // 1 成功
+    // 2 比例不在设置范围内
+    // 3 一天只能设置一次
+    required PBCommResult ret = 1;
+    optional uint32 proportion = 2; // 设置后的比例
+    optional bool disabledSetProp = 3; // 是否禁用设置按钮
+}
+
+// 获取一级代理列表
+message PBAgentReqAgentList {
+}
+
+// 获取一级代理列表返回
+message PBAgentRespAgentList {
+    repeated DownlineInfo agents = 1; // 代理列表
+}
+
+// 查询一级代理
+message PBAgentReqSearchAgent {
+    required uint32 uid = 1; // 用户ID
+}
+
+// 查询一级代理返回
+message PBAgentRespSearchAgent {
+    // 0 失败
+    // 1 成功
+    // 2 用户不存在
+    // 3 非一级下属玩家，无法成为代理
+    required PBCommResult ret = 1;
+    optional DownlineInfo agent = 2; // 代理
+}
+
+// 请求奖励比例配置
+message PBAgentReqIncomeProportion {
+}
+
+// 返回奖励比例配置
+message PBAgentRespIncomeProportion {
+    optional PBCommResult ret = 1;
+    optional uint32 level1AgentConsumptionIncomeProportion = 2; // 一级代理分成奖励比例
+    optional uint32 level2AgentConsumptionIncomeProportion = 3; // 二级代理分成奖励比例
+    optional uint32 level1AgentInsuranceIncomeProportion = 4; // 一级代理保险奖励比例
+    optional uint32 level2AgentInsuranceIncomeProportion = 5; // 二级代理保险奖励比例
+    optional uint32 redEnvelopeIncomeProportion = 6; // 红包奖励比例
+    optional uint32 level3AgentConsumptionIncomeProportion = 7; // 3 级代理分成奖励比例
+    optional uint32 level4AgentConsumptionIncomeProportion = 8; // 4 级代理分成奖励比例
+    optional uint32 level3AgentInsuranceIncomeProportion = 9; // 3 级代理保险奖励比例
+    optional uint32 level4AgentInsuranceIncomeProportion = 10; // 4 级代理保险奖励比例
+}
+
+// 请求私局奖励明细
+message PBAgentReqPrivateIncomeInfo {
+    required uint32 page = 1; // 页码
+}
+
+// 返回私局奖励明细
+message PBAgentRespPrivateIncomeInfo {
+    optional PBCommResult ret = 1;
+    optional uint32 total = 2; // 总数
+    optional uint32 page = 3; // 页码
+    optional uint32 pagesize = 4; // 页面大小
+    repeated PrivateIncomeInfo info = 5; // 明细
+}
+
+// 私局奖励明细
+message PrivateIncomeInfo {
+    optional string matchName = 1; // 牌局名称
+    optional string clubName = 2; // 俱乐部名称
+    optional int64 date = 3; // 日期时间戳(秒)
+    optional int64 amount = 4; // 金额
+}

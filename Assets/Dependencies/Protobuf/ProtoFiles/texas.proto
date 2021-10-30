@@ -1,0 +1,1094 @@
+syntax = "proto2";
+package pbcmd;
+option go_package = "poker/pb/pbcmd;pbcmd";
+import "cmd.proto";
+import "common.proto";
+import "matchList.proto";
+
+message PBTableBlind {
+    required int32  index                 = 1;
+    required uint64 sb                    = 2;
+    required uint64 bb                    = 3;
+}
+
+// 比赛状态
+enum PBMatchState {
+    wait                = 1;
+    running             = 2;
+    pause               = 3;
+    finish              = 4;
+}
+
+enum PBSeatActionStatus{
+	SeatActionStatusDefault = 0; // 默认状态
+	SeatActionStatusSmallBlind = 1; // 小盲注
+	SeatActionStatusBigBlind = 2; // 大盲注
+	SeatActionStatusCheck = 3; // 过牌
+	SeatActionStatusBet = 4; // 下注
+	SeatActionStatusCall = 5; // 跟注
+	SeatActionStatusRaise = 6; // 加注
+	SeatActionStatusAllin = 7; // 全下
+	SeatActionStatusFold = 8; // 弃牌
+    SeatActionStatusAnte = 9;
+    SeatActionStatusStraddle = 10;
+}
+
+enum PBSeatStatus{
+	SeatStatusCanUse        = 0; // 座位可以没人，可以使用
+	SeatStatusWaitGame      = 1; // 当前座位上的玩家处于等待加入牌局状态
+	SeatStatusInGame        = 2; // 当前座位上的玩家手上持有手牌
+	SeatStatusFold          = 3; // 当前座位上的玩家已经弃牌
+    SeatStatusWaitForBuyin  = 4; // 当前座位上的玩家在等待买筹码
+    SeatStatusWaitForRebuy  = 5; // 当前座位上的玩家在等待加买筹码
+	SeatStatusOut           = 6; // 当前座位上的玩家被淘汰
+	SeatStatusLeave         = 7; // 离座留桌
+}
+
+enum PBGameState{
+	GameStatePrepare = 0;   // 准备阶段
+	GameStateStart   = 1;   // 比赛开始，处理走庄，ante，盲注，发牌等
+	GameStatePreflopRound = 2; // 翻牌前阶段
+	GameStateFlopRound  = 3;   // 翻牌阶段
+	GameStateTurnRound  = 4;   // 转牌阶段
+	GameStateRiverRound = 5;   // 河牌阶段
+	GameStateOver       = 6;   // 游戏结束，处理比牌，结算，淘汰等
+}
+
+message PBSeat {
+    // 状态相关
+    required int32  sid                     = 1;    //玩家座位id
+    optional PBPlayer player                = 2;    //玩家信息
+    required uint64 seatChips               = 3;    //玩家手上(也就是座位上)还剩的筹码
+    required bool  hasCards                 = 4;    //当前是否拥有手牌 -- 0 /1
+    required uint32 seatStatus              = 5;    // 详情查看 PBSeatStatus
+    optional int32 card1                    = 6;    //手牌1(没有手牌就是0)
+    optional int32 card2                    = 7;    //手牌2(没有手牌就是0) // 黑红梅方 1234 // 2~9 23456789 // TJQKA  10 11 12 13 14 // eg: 黑桃A 114
+   //chipinType和seatStatus共用
+    optional uint32  chipinType             = 8;    //当前下注动作(就是玩家头上标注的文字).详情看 PBSeatActionStatus
+    optional uint64 chipinMoney             = 9;    //本轮牌圈内玩家已经下注的筹码.
+
+    // 操作相关
+    optional int32 remainThinkingTime       = 10;
+    optional PBUserChipinAction action      = 11;
+    optional uint64 insurance               = 12;
+    optional bool willShowCard1             = 13;
+    optional bool willShowCard2             = 14;
+    optional uint32 remainBuyinTime         = 15;
+    optional uint32 nextExtendThinkCost     = 16;
+    optional uint32 rank                    = 17;   //sng比赛用到的名次
+    optional bool forceShowCard             = 18;   //是否系统强制亮牌
+}
+
+message PBEmpty {
+}
+
+//请求下注
+message PBOptionReq{
+    required int32  chipType            = 1;   //下注类型
+    optional uint64 chipInMoney         = 2;    // 自定义数值加注
+}
+
+//用户下注动作不合法时回复
+message PBOptionResp{
+}
+
+// 离座留桌状态
+enum PBReserveStatus {
+    Blank           = 0;    // 正常玩牌状态
+    NextLeave       = 1;    // 下局离席
+    Leaving         = 2;    // 离席中
+    Back            = 3;    // 已回座位等待下一局
+}
+
+// 赢牌类型
+enum CardWinType{
+    WINNING                         = 0;  // 赢
+    HIGHCARD                        = 1;  // 高牌
+    ONEPAIR                         = 2;  // 一对
+    TWOPAIRS                        = 3;  // 两对
+    THRREKAND                       = 4;  // 三条
+    STRAIGHT                        = 5;  // 顺子
+    FLUSH                           = 6;  // 同花
+    FULLHOUSE                       = 7;  // 葫芦
+    FOURKAND                        = 8;  // 四条
+    STRAIGHTFLUSH                   = 9; // 同花顺
+    ROYALFLUSH                      = 10; // 皇家同花顺
+}
+
+// 短牌赢牌类型
+enum ShortWinType{
+    SHORTWINNING                         = 0;  // 赢
+    SHORTHIGHCARD                        = 1;  // 高牌
+    SHORTONEPAIR                         = 2;  // 一对
+    SHORTTWOPAIRS                        = 3;  // 两对
+    SHORTTHRREKIND                       = 4;  // 三条
+    SHORTSTRAIGHT                        = 5;  // 顺子
+    SHORTFULLHOUSE                       = 6;  // 葫芦
+    SHORTFLUSH                           = 7;  // 同花
+    SHORTFOURKIND                        = 8;  // 四条
+    SHORTSTRAIGHTFLUSH                   = 9; // 同花顺
+    SHORTROYALFLUSH                      = 10; // 皇家同花顺
+}
+
+// ==============================================================================================
+// 请求加入桌子
+message PBJoinTableReq {
+    optional bool autoMuck          = 1;
+    optional bool closeInsurance    = 2;
+}
+
+/*
+ * result 定义
+ * 1 成功
+ * 2 在其他桌子围观
+ * 3 围观人数已达上限
+ * 4 在其他桌子座位上
+ */
+message PBJoinTableResp {
+    required int32  result            = 1; // 结果 成功1
+    optional string matchName         = 2;
+    optional PBMatchIndex requestJoin = 3; // 请求加入的桌子信息
+    optional PBMatchIndex joined      = 4; // 已加入的桌子信息
+}
+
+// ==============================================================================================
+//请求退出
+message PBLeaveTableReq{
+    optional PBMatchIndex passed = 1; // 透传的桌子信息
+}
+
+//返回确认
+/*
+ * result 定义
+ * 0 在座位上
+ * 1 成功
+ * 2 房间不存在
+ */
+message PBLeaveTableResp{
+    required uint32 result       = 1;
+    optional string text         = 2; // 退出失败原因
+    optional PBMatchIndex passed = 3; // 透传的桌子信息
+}
+
+// ==============================================================================================
+//请求牌桌信息.
+message PBTableInfoReq {
+}
+
+message PBTableInfoResp {
+    required uint64 gameId                  = 1;    //牌局id
+    required int32 seatCount                = 2;    //最大玩家数
+    required uint64 smallBlind              = 3;    //小盲
+    required uint64 bigBlind                = 4;    //大盲
+    required string tableName               = 5;    //桌子名称
+    required int32 tableType                = 6;    //桌子类型  //参考PBMatchType
+    required int32 state                    = 7;    // 桌子状态, 参看 PBGameState
+    required int32 buttonSid                = 8;    //庄家位置
+    required uint32 tid                     = 9;    //桌子ID
+    required int32 smallBlindSid            = 10;    //小盲位置
+    required int32 bigBlindSid              = 11;    //大盲位置
+    repeated int32 boards                   = 12;    //公共牌
+    //参见state 桌子状态
+    //required int32 round                    = 13;    //第几轮
+    repeated uint64 publicPools             = 14;    //公共池 数组.
+    repeated PBSeat seatInfos               = 15;    //坐下玩家信息及状态
+    optional uint64 minBuyin                = 16;    //最小买入多少个bb
+    optional uint64 maxBuyin                = 17;    //最大买入多少个bb
+    optional uint32 creatorUid              = 18;    //创建者UID。为0代表官方场 -> uid = self && state = wait 显示 开始 按钮
+    optional uint32 serviceFeeNumerator     = 19;    //服务费分子部分
+    optional uint32 serviceFeeDenominator   = 20;    //服务费分母部分
+    optional bool hasInsurance              = 21;    //是否开启保险
+    optional bool hasTimeLimit              = 22;    //是否是限时房间
+    optional uint32 totalLimitTime          = 23;    //房间预设时长，单位是秒
+    optional uint32 remainLimitTime         = 24;    //房间剩余可进行时长，单位是秒
+    optional uint64 ante                    = 25;    //前注
+    optional int32 thinkingTime             = 26;    //总下注时间
+    optional uint32 remainCloseTime         = 27;    //剩余房间关闭时间。最终以关闭指令为主，若开赛此值不传或为0
+    optional uint64 remainBuyin             = 28;
+    optional uint32 password                = 29;    //仅用于用户自建场
+    optional uint32 matchState              = 30;    //参见PBMatchState
+    optional PBNotifyUserBuyInsurance buyInsurance = 31;
+    optional uint32 cid                     = 32;
+    optional string clubName                = 33;
+    optional bool   hasGPSLimit             = 34;       //定位限制
+    optional bool   hasIPLimit              = 35;       //ip限制
+    optional bool   needBuyinAuthorize      = 36;
+    optional string chatGroupID             = 37;       //腾讯云聊天室id
+    //SNG、MTT等比赛配置
+    optional uint64 sngRegisterFee          = 38; // 比赛报名费
+    optional uint64 sngServiceFee           = 39; // 比赛服务费
+    optional uint64 startChips              = 40; // 起始筹码
+    optional uint32 gameStartTime           = 41; // 自建场开始时间
+    optional uint64 totalPots               = 42; // 总底池
+    optional uint32 matchLevel              = 43; // 桌子级别
+    optional uint32 hasStraddle             = 44; // 是否强制straddle
+    optional PBRecordFee recordFee          = 45; // 记录费信息
+    optional bool showAllHands              = 46; // 强制亮牌
+    optional bool friendLimit               = 47; // 防伙牌
+}
+
+// ==============================================================================================
+//请求坐下
+message PBSitReq {
+    required int32  sid       = 1; // 请求坐下座位 id
+    optional string longitude = 2; // 经度，没有则传空字符串
+    optional string latitude  = 3; // 纬度，没有则传空字符串
+}
+//坐下返回
+message PBSitResp{
+    required int32 code                    = 1; // 是否成功 0保留 1成功 2座位已经有人 3钱不够 4 其他错误 5 用户已经有座位 6 用户状态异常 7 ip限制 8 非法座位号
+    required uint32 sid                    = 2;
+    optional bool needBuyin                = 3;
+    optional uint64 remainMoney            = 4; // 用户的剩余金币，只有自己可见
+    optional uint64 remainDiamond          = 5; // 用户剩余的练习币，只有自己可见
+}
+
+//请求站起
+message PBStandReq {
+    required uint32 option   = 1;       //0，默认值，只站起。1.站起+离开
+}
+
+// 站起返回, 主动T人也是这个
+message PBStandResp {
+    required uint32 sid                    = 1;
+    required int32  code                   = 2; // 是否成功 0保留 1成功 2不可站起
+    required int32  direct                 = 3; // 1主动站起 2操作超时站起 3输光站起 4用户请求站起并离开 5被房主踢起
+    optional uint64 remainMoney            = 4; // 用户的剩余金币，只有自己可见
+    optional uint64 remainDiamond          = 5; // 用户剩余的练习币，只有自己可见
+}
+
+// 通知用户当前手牌类型
+message PBNotifyUserCardType{
+    required int32 type           = 1;
+    repeated uint32 highestCards  = 2; // 最大的五张牌
+    repeated uint32 selectedCards = 3; // 框选的牌
+}
+
+// ==============================================================================================
+// 打开亮牌开关
+message PBNotifyShowCardEable {
+    required int32 enable                   = 1;   // 0 关闭    1 打开
+}
+
+
+//通知亮牌
+message PBShowDealCard {
+    required int32 showType               = 1;    //1 强制亮牌. 2主动亮牌
+    required int32 sid                    = 2;    //座位 id
+    required int32 card1                  = 3;
+    required int32 card2                  = 4;    //为0则代表不亮
+}
+
+// ==============================================================================================
+
+//广播游戏开始
+message PBGameStart{
+    required uint64 gameId              = 1;  //牌局id
+    required int32 gameState            = 2;  //桌子状态
+    required int32 buttonSid            = 3;  //庄家位置
+    required int32 sbSid                = 4;  //
+    required int32 bbSid                = 5;  //
+    required uint64 sb                  = 6;  //  小盲
+    required uint64 bb                  = 7;  //  大盲
+    optional uint64 ante                = 8;  //  前注
+    optional uint64 minChip             = 9;  // 最小筹码
+    optional int64 table_starttime      = 10; //牌局开始时间
+    optional uint32 remainLimitTime     = 11;
+}
+
+//更新玩家信息--广播游戏开始,更新座位玩家信息.
+message PBUpdateSeat{
+    required PBSeat seatInfo            = 1;    //座位信息
+    optional uint64 totalPots          =  2;
+}
+
+// 通知客户端发牌
+message PBStartDealCard{
+    repeated int32 sids               = 1;    // 需要发手牌的sid,先后顺序排好
+}
+
+message PBDealHoleCard{
+    required int32 card1                = 2;  //自己的手牌
+    required int32 card2                = 3;  //自己的手牌
+}
+
+//广播翻牌
+message PBDealFlopCards{
+    required int32 card1                = 1;
+    required int32 card2                = 2;
+    required int32 card3                = 3;
+}
+//广播转牌
+message PBDealTurnCard{
+    required int32 card1                = 1;
+}
+
+//广播 河牌
+message PBDealRiverCard{
+    required int32 card1                = 1;
+}
+
+message PBChipsRange{
+    required uint64 min                 = 1;
+    required uint64 max                 = 2;
+    optional uint64 step                = 3;
+}
+
+message PBFastActionOption{
+    required string name                = 1;
+    required bool   canUse              = 2;
+    optional uint64 number              = 3;
+    optional bool   useBet              = 4;
+    optional bool   useRaise            = 5;
+}
+
+message PBUserChipinAction{
+    optional bool           canCheck             = 3;
+    optional bool           canCall              = 4;
+    optional uint64         needCallChips        = 5;
+    optional bool           canBet               = 6;
+    optional PBChipsRange   betRange             = 7;
+    optional bool           canRaise             = 8;
+    optional PBChipsRange   raiseRange           = 9;
+
+    optional PBFastActionOption option1        = 10;    // 半pot
+    optional PBFastActionOption option2        = 11;    // 半pot数值(用于显示)
+    optional PBFastActionOption option3        = 12;    // 一pot
+
+    repeated PBFastActionOption options = 13;
+    optional uint64 curBetChips = 14;   // 当前已下注筹码数
+}
+
+//广播用户开始下注
+message PBNotifyUserStartChipin{
+    required int32          sid                  = 1;
+    required int64          remainThinkingTime   = 2;
+    optional PBUserChipinAction action           = 3;
+    optional uint32         extendCost           = 4;
+}
+
+//广播用户结束下注
+message PBNotifyUserEndChipin{
+    required int32  sid         = 1;
+}
+
+// =================================================================================
+//广播玩家开始下注. 使用  PBUpdateSeat
+
+//广播玩家下注操作. 使用  PBUpdateSeat
+
+//广播 收筹码前, 飞回座位的 筹码
+message PBBackChips{
+    required int32 sid                   = 1;
+    required uint64 chips                = 2;  //从下注区  飞回座位的 筹码数额
+}
+
+//广播每一轮结束收筹码
+message PBUpdatePots{
+    required uint64 total                   = 1; // 总池
+    repeated uint64 pots                    = 2; // 其他pot
+}
+
+// =================================================================================
+
+//结算包
+message PBFinalGame{
+    repeated PBPotInfo potInfos         = 1; // 分池信息. 每个奖池,分给每个玩家的信息.
+    repeated PBBalanceInfo balanceInfos = 2;
+}
+
+//每个池的情况
+message PBPotInfo{
+    required uint32 potID                = 1;    //公共池号码
+    required uint32 sid                    = 2;
+    required uint64 potMoney            = 3;    //该池总筹码数
+    required uint64 winMoney            = 4;    //该座位 赢取
+    required uint64 seatChips            = 5;    //更新座位的钱
+    repeated uint32 mark                    = 6;    //高亮的牌 分池时,高亮的手牌和公共牌
+    optional uint32 winType                = 7;    //赢牌类型
+}
+
+message PBBalanceInfo{
+    optional uint32 uid             = 1;
+    optional string name            = 2;
+    optional uint32 sid             = 3;
+    optional uint64 seatChips       = 4;
+    optional int64  balance         = 5;
+}
+
+// =================================================================================
+//留坐离桌请求
+message PBReservationReq {
+    required uint32 type                = 1;//0取消离座1请求离座
+}
+
+//坐离桌返回
+message PBReservationResp {
+    required uint64 sid                   = 1;
+    required uint32 result                = 2;//check PBReserveStatus
+}
+
+//通知用户收取Ante
+message PBNotifyPutAnte {
+    required uint64 ante            = 1;
+    repeated PBSeat seatInfos       = 2;
+}
+
+message PBReqStartMatch{}
+message PBRespStartMatch{
+    required uint32 code = 1;   //1.ok, 2.不是创建场, 3.没有权限, 4.玩家不足，5.比赛已经开始
+}
+
+message PBReqBuyin{
+    required uint64 buyin   =   1;
+}
+
+message PBRespBuyin{
+    required uint32 code = 1;   //1.成功，2.没有入座，3.钱不够，4.其他错误
+    optional uint64 remainMoney   = 2;    // 剩余的金币
+    optional uint64 remainDiamond = 3;    // 剩余的练习币
+}
+
+message PBBuyinHistoryUnit{
+    required uint32 uid             = 1;
+    optional string name            = 2;
+    required uint64 totalBuyin      = 3;
+    required int64  balance         = 4;
+	optional bool	isStanding	    = 5; // 是否站起
+    optional uint32 totalHand       = 6; // 总手数
+    optional int64 insuranceBalance = 7; // 保险收益(保险总输赢)
+    optional bool settled           = 8; // 已结算
+    optional uint32 matchCount      = 9; // 超级统计: 参与局数
+    optional int64 positiveProfit   = 10; // 正盈利
+    optional int64 negativeProfit   = 11; // 负盈利
+    optional int64 totalBuyInsurance    = 12; // 保险总买入
+    optional int64 roomFeeContribute    = 13; // 房间费总贡献
+    optional int64 insuranceContribute  = 14; // 保险总贡献
+    optional int64 luckycardContribute  = 15; // luckycard总贡献
+    optional uint32 vpip                = 16; // 玩家本局入池率
+    optional int64 adjusted             = 17; // 调整的战绩
+}
+
+message PBBuyinHistoryLooker {
+    required uint32     uid         = 1;        // 观看者uid
+    required string     name        = 2;        // 观看者名称
+    required string     iconURL     = 3;        // 头像地址
+    optional bool       isOffline   = 4;        // 是否在线
+}
+
+message PBRespBuyinHistory{
+    repeated PBBuyinHistoryUnit list    = 1;
+    required uint64 totalBuyin         = 2;
+    repeated PBBuyinHistoryLooker onlookers = 3;
+    optional int64 insurancePot         = 4;
+    optional uint32 startTime           = 5; // 用作官方限时场记录开始时间
+    optional uint32 remainLimitTime     = 6; // 用作官方限时场记录剩余时间
+    optional int64 systemInsuranceGain  = 7; // 系统保险盈亏
+    optional int64 privateInsuranceGain = 8; // 组局保险盈亏
+    optional int64 creatorUserId        = 9; // 比赛创建者 UserId
+    optional int32 clubId               = 10;
+    optional int32 myLevel              = 11; // 玩家在俱乐部中的级别
+    repeated PBClubUserRemark remarks   = 12; // 俱乐部用户备注
+    optional int64 privateInsurancePump = 13; // 组局保险盈亏抽水
+    optional uint64 privateInsuranceRebate = 14; // 组局保险返利
+}
+
+message PBGameLogAction {  //玩家动作记录
+	optional uint32 chipinType  = 1; //当前下注动作(就是玩家头上标注的文字).详情看 PBSeatActionStatus
+	optional uint64 chips   = 2;  //下注的筹码
+	optional uint32 seq     = 3;  //动作的序列，(整局牌的，非单个用户的序列)
+}
+
+message PBGameLogUnit{
+    required uint32 sid         = 1;
+    required int64  balance     = 2;
+    optional uint32 handCard1   = 3;
+    optional uint32 handCard2   = 4;
+    optional uint32 winType     = 5;
+    repeated uint32 highestCards= 6;
+    optional uint32 uid         = 7;
+    optional string name        = 8;
+    optional string iconURL     = 9;
+    optional uint64 seatChips   = 10;
+    optional uint32 lastChipinType  = 11;
+    optional int64  insurancePot = 12;
+    repeated PBGameLogAction actions = 13; //玩家的动作序列
+}
+
+message PBGameLogPlayer{
+    required uint32 uid             = 1;
+    optional string name            = 2;
+    required uint32 sid             = 3;
+    required uint64 startChip       = 4;
+    repeated uint32 holeCards       = 5;
+    optional int64  insurancePot    = 6;
+    required int64  balance         = 7;
+    optional bool   isMuckCard      = 8;
+    optional uint32 cardsType       = 9;
+    optional string cardsTypeString = 10;
+}
+
+message PBGameLogAct{
+    required uint32 seq         = 1;
+    required uint32 sid         = 2;
+    required uint32 act         = 3;
+    required uint64 chips       = 4;
+	//added by ty 牌局记录新增两个字段
+	required uint32	step		= 5;
+	required uint64 balance		= 6;
+	required uint64 pot			= 7;
+}
+
+// 游戏中的位置
+message PBGamePosition {
+    optional uint32 seatId   = 1;
+    optional string position = 2;
+}
+
+message PBGameDetailUnit{
+    optional uint32 time             = 1;
+    optional uint64 gameID           = 2;
+    repeated uint32 boardCards       = 3;
+    optional int64  insurancePot     = 4;
+    repeated PBGameLogPlayer players = 5;
+    repeated PBGameLogAct    acts    = 6;
+    repeated PBGameLogResult results = 7;
+    optional uint32 dealerSid        = 8;
+    optional uint64 sb               = 9;    //小盲注
+    optional uint64 bb               = 10;   //大盲注
+    optional uint64 ante             = 11;   //前注
+    repeated PBGamePosition gamePos  = 12;
+}
+
+message PBGameLogResult{
+    required uint32 potID       = 1;
+    required uint64 potChips    = 2;
+    required uint32 sid         = 3;
+    required uint64 winChip     = 4;
+    required uint64 seatChip    = 5;
+    repeated uint32 winCards    = 6;
+    required uint32 winType     = 7;
+}
+
+message PBRespGameDetail {
+    repeated PBGameDetailUnit handDetail = 1;
+    optional int32            total      = 2; // 总数
+    optional int32            page       = 3; // 页码
+}
+
+message PBReqGameLog{
+    required int32 index       = 1; // 负数从后向前取。正数从前向后取
+    optional int32 page        = 2; // 页码
+    optional int32 pagesize    = 3; // 页面大小
+}
+
+message PBRespGameLog{
+    required uint64 totalRound  = 1;
+    required uint64 currentRound= 2;
+    required int32  index       = 3;
+    repeated uint32 boardCards  = 4;
+    repeated PBGameLogUnit logs = 5;
+    optional int64  insurancePot= 6;
+    required uint64 lastRound   = 7;
+    optional bool   isFav       = 8;
+    optional uint32 fid         = 9;
+    optional uint32 dealerSid   = 10;
+    optional uint64 sb          = 11;    //小盲注
+    optional uint64 bb          = 12;    //大盲注
+    optional uint64 ante        = 13;    //前注
+}
+
+enum PBAutoActionOption{
+    NotSet          = 0;        //没有自动操作
+    AutoCheck       = 1;        //能看就看，不能看由用户操作
+    AutoCheckOrFold = 2;        //能看就看，不能看直接fold
+}
+
+message PBReqUserAutoAcion{
+    required uint32 option  = 1;
+}
+
+message PBRespUserAutoAction{
+    required uint32 option  = 1;
+}
+
+//请求购买保证金
+message PBReqBuyDeposit{
+    required uint64 num   =   1;  //传0表示查询
+}
+
+//返回购买保证金结果
+message PBRespBuyDeposit{
+    required uint32 code = 1;   //1.成功，2.不是房主 3.金币不够 4.非保险比赛
+    optional uint64 totalBuy = 2;     //累积购买
+    optional uint64 curDeposit = 3;    //增加后的保证金
+    optional uint64 remainMoney = 4;    //剩余的金币
+    optional int64  insurancePot  = 5;  //系统总保险
+}
+
+// 准备增加保证金
+message PBReqPrepareAddDeposit{
+
+}
+
+/*
+ * ret code 定义
+ * 1 成功
+ * 2 获取用户资产错误
+*/
+message PBRespPrepareAddDeposit{
+    optional PBCommResult ret   = 1;
+    optional int64 personalGain = 2; // 组局保险盈利
+    optional int64 systemGain   = 3; // 系统保险盈利
+    optional uint64 deposit     = 4; // 当前的保证金
+    optional uint64 remainMoney = 5; // 剩余的时间币
+}
+
+// 保险赔率
+message PBInsuranceOdds{
+    required uint32 oddsNumerator    = 1;   //分子
+    required uint32 oddsDenominator  = 2;   //分母
+}
+
+// 通知用户买保险
+message PBNotifyUserBuyInsurance{
+    required uint32 sid             = 1;
+    required uint32 potID           = 2;
+    required uint64 potChips        = 3;
+    required uint64 buyCapital      = 4;
+    required uint64 buyWholePot     = 5;
+    repeated uint32 outs            = 6;
+    required PBInsuranceOdds odds   = 7;
+    required uint32 thinkingTime    = 8;
+    required uint64 step            = 9; //保险投注步长
+    optional uint32 extendCost      = 10;
+}
+
+message PBNotifyDisableInsurance{
+    required uint32 code    = 1;        //1, Outs多于14张或没有outs， 2，pot太小，不能购买， 3，比牌人太多，4.用户关闭了保险提示
+    optional uint32 potID   = 2;
+    optional uint64 potChips= 3;
+    optional uint32 sid     = 4;
+}
+
+// 通知进入保险模式
+message PBNotifyEnterInsuranceMode{
+    required uint32 waitingTime     = 1;
+}
+
+// 请求买保险
+message PBReqUserBuyInsurance{
+    required uint32 potID   = 1;
+    required uint64 premium = 2;    //保费，传0意味着不参加保险。
+}
+
+message PBNotifyUserEndBuyInsurance{
+    required uint32 sid             = 1;
+    required uint64 premium         = 2;
+}
+
+message PBNotifyInsurancePayment{
+    required uint32 sid         = 1;
+    required int64  payment     = 2;
+    required uint64 seatChips   = 3;
+}
+
+message PBNotifyAllSeatsInfo{
+    repeated PBSeat seats           = 1;
+}
+
+// 俱乐部用户备注
+message PBClubUserRemark {
+    optional uint32 userId = 1;
+    optional string remark = 2;
+}
+
+// 盲注信息
+message PBBlindInfo {
+    optional uint32 sb = 1;
+    optional uint32 bb = 2;
+    optional uint32 ante = 3;
+    optional bool hasStraddle = 4;
+}
+
+message PBNotifyMatchOver{
+    required uint32 totalHand           = 1;
+    required uint64 totalBuyin          = 2;
+    required uint32 mvpUID              = 3;
+    required uint32 fishUID             = 4;
+    required uint32 richUID             = 5;
+    optional int64  insurancePot        = 6;
+    repeated PBBuyinHistoryUnit list    = 7;
+    optional uint64 sb                  = 8;
+    optional uint64 bb                  = 9;
+    optional uint64 ante                = 10;
+    optional uint32 totalDuration       = 11;
+    optional PBRecordRate recordRate    = 12; // 记录费比例 普通用户显示
+    optional PBRecordNum recordNum      = 13; // 记录费数值  管理员显示
+    optional int64 systemInsuranceGain  = 14; // 平台保险
+    optional int64 privateInsuranceGain = 15; // 组局保险
+    optional uint32 creatorUserId       = 16; // 比赛创建者 UserId
+    optional uint32 clubId              = 17; // 俱乐部 Id
+    optional string clubName            = 18; // 俱乐部名称
+    optional uint32 clubCreatorUserId   = 19; // 俱乐部创建者 UserId
+    optional uint64 itemFee             = 20; // 道具费
+    repeated PBClubUserRemark remarks   = 21; // 俱乐部用户备注
+    optional uint64 roomFeePump         = 22; // 房间服务费
+    optional int64 privateInsurancePump = 23; // 保险服务费
+    optional uint64 roomFeeRebate       = 24; // 房间费返利
+    optional uint64 privateInsuranceRebate = 25; // 组局保险返利
+    optional uint32 beginTime           = 26; // 统计开始时间(联盟)
+    optional uint32 endTime             = 27; // 统计结束时间(联盟)
+    repeated PBBlindInfo blindInfos     = 28; // 统计牌局盲注信息列表(联盟)
+    optional MatchSummary matchSummary  = 29; // 收益概况(联盟)
+    optional MatchProfit matchProfit    = 30; // 正负盈利(联盟)
+    optional VpipConf vpipConf          = 31; // 入池标准 vpipConf.vpip = 0 表示普通桌
+    optional uint32 unloadTimes         = 32; // 自动卸码倍数
+    optional bool faceVip               = 33; // 是否人脸认证
+}
+
+//每次结算房主的剩余的保证金
+message PBNotifyDepositChange{
+    required int64  deposit   = 1;
+    optional int64  insurancePot  = 2;  //系统总保险
+}
+
+//比赛结束后房主保证金的结算
+message PBNotifyMatchOverDeposit{
+    optional uint64 buyDeposit  = 1; //房主总买入
+    optional int64 deposit = 2;   //房主剩余保证金
+}
+
+message PBSNGPrize{
+    optional uint64 winChips = 1;
+    optional uint64 point    = 2;
+}
+
+message PBNotifySNGMatchOver{
+    required uint64 startChips    = 1;
+    required uint32 raiseBlindGap = 2;
+    required uint32 TotalDuration = 3;
+    repeated PBSNGPrize prizeList = 4;  //奖励列表
+    repeated uint32 playerRank    = 5;  //名次表
+    optional uint32 totalHand     = 6;
+    optional uint64 sngRegisterFee= 7;
+}
+
+
+message PBSendChatMsg{
+    required PBChatMsg msg  = 1;
+}
+
+message PBNotifyChatMsg{
+    required uint32     uid = 1;
+    required PBChatMsg  msg = 2;
+}
+
+message PBReqExtendThinkingTime{
+    required uint32     extendType = 1;  //1.操作思考倒计时，2.购买保险倒计时
+}
+message PBRespExtendThinkingTime{
+    required uint32     code = 1;       //1，成功，2，钱不够，3，时机不对，4.已经超时
+    required uint32     extendType = 2;
+    //modified by ty 将钻石改为金币 remainDiamond->remainMoney
+    optional uint32     remainMoney = 3;
+    optional uint32     nextCost = 4;
+}
+
+message PBNotifyUpdateThinkingTime{
+    required uint32 sid         = 1;
+    required uint32 remainTime  = 2;
+    required uint32 extendType  = 3;
+    optional uint32 addTime     = 4; //本次加时时间
+}
+
+message PBReqShowHoleCard{
+    optional bool card1   = 1;
+    optional bool card2   = 2;
+}
+
+message PBRespShowHoleCard{
+    optional bool card1   = 1;
+    optional bool card2   = 2;
+}
+
+message PBReqChangeMuckOption{
+    optional bool autoMuck      = 1;
+}
+
+message PBRespChangeMuckOption{
+    optional bool autoMuck      = 1;
+}
+
+message PBReqChangeInsuranceNotifyOption{
+    optional bool close      = 1;
+}
+
+message PBRespChangeInsuranceNotifyOption{
+    optional bool close      = 1;
+}
+
+message PBReqLikeMatch{
+    required uint64 gid     = 1;
+}
+
+message PBRespLikeMatch{
+    required uint32 code        = 1;
+    optional uint64 gid         = 2;
+    optional uint32 mid         = 3;
+    optional uint32 fid         = 4;
+}
+
+message PBReqUnlikeMatch{
+    required uint64 gid     = 1;
+}
+message PBRespUnlikeMatch{
+    required uint32 code        = 1;
+}
+
+message PBMatchBuyinRequest{
+    required uint32 id          = 1;
+    required uint32 uid         = 2;
+    required string name        = 3;
+    required string icon        = 4;
+    required uint64 buyin       = 5;
+    required PBMatchIndex idx   = 6;
+    required uint32 sendTime    = 7;
+    required uint32 expireTime  = 8;
+    required string matchName   = 9;
+    required uint32 status      = 10;    //0，未处理。1，已经同意。2，已经拒绝
+    optional uint32 matchType   = 11;
+}
+
+message PBReqKickUser{
+    required uint32 uid         = 1;
+}
+
+message PBRespKickUser{
+    required uint32 code        = 1;
+    required uint32 uid         = 2;
+}
+
+message PBReqProcessBuyinRequest{
+    required uint32 id          = 1;
+    required uint32 option      = 2;    //1:同意，2：拒绝
+}
+
+message PBRespProcessBuyinRequest{
+    required uint32 code    = 1;        //1：OK， 2：没有权限， 3：没有找到用户buyin记录 4:已处理 5：已过期
+    required uint32 id      = 2;
+}
+
+message PBUpdateMatchCloseTime{
+    required uint32 remainCloseTime = 1;
+    optional uint32 matchType = 2;
+}
+
+message PBReqSendInteractiveItem{
+    required uint32 itemID  = 1;
+    required uint32 tarUID  = 2;
+}
+
+message PBRespSendInteractiveItem{
+    required uint32 code    = 1;
+    required uint32 itemID  = 2;
+    required uint32 count   = 3;
+    required uint32 price   = 4;
+    optional bool   useMoney= 5;
+    optional uint64 money   = 6;
+}
+
+message PBNotifySendInteractiveItem{
+    required uint32 itemID  = 1;
+    required uint32 tarUID  = 2;
+    required uint32 srcUID  = 3;
+}
+
+message PBInteractiveItemWrapper{
+    required uint32 itemID  = 1;
+    required uint32 price   = 2;
+}
+
+message PBNotifyInteractiveItemConfig{
+    repeated PBInteractiveItemWrapper items = 1;
+}
+
+message PBNotifyUserUpdateMatchConfig{
+    required uint64 sb          =   1;
+    required uint64 bb          =   2;
+    required uint64 ante        =   3;
+    required uint64 minBuyin    =   4;
+    required uint64 maxBuyin    =   5;
+    required uint32 afterTime   =   6;
+}
+
+message PBSyncMatchCloseRemind{
+    required uint32 remainSeconds = 1;
+}
+
+//涨盲通知
+message PBNotifyRaiseBlind{
+    required uint64 sb              =   1;
+    required uint64 bb              =   2;
+    required uint64 ante            =   3;
+    required uint32 raiseBlindGap   =   4;
+    optional uint64 nextSb          =   5;
+    optional uint64 nextBb          =   6;
+    optional uint64 nextAnte        =   7;
+    optional uint64 needRemoveChip  =   8;
+}
+
+//淘汰后名次及奖励通知
+message PBNotifySNGPrize{
+    required uint32 uid     = 1;
+    required PBMatchPrize prize = 2;
+}
+
+//sng比赛配置
+message PBNotifySNGConfig{
+    optional PBSNGBlindsTable blindTable    = 1;
+    required uint32           raiseBlindGap = 2;
+    repeated PBMatchPrize     prizeList     = 3;
+}
+
+message PBSNGChipRankUnit{
+    required uint32 uid = 1;
+    required uint64 chips = 2;
+}
+
+message PBNotifySNGChipRank{
+    repeated PBSNGChipRankUnit rank = 1;
+    required uint64 averageChip     = 2;
+    repeated uint32 onlookers       = 3;
+}
+
+message PBNotifySNGMatchBoard{
+    optional uint32 remainRaiseBlindTime = 1;   //剩余涨盲时间，单位是秒
+    optional uint32 gameStartTime        = 2;   //比赛开始时间，时间戳
+    optional uint64 averageChip          = 3;   //当前平均筹码
+}
+// =================================================================================
+
+
+///////看公共牌
+//通知玩家可以执行看公共牌操作 Texas_NotifyShowPublicCards = 0x1059
+message PBNotifyShowPublicCards{
+    required int32  state                 = 1;   // 看哪个游戏状态的牌, 参看 PBGameState 3：翻牌（3张） 4:转牌(1张) 5:和牌牌(1张)
+    required uint32 leftTime              = 2;   // 剩余可操作时间，单位是秒
+    optional uint64 costMoney             = 3;   // 需要消耗的时间币
+}
+
+//请求看公共牌
+message PBReqShowPublicCards {
+}
+
+//回复看公共牌 Texas_RespShowPublicCards = 0x1060
+message PBRespShowPublicCards{
+    required int32 code                    = 1;    // 是否成功 1:成功 2:不可看牌 3:时间币不够
+    repeated int32 pcards                  = 2;    // 公共牌
+    optional int32 state                   = 3;    // 发哪个游戏状态的牌, 参看 PBGameState 3：翻牌（3张） 4:转牌(1张) 5:和牌牌(1张)
+    optional uint64 remainMoney            = 4;    // 操作后剩余金币
+}
+
+//广播房间所有人，谁看了公共牌 Texas_NotifyWhoShowPublicCards = 0x1061
+message PBNotifyWhoShowPublicCards{
+    required uint32 uid                    = 1;     // 玩家id
+    required string name                   = 2;    // 玩家名字
+}
+
+////////看手牌
+//通知玩家可以执行看所有人手牌操作  Texas_NotifyShowAllHands = 0x1062
+message PBNotifyShowAllHands{
+    required uint32 leftTime               = 1;   // 剩余可操作时间，单位是秒
+    optional uint64 costMoney              = 2;   // 需要消耗的时间币
+}
+
+//请求看所有人手牌
+message PBReqShowAllHands {
+}
+
+//回复看所有人手牌  Texas_ResphowAllHands = 0x1063
+message PBRespShowAllHands{
+    required int32 code                    = 1;    // 是否成功 1:成功 2:不可看牌 3:时间币不够
+    repeated PBShowDealCard hands          = 2;    // 所有玩家的手牌
+    optional uint64 remainMoney            = 3;    // 操作后剩余金币 失败时无此信息
+}
+
+////////////////新的记录费相关数值#START#/////////////
+//战绩里的普通玩家的记录费比例
+message PBRecordRate{
+    optional uint32 buyinRate      = 1;  //买入费率分母为10000 eg:展示5% value:500
+    optional uint32 profitRate     = 2;  //战绩(盈利)费率分母为10000
+    optional uint32 potRate        = 3;  //按底池抽水费率分母为10000
+    optional uint32 potLimit       = 4;  //底池费封顶
+}
+
+//战绩里的管理员的记录费的具体值
+message PBRecordNum{
+    optional uint64 buyinNum       = 1;  //买入费
+    optional uint64 profitNum     = 2;  //战绩(盈利)费
+    optional uint64 potNum      = 3;  //按底池抽水费
+}
+
+//请求记录费的具体数值
+message PBReqRecordNum {
+}
+
+//回复记录费的具体数值
+message PBRespRecordNum {
+    optional uint32 code = 1;   //结果： 1:成功 2:无记录费 3:无权限(需管理员)
+    optional PBRecordNum result = 2;  //具体的记录费
+}
+///////////////新的记录费相关数值#END#/////////////
+
+message PBRespCloseMatch {
+    optional PBCommResult ret  = 1;
+    optional uint32 gameStatus = 2; // 游戏状态
+}
+
+// 准备结算离桌
+message PBReqPrepareCheckout {
+
+}
+
+/*
+ * ret code 定义
+ * 1 成功
+ * 2 失败
+*/
+message PBRespPrepareCheckout {
+    optional PBCommResult ret  = 1;
+    optional uint64 profit     = 2; // 战绩费
+    optional uint64 checkout   = 3; // 返还的时间币
+}
+
+// 结算离桌
+message PBReqCheckout {
+
+}
+
+/*
+ * ret code 定义
+ * 1 成功
+ * 2 失败
+*/
+message PBRespCheckout {
+    optional PBCommResult ret  = 1;
+    optional uint64 checkout   = 2; // 返还的时间币
+}
+
+message PBReqPrivateInfo {
+
+}
+
+message PBRespPrivateInfo {
+    optional PBCommResult ret        = 1;
+    optional uint32 extendThinkTimes = 2; // 延时思考次数
+    optional uint32 extendThinkCost  = 3; // 延时思考费用
+    optional bool canCheckout        = 4; // 可以结算离桌
+}
+
+// 通知玩家退出游戏到登录界面
+message PBNotifyLogout {
+    optional uint32 reason = 1; // 退出原因(1: 停服)
+}

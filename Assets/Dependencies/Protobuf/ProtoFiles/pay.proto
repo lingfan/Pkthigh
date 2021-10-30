@@ -1,0 +1,244 @@
+syntax = "proto2";
+package pbcmd;
+option go_package = "poker/pb/pbcmd";
+import "cmd.proto";
+
+enum PBMainCmdPaySubCmd {
+    PBReqTest                   = 1; // test请求
+    PBRespTest                  = 2;
+
+    PBReqPayGenOrder            = 3; // 统一下单接口
+    PBRespPayGenOrder           = 4;
+
+    PBReqWithdrawGenOrder       = 5; // 发起提现申请
+    PBRespWithdrawGenOrder      = 6;
+
+    PBReqHttpSent               = 7; // 转发接口
+    PBRespHttpSent              = 8;
+
+    ID_PBReqVgpayExchangeRate   = 9; // 获取汇率
+    ID_PBRespBgpayExchangeRate  = 10; // 返回汇率
+
+    ID_PBReqVGPayConf           = 11; // 获取Vgpay 配置
+    ID_PBRespVGPayConf          = 12; //
+
+    ID_PBReqRecharge            = 13; // 冲币申请
+    ID_PBRespRecharge           = 14; //
+
+    ID_PBReqRechargeOrders      = 15; // 充值记录
+    ID_PBRespRechargeOrders     = 16; //
+
+    ID_PBReqRechargeCancel      = 17; // 取消充值订单
+    ID_PBRespRechargeCancel     = 18; //
+
+    ID_PBReqWithdrawFee         = 19; // 获取提现手续费 提现配置
+    ID_PBRespWithdrawFee        = 20; //
+
+    ID_PBReqWithdraw            = 21; // 提现申请
+    ID_PBRespWithdraw           = 22; //
+
+    ID_PBReqWithdrawOrders      = 23; // 提现记录
+    ID_PBRespWithdrawOrders     = 24; //
+
+    ID_PBReqRechargeCheck       = 25; // 充值支付订单检查
+    ID_PBRespRechargeCheck      = 26;
+
+    ID_PBReqRechargeCallback    = 27; //  充值订单回调
+    ID_PBRespRechargeCallback   = 28; //  充值订单回调
+
+}
+
+// test请求
+message PBPayReqTest {
+}
+
+// test返回
+message PBPayRespTest {
+    optional PBCommResult ret = 1;
+}
+
+// 统一下单接口
+message PBPayReqPayGenOrder { 
+    optional uint32     payId = 1; // 支付方式ID
+    optional uint32     money = 2; // 金额
+}
+
+message PBPayRespPayGenOrder {
+    optional PBCommResult ret       = 1; // code 1:成功, 2:参数解析失败, 3:参数错误, 4:操作失败（第三方请求失败）, 5:订单生成失败
+    optional uint32       showType  = 2; // 返回类型，1:支付页面，2:二维码
+    optional string       showUrl   = 3; // URL，支付页面或二维码
+}
+
+// 发起提现申请
+message PBPayReqWithdrawGenOrder { 
+    optional uint32     money       = 1; // 代付金额，单位元，整数
+    optional string     realname    = 2; // 真实姓名
+    optional string     batype      = 3; // 身份证号
+    optional string     idcard      = 4; // 收款银行ID，例：1002
+    optional string     baname      = 5; // 收款账号
+    optional string     baaddr      = 6; // 开户支行
+    optional string     phoneNo     = 7; // 手机号码
+    optional string     pwd         = 8; // 二级密码 密文
+}
+
+message PBPayRespWithdrawGenOrder {
+    optional PBCommResult ret = 1; // code 1:成功, 2:参数解析失败, 3:参数错误, 4:操作失败（第三方请求失败）, 5:订单生成失败
+}
+
+// 转发接口
+message PBPayReqHttpSent {
+    optional string   method = 1; // 接口类型, [POST,GET...]
+    optional string   path   = 2; // 接口path, 域名后的path, 如: /api/v1/welcome
+    optional string   qs     = 3; // 透传querystring, 如: k1=v1&k2=v2...
+    optional string   body   = 4; // 透传body, Json字符串
+}
+
+message PBPayRespHttpSent {
+    optional string     data = 1; // 透传返回值, Json字符串
+}
+
+// 获取汇率 =================================
+message PBReqVgpayExchangeRate{ // 查询BTC和VHKD的汇率
+}
+
+message PBRespVgpayExchangeRate{
+    required PBCommResult  ret          = 1;
+    optional string        USDTRate     = 2;   // USDT 冲币汇率
+    optional string        BTCRate      = 3;   // BTC 冲币汇率
+    optional string        ETHRate      = 4;   // ETH 冲币汇率
+    optional string        USDTOutRate  = 5;   // USDT 提币汇率
+    optional string        BTCOutRate   = 6;   // BTC 提币汇率
+    optional string        ETHOutRate   = 7;   // ETH 提币汇率
+}
+
+// 获取vgpay 配置 =================================
+message PBReqVGPayConf {
+
+}
+
+message PBRespVGPayConf {
+    required PBCommResult   ret       = 1;
+    optional vgswitch       switch    = 2;   // 数字币开关
+    optional CommConfig     USDTConf  = 3;   // USDT 配置
+    optional CommConfig     BTCConf   = 4;   // BTC 配置
+    optional CommConfig     ETHConf   = 5;   // ETH 配置
+}
+
+message vgswitch {
+    required string payment  = 1;  // 充值开关
+    required string withdraw = 2;  // 提现开关
+}
+
+message CommConfig {
+    required uint64 rechargeMin = 1;  // 最少充值数量 单位（1毫 = 0.01分）
+    required uint64 withdrawMin = 2;  // 最少提现数量 单位（1毫 = 0.01分）
+    required uint64 withdrawMax = 3;  // 最大提现数量 单位（1毫 = 0.01分）
+}
+
+// 待支付订单 检查=============================
+message PBReqRechargeCheck {
+    required string       moneyType  = 1; // 币种
+}
+
+message PBRespRechargeCheck {
+    required PBCommResult ret        = 1;
+    optional string       oid        = 2; // 订单号
+    optional string       address    = 3; // 支付地址
+    optional int64        orderTime  = 4; // 订单时间
+    optional string       moneyType  = 5; // 币种
+    optional uint64        amount     = 6; // 货币数量 单位（1毫 = 0.01分）
+}
+
+// 充币申请  =================================
+message PBReqRecharge {
+    required uint32 uid        = 1; // 用户UID
+    required string moneyType  = 2; // 币种
+    required uint64 amount     = 3; // 时间币数量
+    required uint64  dcAmount   = 4; // 数字币数量
+}
+
+message PBRespRecharge {
+    required PBCommResult ret       = 1;
+    optional string       oid       = 2; // 订单号
+    optional string       address   = 3; // 支付地址
+    optional int64        orderTime = 4; // 订单时间
+    optional string       moneyType = 5; // 货币类型
+    optional uint64       amount    = 6; // 货币数量
+}
+
+// 冲币单查询  =================================
+message PBReqRechargeOrders {
+    required uint32 uid         = 1; // 用户UID
+    required string moneyType   = 2; // 币种
+}
+
+message PBRespRechargeOrders {
+    required PBCommResult ret     = 1;
+    repeated Order rechargeOrders = 2;
+}
+
+message Order {
+    required uint32 uid       = 1; // 用户uid
+    required string oid       = 2; // 订单号
+    required string moneyType = 3; // 币种
+    required uint32 status    = 4; // 订单状态 1-处理中 2-成功  3-失败
+    required string orderTime = 5; // 订单时间
+    required uint64 amount    = 6; // 时间币数量  单位（分）
+    required uint64 dcAmount  = 7; // 数字币数量  单位（1毫 = 0.01分）
+    required uint64 rate      = 8; // 兑换时的汇率 单位（1毫 = 0.01分）
+    required uint64 fee       = 9; // 手续费     单位（1毫 = 0.01分）
+    required uint32 orderType = 10; // 订单类型：1充值订单 2提现订单
+}
+
+// 冲币单取消  =================================
+message PBReqRechargeCancel {
+    required uint32 uid = 1; // 用户UID
+    required string oid = 2; // 订单号
+}
+
+message PBRespRechargeCancel {
+    required PBCommResult ret = 1;
+    optional string       oid = 2; // 订单号
+}
+
+
+// 提币配置 --> 提币手续费  =================================
+message PBReqWithdrawFee {
+    required string moneyType  = 1; // 币种标识(USDT、BTC、ETH)
+}
+
+message PBRespWithdrawFee {
+    required PBCommResult ret     = 1;
+    optional uint32       feeType = 2; // 手续费类型1.固定;2.比例
+    optional uint64        feeNum  = 3; // 单位（1毫 = 0.01分）
+    optional uint64        minFee  = 4; // 最低手续费 单位（1毫 = 0.01分）
+}
+
+
+// 提币申请  =================================
+message PBReqWithdraw {
+    required uint32 uid       = 1; // 用户UID
+    required string moneyType = 2; // 币种
+    required uint64 amount    = 3; // 时间币数量 单位（分）
+    optional uint64 dcAmount  = 4; // 数字币数量 单位（1毫 = 0.01分）
+    required string address   = 5; // 提币地址
+    optional uint64 withdraw  = 6; // 提币手续费 单位（1毫 = 0.01分）
+    required string pwd       = 7; // 提现密码
+}
+
+message PBRespWithdraw {
+    required PBCommResult ret = 1;
+    optional string       oid = 2; // 提币单号
+}
+
+// 提币单查询  =================================
+message PBReqWithdrawOrders {
+    required uint32 uid       = 1; // 用户UID
+    required string moneyType = 2; // 币种
+}
+
+message PBRespWithdrawOrders {
+    required PBCommResult ret     = 1;
+    repeated Order withdrawOrders = 2;
+}
+

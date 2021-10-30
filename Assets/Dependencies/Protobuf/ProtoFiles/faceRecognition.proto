@@ -1,0 +1,102 @@
+syntax = "proto2";
+package pbcmd;
+option go_package = "poker/pb/pbcmd;pbcmd";
+
+enum FaceRecognition 
+{
+    getBizTokenReq = 1;
+    getBizTokenRsp = 2;
+
+    verifyReq = 3;
+    verifyRsp = 4;
+
+    unbindReq = 5;
+    unbindRsp = 6;
+
+    vipInfoReq = 7;
+    vipInfoRsp = 8;
+
+    timeLimitedWelfareRep = 9;
+    timeLimitedWelfareRsp = 10;
+
+    cancelVerifyReq = 11;
+    cancelVerifyRsp = 12;
+}
+
+// https://faceid.com/faceid-open-doc/docs/idverify-api-getbiztoken.html
+message GetBizTokenReq {
+    required int32 uid    = 1;
+    optional int32 mid    = 2;
+    optional string imgUrl = 3; // 绑定时传入(服务器判断是否为首次绑定)
+}
+message GetBizTokenRsp {
+    required int32 httpCode = 1;
+    optional string error = 2;
+    optional string token = 3;
+}
+
+// https://faceid.com/faceid-open-doc/docs/idverify-api-verify.html
+message VerifyReq {
+    required int32 uid    = 1;
+    optional int32 mid    = 2;
+    required string data = 3;
+    required string token = 4;
+}
+
+message VerifyRsp {
+    // httpCode == 200 同时 verifyCode == 1000 成功
+    optional int32 httpCode = 1;
+    optional int32 verifyCode = 2;
+    optional string message = 3;
+    optional string continuousFailLimit = 4; // 连续失败次数限制
+    optional string currentContinuousFailCount = 5; // 当前玩家已经连续失败次数
+    optional string totalFailLimit = 6; // 总失败次数限制
+    optional string currentTotalFailCount = 7; // 当前总失败次数限制
+}
+
+message UnbindReq {
+    required int32 uid = 1;
+}
+
+message UnbindRsp{
+    required int32 status = 1; // 1: 成功
+}
+
+message VIPInfoReq{
+    required int32 uid = 1;
+}
+
+message VIPInfoRsp{
+    required int32 state = 1; // 0:普通用户, 1: vip, 2: 审核中
+    required bool isNeverBind = 2; // 是否从未绑定过
+    required string firstBindBounsHand = 3; // 首次绑定奖励-手数 
+    required string firstBindBonusMoney = 4; // 首次绑定奖励-金额
+    required string vipMatchLuckyCardHitBounsRatio = 5; // vip房间lc命中奖励倍数
+    required string generalMatchVipPlayerLuckyCardHitBounsRatio = 6; // 普通房间vip玩家lc命中奖励倍数
+    required string unbindDeductionMoney = 7; // 解除绑定扣费金额
+    required string dailyTransLimit = 8; // 每日转账上线
+    // required string message = 2;
+}
+
+message TimeLimitedWelfareRep{
+    required int32 uid = 1;
+}
+
+message TimeLimitedWelfareRsp{
+    required bool switch = 1; // 开关
+    required string hands = 2; // 满足手速
+    required string bonus = 3; // 发放奖励
+    optional string befores = 4; // 前多少名玩家获得奖励
+}
+
+message CancelVerifyReq{
+    required int32 uid    = 1;
+    optional int32 mid    = 2;
+}
+
+message CancelVerifyRsp{
+    optional string continuousFailLimit = 4; // 连续失败次数限制
+    optional string currentContinuousFailCount = 5; // 当前玩家已经连续失败次数
+    optional string totalFailLimit = 6; // 总失败次数限制
+    optional string currentTotalFailCount = 7; // 当前总失败次数限制
+}

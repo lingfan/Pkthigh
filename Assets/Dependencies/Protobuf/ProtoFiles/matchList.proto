@@ -1,0 +1,325 @@
+syntax = "proto2";
+package pbcmd;
+option go_package = "poker/pb/pbcmd;pbcmd";
+import "cmd.proto";
+import "common.proto";
+
+enum PBCashLevel{
+    TableLevelNewbie        =   1;
+    TableLevelBeginner      =   2;
+    TableLevelSenior        =   3;
+    TableLevelMaster        =   4;
+}
+
+message PBReqMatchList{
+    required int32 matchType    =   1;  // 请求比赛类型，1 返回官方时间币场，101 返回官方练习币场
+    optional uint32 matchLevel  =   2;  // 请求分类 0 全部，1 微，2 小，3 中，4 大
+    optional uint32 matchKind   =   3;  // 请求玩法 0 德州 + 短牌，1 德州，2 短牌
+}
+
+message PBMatchInfo{
+    required int32 type             = 1;
+    required PBMatchIndex idx       = 2;  // 比赛ID
+    required string name            = 3;
+    required uint32 maxSeats        = 4;
+    required uint64 sb              = 5;
+    required uint64 bb              = 6;
+    optional bool   hasAnte         = 7;
+    optional uint64 ante            = 8;
+    optional uint64 minBuyin        = 9;
+    optional uint64 maxBuyin        = 10;
+    optional bool   hasInsurance    = 11; // 保险功能是否打开
+    optional bool   hasTimeLimit    = 12; // 是否是限时房间
+    optional uint32 startTime       = 13; // 牌局开始时间
+    optional uint32 totalLimitTime  = 14; // 设定总时长
+    optional uint32 remainLimitTime = 15; // 剩余可使用时长
+    optional bool   needPassword    = 16; // 房间进入密码
+    required uint32 inUseSeats      = 17;
+    optional uint32 password        = 18; // 只有用户自建场会显示
+    optional uint32 icon	         = 19;
+    optional uint32 matchLevel      = 20;
+    optional uint32 creatorUID      = 21; // 创建者uid
+    optional uint32 cid             = 22; // 战队id
+    optional string clubName        = 23; // 战队名称
+    optional string chatGroupID     = 24; // 腾讯云聊天室id
+    optional uint32 thinkingTime    = 25;
+    optional uint32 kind            = 26; // 玩法类型，1-德州，2-短牌
+    optional bool   dealerDouble    = 27; // 庄位双倍前注，短牌
+    optional uint32 minRetain       = 28; // 最少保留筹码前注倍数
+    optional uint32 minCashOut      = 29; // 最少带出筹码前注倍数
+    optional bool   hasStraddle     = 30; // 是否强制straddle
+    optional bool hasIPLimit        = 31; // 定位限制
+    optional bool hasGPSLimit       = 32; // ip 限制
+    repeated uint32 inSeatUIDs      = 33; // 在座位上的uid列表
+    optional string clubIcon        = 34; // 俱乐部 Icon
+    optional bool showAllHands      = 35; // 是否强制亮手牌
+    optional string creatorIcon     = 36; // 创建者头像
+    optional string creatorName     = 37; // 创建者名称
+    optional bool friendLimit       = 38; // 防伙牌
+}
+
+message PBSNGMatchInfo{
+    required int32 type             = 1;
+    required PBMatchIndex idx       = 2;        //比赛ID
+    required string name            = 3;
+    required uint32 maxSeats        = 4;
+    required uint32 inUseSeats      = 5;
+    required uint64 registerFee     = 6;        //报名费
+    optional uint64 serviceFee      = 7;        //服务费，客户端不用传，根据配置文件显示
+    optional bool   needPassword    = 8;       //房间进入密码
+    optional uint32 password        = 9;       //只有用户自建场会显示
+    optional uint32 creatorUID      = 10;       //创建者uid
+    optional uint32 cid             = 11;       //战队id
+    optional string clubName        = 12;       //战队名称
+    optional string chatGroupID     = 13;       //腾讯云聊天室id
+    optional uint32 startTime       = 14;       //牌局开始时间
+    optional uint32 createTime      = 15;       //比赛创建时间
+    optional uint32 dbIndex         = 16;       //官方SNG在配置中的编号
+    repeated PBMatchPrize prizeList = 17;       //比赛奖励信息
+}
+
+message PBReqClubMatchList{
+    required uint32 cid    = 1;
+}
+
+message PBRespMatchList{
+    repeated PBMatchInfo list       = 1;
+}
+
+message PBReqOfficialMatch {
+    required string name            = 1;  // 牌局名称
+    required uint64 sb              = 2;  // 小盲
+    required uint64 bb              = 3;  // 大盲
+    required uint32 totalLimitTime  = 4;  // 时长
+    required uint64 minBuyin        = 5;  // 最小买入
+    required uint64 maxBuyin        = 6;  // 最大买入
+    required uint32 maxSeats        = 7;  // 座位数
+    required int32  type            = 8;  // 游戏类型，默认为Offical Cash
+    optional bool   hasInsurance    = 9;  // 保险标志
+    optional bool   gpsLimit        = 10; // gps限制
+    optional bool   ipLimit         = 11; // ip限制
+    optional uint64 ante            = 12; // 前注
+    optional uint32 kind            = 13; // 玩法类型，1 德州，2 短牌
+    optional int32  matchType       = 14; // 比赛类型，1 返回官方时间币场，101 返回官方练习币场
+    optional bool	 straddle		 = 15; // straddle标志
+    optional bool   showAllHands    = 16; // 强制亮手牌
+    optional bool friendLimit       = 17; // 防伙牌
+}
+
+message PBReqCreateMatch{
+    required string name                = 1;
+    required uint64 sb                  = 2;
+    required uint64 bb                  = 3;
+    required uint32 totalLimitTime      = 4;
+    optional uint64 ante                = 5;
+    optional bool   hasInsurance        = 6; // 保险功能是否打开
+    required uint32 maxSeats            = 7; // 座位
+    required uint64 minBuyin            = 8;
+    required uint64 maxBuyin            = 9;       
+    optional bool   gpsLimit            = 10; // 定位限制
+    optional bool   ipLimit             = 11; // ip限制
+    optional bool   buyinAuthorize      = 12; // 授权买入，打开此开关，用户每次buyin需要房主同意
+    optional uint32 feeNumerator        = 13; // 客户端不用传
+    optional uint32 feeDenominator      = 14; // 客户端不用传
+    optional uint64 deposit             = 15; // 保证金
+	optional bool	straddle			= 16; // straddle标志
+	optional bool	jackpot				= 17; // jackpot标志
+    optional bool   dealerDouble        = 18; // 庄位双倍前注
+    optional uint32 minRetain           = 19; // 保留筹码倍数
+    optional uint32 minCashOut          = 20; // 最小撤回筹码倍数
+    optional uint32 kind                = 21; // 玩法类型，1 德州，2 短牌
+    optional int32  matchType           = 22; // 比赛类型，1 返回官方时间币场，101 返回官方练习币场
+    optional uint32 thinkingTime        = 23; //思考时间
+    optional bool showAllHands          = 24; //强制亮手牌
+    optional PBRecordFee recordFee      = 25; //私局记录费
+    optional bool friendLimit           = 26; // 防伙牌
+    optional bool closeChat             = 27; // 关闭聊天: true 关闭、false 开启
+    optional bool luckyCard             = 28; // 是否有 Lucky Card
+    optional VpipConf vpipConf          = 29; // 入池标准 vpipConf.vpip = 0 表示普通桌
+    optional uint32 unloadTimes         = 30; // 自动卸码倍数
+    optional bool faceVip               = 31; // 是否人脸认证
+}
+
+message PBRespCreateShort {
+    required PBCommResult result        = 1;        // 1-成功，2-参数错误，3-牌局已达上线，4-创建配置失败，5-创建邀请码失败
+    optional PBMatchIndex idx           = 2;
+    optional uint32       password      = 3;
+}
+
+// 1 成功, 2 比赛已满 3 内部错误, 4 参数不对, 5 超过上限 6 时间币不足
+message PBRespCreateMatch{
+    required PBCommResult result    = 1;
+    optional PBMatchIndex idx       = 2;
+    optional uint32       password  = 3;
+}
+
+message PBReqMatchIndex{
+    required uint32 password            = 1;
+}
+
+message PBRespMatchIndex{
+    required PBCommResult result        = 1;           //成功为1
+    optional PBMatchIndex idx           = 2;
+}
+
+//快速加入牌局  //ML_ReqQuickJoinMatch			 = 0x0009;
+message PBReqQuickJoinMatch{
+    optional pbcmd.PBMatchIndex idx         = 1;        //(不希望进入的房间,主要用来换房)
+    optional uint32             matchType   = 2;        //比赛类型 1:时间币场  101:练习币场
+}
+
+message PBRespQuickJoinMatch{
+    required PBCommResult result        = 1;           //成功为1, 2没有适合的房间，3内部错误
+    optional PBMatchIndex idx           = 2;
+}
+
+message PBReqMatchListByGroup{
+    required int32 matchType    =   1;              //请求比赛类型
+    optional uint32 matchLevel  =   2;              //请求分类
+    optional uint32 sngLevel    =   3;              //0:默认，1：热门，2:3人桌，3:6人桌，其他全部
+}
+
+message PBMatchListGroup{
+    required string key     = 1;
+    required uint64 sb      = 2;
+    required uint64 bb      = 3;
+    required uint64 ante    = 4;
+    required bool   hasInsurance = 5;
+    required uint64 minBuyin= 6;
+    required uint32 players = 7;
+}
+
+message PBMatchListSNGGroup{
+    required string key         = 1;
+    optional uint64 registerFee = 2;
+    optional uint64 serviceFee  = 3;
+    optional uint32 players     = 4;
+    optional uint32 dbIndex     = 5;
+    repeated PBMatchPrize prizeList  = 6;
+    optional uint32 maxSeats    = 7;
+    optional uint32 matchCount  = 8;
+}
+
+message PBRespMatchListByGroup{
+    repeated PBMatchListGroup groups        = 1;
+    repeated PBMatchListSNGGroup sngGroups  = 2;
+    optional int32 matchType                = 3;              //请求比赛类型
+    optional uint32 matchLevel              = 4;              //请求分类
+    optional uint32 sngLevel                = 5;              //0:默认，1：热门，2:3人桌，3:6人桌，其他全部
+}
+
+message PBReqJoinGroupMatch{
+    required string key         = 1;
+    optional PBMatchIndex idx   = 2;        //需要排除的idx
+    optional uint32 matchType   = 3;        //比赛类型
+}
+
+message PBRespJoinGroupMatch{
+    required PBCommResult result        = 1;           //成功为1, 2没有适合的房间，3内部错误
+    optional PBMatchIndex idx           = 2;
+    optional string       key           = 3;
+    optional uint32       matchType     = 4;
+}
+
+message PBReqGetCreateMatchConfig{
+    optional uint32 clubId = 1;
+}
+
+message PBCreateShortAntes {
+    required uint64 antes           = 1;    // 短牌前注
+    optional uint32 feeNumerator    = 2;    // 服务费分子
+    optional uint32 feeDenominator  = 3;    // 服务费分母
+    repeated uint64 handLimits      = 5;   //单手底池封顶值
+}
+
+message PBCreateMatchBlinds{
+    required uint64 sb              = 1;
+    repeated uint64 antes           = 2;
+    optional uint32 feeNumerator    = 3;
+    optional uint32 feeDenominator  = 4;
+    repeated int64 handLimits       = 5;  //单手底池封顶值
+}
+
+message PBRespGetCreateMatchConfig{
+    repeated uint32                 times           = 1;    //总局时
+    repeated uint64                 buyins          = 2;
+    repeated PBCreateMatchBlinds    blinds          = 3;
+    repeated PBCreateShortAntes     antes           = 4;    // 短牌前注表
+    optional PBCreateSNGMatchConfig sngConfig       = 5;
+    optional uint64                 defaultMinBuyin = 6;    //默认展示的的最小买入
+    optional uint64                 defaultMaxBuyin = 7;    //默认展示的的最大买入
+    repeated uint32                 thinkTimes      = 8;   //可选的思考时间
+    repeated uint32                 buyFees         = 9;   //带入费率分子(分母为10000)
+    repeated uint32                 profitFees      = 10;   //战绩费率分子(分母为10000)
+    repeated uint32                 potFees         = 11;   //底池费率分子(分母为10000)
+    optional uint32                 defaultBuyFee   = 12;    //默认展示的带入费率(要除以10000)
+    optional uint32                 defaultProfitFee = 13;    //默认展示的战绩费率(要除以10000)
+    optional uint32                 defaultPotFee    = 14;    //默认展示的底池费率(分母为10000)
+    optional uint32                 privatePumpProportion = 15; // 私局抽水比例
+    optional uint32                 clubPumpProportion    = 16; // 俱乐部抽水比例
+    repeated uint32                 userNums         = 17; // 德州人数列表
+    repeated uint32                 shortUserNums    = 18; // 短牌人数列表
+}
+
+
+message PBCreateSNGRegisterConfig{
+    required uint64 registerFee = 1;
+    required uint64 serviceFee  = 2;
+}
+
+message PBSNGBlindsTableItem{
+    required uint32 level   = 1;
+    required uint64 sb      = 2;
+    required uint64 bb      = 3;
+    required uint64 ante    = 4;
+}
+
+message PBSNGBlindsTable{
+    required uint32                 id          = 1;
+    repeated PBSNGBlindsTableItem   blindsItem  = 2;
+}
+
+message PBCreateSNGMatchConfig{
+    repeated PBCreateSNGRegisterConfig register     = 1;
+    repeated uint64                    startChips   = 2;
+    repeated uint32                    raiseBlindGap= 3;
+    repeated PBSNGBlindsTable          blindsTable  = 4;
+}
+
+message PBReqCreateSNGMatch{
+    required string name                = 1;
+    required uint64 registerFee         = 2;        //报名费
+    optional uint64 serviceFee          = 3;        //服务费，客户端不用传，根据配置文件显示
+    required uint64 startChips          = 4;        //起始记分牌
+    required uint32 raiseBlindGap       = 5;        //涨盲间隔时间，单位秒
+    required uint32 blindTableId        = 6;        //盲注表编号，不传或传错服务器默认取1
+    required uint32 maxSeats            = 7;        //座位      
+    optional bool   gpsLimit            = 8;        //定位限制
+    optional bool   ipLimit             = 9;        //ip限制
+    optional bool   buyinAuthorize      = 10;       //授权买入，打开此开关，用户每次buyin需要房主同意
+    optional uint32 prizeType           = 11;       //奖励类型，客户端可不传，默认为1，金币类型
+    optional uint32 dbIndex             = 12;       //官方SNG配置序号，客户端忽略
+}
+
+message PBRespCreateSNGMatch{
+    required PBCommResult result    = 1;           //1：成功:2：比赛已满为， 3：内部错误， 4：参数不对, 5：超过上限
+    optional PBMatchIndex idx       = 2;
+    optional uint32       password  = 3;
+}
+
+
+///////记录费定义#start#///////////////
+//按底池百分比抽
+message PBPotFee {
+    optional uint32 rate  = 1;  // 抽水百分比
+    optional int64 handsLimit = 2; // 每手封顶 筹码数
+    optional int64 totalLimit = 3; // 整局封顶 筹码数
+}
+
+//记录费的配置 买入 战绩(盈利) 底池 
+message PBRecordFee {
+    optional uint32 buyinFee  = 1; // 买入费率 百分比 5为5% (分母为10000)
+    optional uint32 profitFee = 2; // 战绩(盈利)费用 百分比(分母为10000)
+    optional PBPotFee potFee  = 3; // 按底池抽水(分母为10000)
+}
+////////////记录费定义#end#////////////

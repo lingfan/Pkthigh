@@ -1,0 +1,97 @@
+syntax = "proto2";
+package pbcmd;
+option go_package = "poker/pb/pbcmd;pbcmd";
+
+// 对应 LuckyCard 客户端与服务器的交互
+// xxReq: 客户端请求
+// xxResp: 服务器回复客户端请求
+// xxPush: 服务器通知客户端
+enum LuckyCard {
+    luckyCardInfoReq  = 1; // 获取 Lucky Card 相关信息
+    luckyCardInfoResp = 2;
+
+    luckyCardWinningRecordsReq  = 3; // Lucky Card 获奖记录
+    luckyCardWinningRecordsResp = 4;
+
+    luckyHitPush = 5; // 玩家击中 Lucky Card 推送
+}
+
+// 获取用户 Lucky Card 相关信息
+message LuckyCardInfoReq {
+    optional int32 userId    = 1;
+    optional int32 gameKind  = 2; // 游戏类型: 1 德州, 2 短牌
+    optional int32 level     = 3; // 级别(德州: SB，短牌: Ante)
+    optional int32 matchId   = 4;
+    optional uint32 coinType = 5; // 币种: 0 时间币, 1 扑克币
+}
+
+// 返回用户 Lucky Card 相关信息
+message LuckyCardInfoResp {
+    optional int32 code             = 1; // 1 成功、2 功能关闭
+    optional int32 userId           = 2;
+    optional int32 gameKind         = 3; // 游戏类型: 1 德州, 2 短牌
+    optional int32 level            = 4; // 级别(德州: SB，短牌: Ante)
+    optional int32 matchId          = 5;
+    optional int64 pot              = 6; // 奖池
+    repeated int32 cards            = 7; // 幸运牌
+    repeated LuckyCardWinningRules rules = 8; // 中奖规则
+    optional int32 hits             = 9; // 击中次数
+    optional int64 refreshAt        = 10; // 刷新时间(unix 时间戳，单位秒)
+    optional uint32 coinType        = 11; // 币种: 0 时间币, 1 扑克币
+    repeated LuckyCardWinningRules vipRules = 12; // 中奖规则
+    optional string vipRatio =  13; // vip奖励倍数
+}
+
+// 中奖规则
+message LuckyCardWinningRules {
+    optional int32 hits              = 1; // 击中次数
+    optional LuckyCardReward rewards = 2;
+}
+
+// 奖励
+message LuckyCardReward {
+    optional int32 value      = 1; // 数值
+    optional int32 rewardType = 2; // 奖励类型: 1 (SB 数量)、2 (奖池万分比)
+}
+
+// 请求指定用户/级别的幸运牌获奖记录
+message LuckyCardWinningRecordsReq {
+    optional int32 userId   = 1; // 用户 id(可不传)
+    optional int32 gameKind = 2; // 游戏类型: 1 德州, 2 短牌(必传)
+    optional int32 level    = 3; // 级别(德州: SB，短牌: Ante)
+    optional int32 page     = 4; // 页码
+    optional uint32 coinType = 5; // 币种: 0 时间币, 1 扑克币
+}
+
+// 中奖记录
+message LuckyCardWinningRecordsResp {
+    optional int32 userId                   = 1;
+    optional int32 totalRewardAmount        = 2; // 累计中奖金额
+    optional int32 gameKind                 = 3; // 游戏类型: 1 德州, 2 短牌
+    optional LuckyCardWinningRecord highest = 4; // 历史最高
+    repeated LuckyCardWinningRecord records = 5;
+    optional int32 total                    = 6; // 总数
+    optional int32 page                     = 7; // 页码
+    optional int32 pagesize                 = 8; // 页面大小
+    optional int32 level                    = 9; // 级别(德州: SB，短牌: Ante)
+    optional uint32 coinType                = 10; // 币种: 0 时间币, 1 扑克币
+}
+
+// 获奖记录
+message LuckyCardWinningRecord {
+    optional string name     = 1; // 用户名称
+    optional string clubName = 2; // 俱乐部名称
+    optional int32 level     = 3; // 级别
+    optional int32 hits      = 4; // 击中次数
+    optional uint32 rewardAmount = 5; // 奖励金额
+    optional int64 timestamp     = 6; // 时间
+    optional int32 userId        = 7;
+    optional int32 clubId        = 8;
+}
+
+// 玩家击中 Lucky Card 推送
+message LuckyHitPush {
+    optional int32 hits         = 1; // 击中次数，大于 0 才算击中
+    optional int32 rewardAmount = 2; // 奖励金额，大于 0 才算中奖
+    optional uint32 coinType    = 3; // 币种: 0 时间币, 1 扑克币
+}

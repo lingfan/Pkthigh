@@ -1,0 +1,928 @@
+syntax = "proto2";
+package pbcmd;
+option go_package = "poker/pb/pbcmd;pbcmd";
+
+message PBHeader{
+  required uint32  mainCmd = 1;
+  required uint32 subCmd = 2;
+  optional uint32 encrypt = 3;
+  optional uint32 clientCtx = 4;    //原样返回
+  optional PBMatchIndex idx = 5;    //SVR专用
+}
+
+message PBMatchIndex{// 比赛索引结构体
+  required uint32 svrID = 1;    // 服务ID
+  required uint32 matchID = 2;    // 比赛ID
+  optional uint32 gameType = 3;    // 游戏类型，区分不同游戏 common.proto PBMatchType
+  optional uint32 kind = 4;       // 玩法类型 1:德州 2:短牌 3:钓鱼 4:奥马哈
+  optional uint32 tid = 5;       // 桌子id(新的玩牌逻辑)
+}
+
+message PBCommParam{//公共请求参数
+  required uint32         cid = 1;        //客户端编号 android 1, iOS 2
+  required uint32         uid = 2;
+  required string         token = 3;
+  required string         version = 4;        //客户端版本号
+  optional uint32         channel = 5;        //子渠道号 channel 就是0 . 用 cid 代表channel 100是渠道包, 1000 苹果审核包
+  optional uint32         lang = 6;        //客户端语言 客户端语言 0:中文， 1:英文
+  optional PBDeviceInfo   device = 7;        //设备信息
+  optional string      pkgName = 8;    //包名
+}
+
+message PBDeviceInfo{
+  optional string     network = 1;    //网络类型(wifi, gsm, 4G)
+  optional string     osType = 2;    //系统类型(IOS, Android)
+  optional string     osVersion = 3;    //系统版本号
+  optional string     deviceType = 4;    //设备型号(HUAWEI Mate20 ...)
+  optional string     imei = 5;    //设备IMEI
+  optional string     macAddr = 6;    //MAC地址
+}
+
+message PBCommResult{
+  required int32  code = 1; // 结果码,值为1成功,其他值失败
+  optional string desc = 2; // 备用,比如对code描述或返回调试用的信息等
+}
+
+message PBHearBeat{
+  required uint64 timestamp = 1;
+}
+
+//	main        MCmd_Access			= 0x1001;	//用于接入服
+//  subcmd  	ServiceNotFound		= 0x0001;
+message PBServiceNotFound{
+  required uint32 svrType = 1;  //服务器的类型
+  required uint32  clientCtx = 2; //上下文(与客户请求头里的一致，返回的头也有)
+  optional uint32 mainCmd = 3;  //服务没找到的主命令字
+  optional uint32 subCmd = 4;   //请求的子命令字
+  optional uint32 reason = 5;   //1：服务进程不存在  2:服务进程到不到处理体(如找不到比赛，比赛已结束等)
+}
+
+
+enum PBMainCmd{
+  MCmd_HeartBeat = 0x0000;  //用于心跳
+  MCmd_Account = 0x0001;  //用于账号相关
+  MCmd_Guess = 0x0002;  //用于竞猜业务
+  MCmd_Texas = 0x0003;  //用于德州业务
+  MCmd_MatchList = 0x0004;  //用于房间列表，加入房间
+  MCmd_Club = 0x0005;  //用于俱乐部业务
+  MCmd_Gamelog = 0x0006;  //用于牌局日志
+  MCmd_Weibo = 0x0007;   //用于扑克圏
+  MCmd_Rank = 0x0008;   //用于排行榜
+  MCmd_Mall = 0x0009;   //用于商城
+  MCmd_Promo = 0x000A;  //用于活动类
+  MCmd_Notification = 0x000B;  //用于通知类
+  MCmd_HunTexas = 0x000C;  //用于百人德州业务
+  MCmd_Short = 0x000E;   // 短牌服
+  MCmd_Agent = 0x000F;   // 代理
+  MCmd_Pay = 0x0010;   // 支付
+  MCmd_PKT = 0x0011;   // 重构的服务(subcmd 为0即可)
+  MCmd_Poker = 0x0012;   // 新的玩牌逻辑(德州、短牌、奥马哈)
+  MCmd_ClubNew = 0x0013;   // 新的俱乐部业务
+  MCmd_Chat = 0x0014;  // 聊天服
+  MCmd_Union = 0x0015;  // 联盟业务
+  MCmd_MatchMgr = 0x0016;   // 新的牌局管理
+  MCmd_LuckyCard = 0x0017;   // 幸运牌
+  MCmd_Profile = 0x0018;   // profile管理, 用户信息，钱包等
+  MCmd_Fish = 0x0019;   // 德州钓鱼
+  MCmd_FaceRecognition = 0x001A; // 人脸识别
+  MCmd_Registry = 0x001B; // 报名登记业务
+
+  //Server用
+  MCmd_Access = 0x1001;  //用于接入服
+  MCmd_State = 0x1002;  //用于状态服
+  MCmd_Statistic = 0x1003;  //用于统计服
+  MCmd_Monitor = 0xE001;  //用于监控
+  //0xF000~0xFFFF保留
+}
+
+enum PBMainCmdHeartBeatSubCmd{
+  HB_Send = 0x0001;
+  HB_Response = 0x0002;
+}
+
+enum PBMainCmdAccessSubCmd{
+  ServiceNotFound = 0x0001;
+
+  Access_ReqLogout = 0x1001;
+  Access_RespLogout = 0x1002;
+}
+
+enum PBMainCmdAccountSubCmd{//账号类子命令字
+  Account_ReqLogin = 0x0001;    //登录请求
+  Account_RespLogin = 0x0002;
+  Account_ReqInfo = 0x0003;    //用户信息请求
+  Account_RespInfo = 0x0004;
+  Account_ReqModifyInfo = 0x0005;    //用户信息修改
+  Account_RespModifyInfo = 0x0006;
+  Account_ReqAccountIsChargeChangeName = 0x0075; // 判断本次改名是否需要收费
+  Account_RespAccountIsChargeChangeName = 0x0076;
+  Account_ReqMobileCode = 0x0007;    //获取手机验证码
+  Account_RespMobileCode = 0x0008;
+  Account_ReqMobileAuth = 0x0009;    //手机号码注册或验证码或密码登录
+  Account_RespMobileAuth = 0x000A;
+  Account_ReqMobileRepwd = 0x000B;    //重置密码
+  Account_RespMobileRepwd = 0x000C;
+  Account_ReqAccountCheckCode = 0x0073; // 验证码验证
+  Account_RespAccountCheckCode = 0x0074;
+  Account_ReqWeixinAuth = 0x000D;       //微信登录
+  Account_RespWeixinAuth = 0x000E;
+  Account_ReqMobileSecret = 0x000F;       //密码临时密钥
+  Account_RespMobileSecret = 0x0010;
+  Account_ReqMoney = 0x0011;       //获取用户资产
+  Account_RespMoney = 0x0012;
+  Account_ReqOssParam = 0x0013;       //获取用户文件上传参数
+  Account_RespOssParam = 0x0014;
+  Account_ReqUserProps = 0x0015;       //获取用户道具列表
+  Account_RespUserProps = 0x0016;
+  Account_ReqSetDeviceToken = 0x0017;   //上报(更新)设备TOKEN
+  Account_RespSetDeviceToken = 0x0018;
+  Account_ReqFeedback = 0x0019;   //用户反馈
+  Account_RespFeedback = 0x001A;
+  Account_ReqSetLocation = 0x001B;   //上报(更新)设备地理位置
+  Account_RespSetLocation = 0x001C;
+  Account_ReqGetAvcSign = 0x001D;   //获取用户语音服务签名
+  Account_RespGetAvcSign = 0x001E;
+  Account_ReqPrelogin = 0x001F;   //预登录接口
+  Account_RespPrelogin = 0x0020;
+  Account_ReqBlackList = 0x0021;   //用户黑名单列表
+  Account_RespBlackList = 0x0022;
+  Account_ReqBlackEdit = 0x0023;   //用户黑名单编辑(添加/移除)
+  Account_RespBlackEdit = 0x0024;
+  Account_ReqBlackCount = 0x0025;   //用户黑名单用户数
+  Account_RespBlackCount = 0x0026;
+  Account_ReqHuaweiAuth = 0x0027;   //华为登录
+  Account_RespHuaweiAuth = 0x0028;
+  Account_ReqOppoAuth = 0x002B;   //Oppo登录
+  Account_RespOppoAuth = 0x002C;
+  Account_ReqVivoAuth = 0x002D;   //Vivo登录
+  Account_RespVivoAuth = 0x002E;
+  Account_ReqWxGameAuth = 0x002F;   //微信小游戏登录
+  Account_RespWxGameAuth = 0x0030;
+
+  // VHKD
+  Account_ReqAccountVhkdapiVhkdLogIn = 0x0031; // vhkd注册 or 登陆
+  Account_RespAccountVhkdapiVhkdLogIn = 0x0032;
+  Account_ReqAccountVhkdapiVhkdSetPin = 0x0033; // vhkd设置PIN
+  Account_RespAccountVhkdapiVhkdSetPin = 0x0034;
+  Account_ReqAccountVhkdapiVhkdGetAssets = 0x0035; // vhkd查询用户资产
+  Account_RespAccountVhkdapiVhkdGetAssets = 0x0036;
+  Account_ReqAccountVhkdapiUpdateAssets = 0x0037; // vhkd用户资产转入转出
+  Account_RespAccountVhkdapiUpdateAssets = 0x0038;
+  Account_ReqAccountVhkdapiGetFlowList = 0x0039; // 查询vhkd与金币兑换记录
+  Account_RespAccountVhkdapiGetFlowList = 0x003A;
+  Account_ReqAccountVhkdapiVhkdIsHasPin = 0x003B; // 查询vhkd pin
+  Account_RespAccountVhkdapiVhkdIsHasPin = 0x003C;
+  Account_ReqAccountVhkdapiVhkdwebViewControl = 0x003D; // 查询webview开关
+  Account_RespAccountVhkdapiVhkdwebViewControl = 0x003E;
+  Account_ReqAccountVhkdapiDigitalMoneyMallControl = 0x004A; // 查询数字货币商城开关
+  Account_RespAccountVhkdapiDigitalMoneyMallControl = 0x004B;
+  Account_ReqAccountVhkdapiGetBTCExchangeRate = 0x0041; // 查询BTC和VHKD的汇率
+  Account_RespAccountVhkdapiGetBTCExchangeRate = 0x0042;
+  Account_ReqAccountVhkdapiGetConfig = 0x0045; // vhkd or btc 获取兑换最大最小值限制
+  Account_RespAccountVhkdapiGetConfig = 0x0046;
+  Account_ReqAccountVhkdapiGiveMoney = 0x0049; // 用户间金币赠送
+  Account_RespAccountVhkdapiGiveMoney = 0x0050;
+  Account_ReqAccountGetRecordLog = 0x0054; // 获取用户间金币赠送记录
+  Account_RespAccountGetRecordLog = 0x0055;
+  Account_ReqAccountVGPayUpdateAssets = 0x0056; // 游戏币 <=> 数字货币 兑换
+  Account_RespAccountVGPayUpdateAssets = 0x0057;
+  Account_ReqAccountVGPayGetAddress = 0x0058; // 获取充币地址
+  Account_RespAccountVGPayGetAddress = 0x0059;
+  Account_ReqAccountVGPayGetWithdrawConfig = 0x005A; // 获取提币配置
+  Account_RespAccountVGPayGetWithdrawConfig = 0x005B;
+
+  Account_ReqAccountVGPayApplyTransactionOut = 0x005C; // 提交提币申请
+  Account_RespAccountVGPayApplyTransactionOut = 0x005D;
+  Account_ReqAccountVGPayGetAssetsRecordPageList = 0x005E; // 获取冲提币记录
+  Account_RespAccountVGPayGetAssetsRecordPageList = 0x005F;
+  Account_ReqAccountVGPayVhkdToMoney = 0x0070; // VHKD 自动兑换为 Money
+  Account_RespAccountVGPayVhkdToMoney = 0x0071;
+
+  // FtPay
+  Ftpay_ReqFtpayGetPayList = 0x0060; // ftpay获取支付方式
+  Ftpay_RespFtpayGetPayList = 0x0061;
+  Ftpay_ReqFtpayPaySubmitAct = 0x0062; // ftpay提交支付请求
+  Ftpay_RespFtpayPaySubmitAct = 0x0063;
+  Ftpay_ReqFtpayGetBaId = 0x0064; // ftpay用户发起提现申请-获取收款银行ID
+  Ftpay_RespFtpayGetBaId = 0x0065;
+  Ftpay_ReqFtpayLaunchWithdraw = 0x0066; // ftpay用户发起提现申请
+  Ftpay_RespFtpayLaunchWithdraw = 0x0067;
+  Ftpay_ReqFtpayGetFlowList = 0x0068; // 获取流水列表
+  Ftpay_RespFtpayGetFlowList = 0x0069;
+  Ftpay_ReqFtpayGetHistoryCardInfo = 0x006C; // 获取用户上一次提现的银行卡信息
+  Ftpay_RespFtpayGetHistoryCardInfo = 0x006D;
+  Ftpay_ReqGetPayStatus = 0x006E; // 获取支付通道状态
+  Ftpay_RespGetPayStatus = 0x006F;
+  Ftpay_ReqFtpayGetLaunchWithdrawFee = 0x0077; // 用户发起提现金申请
+  Ftpay_RespFtpayGetLaunchWithdrawFee = 0x0078;
+
+  Ftpay_ReqCheckPIN = 0x006A; // 验证PIN
+  Ftpay_RespCheckPIN = 0x006B;
+
+  Account_ReqAccountCheckPhoneOrEmail = 0x0051; // 绑定手机号码 or 邮箱
+  Account_RespAccountCheckPhoneOrEmail = 0x0052;
+
+  Account_ReqGetAutoHeadImg = 0x0080; // 获取随机默认头像
+  Account_RespGetAutoHeadImg = 0x0081;
+
+  Account_ReqCheckPayDisable = 0x0082; // 验证当前渠道版本是否处于支付禁用中
+  Account_RespCheckPayDisable = 0x0083;
+
+  Account_ReqGetVGPayConf = 0x0084; // 获取VGPay配置
+  Account_RespGetVGPayConf = 0x0085;
+
+  Account_ReqCheckIpLimit = 0x0086; // 检查IP地区限制
+  Account_RespCheckIpLimit = 0x0087;
+
+  Account_KickUser = 0xF000;    //服务器踢出用户
+}
+
+enum PBMainCmdGuessSubCmd{//竞猜类子命令字
+  Guess_ReqList = 0x0001;  //@deprecated 老版本列表请求, 新版请用 Guess_ReqInfoList
+  Guess_RespList = 0x0002;
+  Guess_ReqInfo = 0x0003;  //详情请求
+  Guess_RespInfo = 0x0004;
+  Guess_ReqMake = 0x0005;  //竞猜请求
+  Guess_RespMake = 0x0006;
+  Guess_ReqGuesserList = 0x0007;  //竞猜者列表请求
+  Guess_RespGuesserList = 0x0008;
+  Guess_ReqNewsList = 0x0009;  //获取竞猜新闻列表
+  Guess_RespNewsList = 0x000A;
+  Guess_ReqStarMarkList = 0x000B;  //获取选手个人成绩列表
+  Guess_RespStarMarkList = 0x000C;
+  Guess_ReqPraise = 0x000D;  //点赞新闻、评论等
+  Guess_RespPraise = 0x000E;
+  Guess_ReqReview = 0x000F;  //评论提交
+  Guess_RespReview = 0x0010;
+  Guess_ReqReviewList = 0x0011;  //评论列表
+  Guess_RespReviewList = 0x0012;
+  Guess_ReqReportReview = 0x0013;  //举报评论
+  Guess_RespReportReview = 0x0014;
+  Guess_ReqRecordList = 0x0015;  //我的竞猜记录
+  Guess_RespRecordList = 0x0016;
+  Guess_ReqNotifyList = 0x0017;  //我的竞猜通知(获赞或评论通知列表)
+  Guess_RespNotifyList = 0x0018;
+  Guess_ReqNotifyRead = 0x0019;  //读取竞猜通知内容(获赞或评论列表)
+  Guess_RespNotifyRead = 0x001A;
+  Guess_ReqPraisers = 0x001B;   //赞过的人
+  Guess_RespPraisers = 0x001C;
+  Guess_ReqMessageList = 0x001D;  //我的竞猜通知(普通消息列表)
+  Guess_RespMessageList = 0x001E;
+  Guess_ReqMessageRead = 0x001F;  //读取竞猜通知内容(普通消息内容)
+  Guess_RespMessageRead = 0x0020;
+  Guess_ReqNews = 0x0021;  //获取竞猜新闻详情
+  Guess_RespNews = 0x0022;
+  Guess_ReqPokerList = 0x0023;   //扑克竞猜列表
+  Guess_RespPokerList = 0x0024;
+  Guess_ReqPokerMake = 0x0025;   //扑克竞猜请求
+  Guess_RespPokerMake = 0x0026;
+  Guess_ReqPokerRecordList = 0x0027;   //扑克竞猜记录
+  Guess_RespPokerRecordList = 0x0028;
+  Guess_ReqPokerRecordInfo = 0x0029;   //扑克竞猜详情
+  Guess_RespPokerRecordInfo = 0x002A;
+  Guess_ReqInfoList = 0x002B;  //列表请求
+  Guess_RespInfoList = 0x002C;
+}
+
+enum PBMainCmdWeiboSubCmd{//扑克圏子命令字
+  Weibo_ReqHome = 0x0001;       //当前用户主页
+  Weibo_RespHome = 0x0002;
+  Weibo_ReqProfile = 0x0003;       //用户主页
+  Weibo_RespProfile = 0x0004;
+  Weibo_ReqPublish = 0x0005;       //发布微博
+  Weibo_RespPublish = 0x0006;
+  Weibo_ReqRemove = 0x0007;       //删除微博
+  Weibo_RespRemove = 0x0008;
+  Weibo_ReqList = 0x0009;       //微博列表
+  Weibo_RespList = 0x000A;
+  Weibo_ReqPraise = 0x000B;       //点赞微博、评论等
+  Weibo_RespPraise = 0x000C;
+  Weibo_ReqReview = 0x000D;       //评论提交
+  Weibo_RespReview = 0x000E;
+  Weibo_ReqRelay = 0x000F;       //转发微博
+  Weibo_RespRelay = 0x0010;
+  Weibo_ReqReport = 0x0011;       //用户举报
+  Weibo_RespReport = 0x0012;
+  Weibo_ReqReviewList = 0x0013;       //评论列表
+  Weibo_RespReviewList = 0x0014;
+  Weibo_ReqRelationList = 0x0015;       //获取用户关系列表(关注,粉丝)
+  Weibo_RespRelationList = 0x0016;
+  Weibo_ReqFeed = 0x0017;       //微博详情
+  Weibo_RespFeed = 0x0018;
+  Weibo_ReqPraisers = 0x0019;       //赞过的人
+  Weibo_RespPraisers = 0x001A;
+  Weibo_ReqNotifyList = 0x001B;       //通知列表
+  Weibo_RespNotifyList = 0x001C;
+  Weibo_ReqRelationFollow = 0x001D;       //关注/取消关注
+  Weibo_RespRelationFollow = 0x001E;
+  Weibo_ReqRelation = 0x001F;       //获取关系类型
+  Weibo_RespRelation = 0x0020;
+  Weibo_ReqRemoveReview = 0x0021;       //删除评论
+  Weibo_RespRemoveReview = 0x0022;
+  Weibo_ReqHotUsers = 0x0023;       //热门用户
+  Weibo_RespHotUsers = 0x0024;
+}
+
+enum PBMainCmdRankSubCmd{
+  Rank_ReqList = 0x0001;
+  Rank_RespList = 0x0002;
+}
+
+enum PBMainCmdPromoSubCmd{//活动类子命令
+  Promo_ReqProfile = 0x0001;
+  Promo_RespProfile = 0x0002;
+  Promo_ReqClubList = 0x0003;  //发现-俱乐部列表
+  Promo_RespClubList = 0x0004;
+  Promo_ReqShareUrl = 0x0005;  //分享链接获取
+  Promo_RespShareUrl = 0x0006;
+  Promo_ReqNotifyList = 0x0007;  //通知(公告)类列表
+  Promo_RespNotifyList = 0x0008;
+  Promo_ReqNotifyRead = 0x0009;  //读取通知(公告)类信息
+  Promo_RespNotifyRead = 0x000A;
+  Promo_ReqAppSettings = 0x000B;   //获取一些APP用的设置
+  Promo_RespAppSettings = 0x000C;
+  Promo_ReqRelief = 0x000D;   //领取破产救济
+  Promo_RespRelief = 0x000E;
+  Promo_ReqLuckyboxGet = 0x000F;   //获取用户当前宝箱信息
+  Promo_RespLuckyboxGet = 0x0010;
+  Promo_ReqLuckyboxOpen = 0x0011;   //开宝箱
+  Promo_RespLuckyboxOpen = 0x0012;
+  Promo_ReqNotifyAward = 0x0013;   //通知奖励领取
+  Promo_RespNotifyAward = 0x0014;
+  Promo_ReqActivityList = 0x0015;   //活动列表
+  Promo_RespActivityList = 0x0016;
+  Promo_ReqActivityAward = 0x0017;   //活动领奖
+  Promo_RespActivityAward = 0x0018;
+
+  Promo_ReqAutoRestart = 0x0019;  //自动重启
+  Promo_RespAutoRestart = 0x001A;
+
+  Promo_ReqGetFoundOnlineList = 0x001B;  //获取发现列表
+  Promo_RespGetFoundOnlineList = 0x001C;
+}
+
+enum PBMainCmdMallSubCmd{
+  Mall_ReqList = 0x0001;       //商品列表
+  Mall_RespList = 0x0002;
+  Mall_ReqApplePayCreate = 0x0003;       //苹果支付请求下单
+  Mall_RespApplePayCreate = 0x0004;
+  Mall_ReqApplePayDeliver = 0x0005;       //苹果支付请求发货
+  Mall_RespApplePayDeliver = 0x0006;
+  Mall_ReqPropBuy = 0x0007;       //购买道具
+  Mall_RespPropBuy = 0x0008;
+  Mall_ReqWeixinPayCreate = 0x0009;       //微信支付请求下单
+  Mall_RespWeixinPayCreate = 0x000A;
+  Mall_ReqAliPayCreate = 0x000B;       //支付宝支付请求下单
+  Mall_RespAliPayCreate = 0x000C;
+  Mall_ReqHuaweiPayCreate = 0x000D;       //华为支付请求下单
+  Mall_RespHuaweiPayCreate = 0x000E;
+  Mall_ReqVivoPayCreate = 0x000F;       //Vivo支付请求下单
+  Mall_RespVivoPayCreate = 0x0010;
+  Mall_ReqGiftList = 0x0011;       //积分商品列表
+  Mall_RespGiftList = 0x0012;
+  Mall_ReqUserAddrGet = 0x0013;       //获取收货地址
+  Mall_RespUserAddrGet = 0x0014;
+  Mall_ReqUserAddrSet = 0x0015;       //设置收货地址
+  Mall_RespUserAddrSet = 0x0016;
+  Mall_ReqGiftExchange = 0x0017;       //积分兑换
+  Mall_RespGiftExchange = 0x0018;
+  Mall_ReqGiftExchangeList = 0x0019;   //积分兑换记录
+  Mall_RespGiftExchangeList = 0x001A;
+  Mall_ReqOppoPayCreate = 0x001B;       //Oppo支付请求下单
+  Mall_RespOppoPayCreate = 0x001C;
+  Mall_ReqMallGetPracticeGoodsList = 0x0020; // 获取练习币商城列表
+  Mall_RespMallGetPracticeGoodsList = 0x0021;
+  Mall_ReqMallBuyPracticeProp = 0x0022; // 购买练习币道具
+  Mall_RespMallBuyPracticeProp = 0x0023;
+}
+
+enum PBMainCmdTexasSubCmd{
+  //以下由客户端发给服务端
+  Texas_ReqJoinTable = 0x0001;
+  Texas_ReqLeaveTable = 0x0002;
+  Texas_ReqSit = 0x0003;
+  Texas_ReqStand = 0x0004;
+  Texas_ReqChipin = 0x0005;
+  Texas_ReqTabelInfo = 0x0006;
+  Texas_ReqShowCard = 0x0007;
+  Texas_ReqChat = 0x0008;
+  Texas_ReqBuyin = 0x0009;
+  Texas_ReqStartMatch = 0x000A;
+  Texas_ReqBuyinHistory = 0x000B;
+  Texas_ReqGameLog = 0x000C;
+  Texas_ReqRegisterAutoAction = 0x000D;
+  Texas_ReqBuyInsurance = 0x000E;
+  Texas_ReqCloseMatch = 0x000F;
+  Texas_ReqExtendThinkingTime = 0x0010;
+  Texas_ReqChangeMuckOption = 0x0011;
+  Texas_ReqChangeInsuranceNotifyOption = 0x0012;
+  Texas_ReqLikeAMatch = 0x0013;
+  Texas_ReqUnlikeAMatch = 0x0014;
+  Texas_ReqKickUser = 0x0015;
+  Texas_ReqProcessBuyinRequest = 0x0016;
+  Texas_ReqSendInteractiveItem = 0x0017;
+  Texas_ReqSNGConfig = 0x0018;
+  Texas_ReqSNGChipRank = 0x0019;
+  Texas_ReqSNGMatchBoard = 0x0020;
+  Texas_ReqBuyDeposit = 0x0021; // 增加保证金
+
+  Texas_ReqShowPublicCards = 0x0022; // 请求看公共牌 PBReqShowPublicCards
+  Texas_ReqShowAllHands = 0x0023; // 请求看所有人手牌 PBReqShowAllHands
+  Texas_ReqRecordNum = 0x0024; // 请求记录费的具体数值 PBReqRecordNum
+  Texas_ReqPrepareAddDeposit = 0x0025; // 准备增加保证金
+
+  Texas_ReqPrepareCheckout = 0x0026; // 准备结算离桌
+  Texas_ReqCheckout = 0x0027; // 结算离桌
+
+  Texas_ReqPrivateInfo = 0x0028; // 请求私人信息
+
+  //以下是服务器发给客户端（含单播及广播）
+  Texas_NotifyJoinTable = 0x1001;
+  Texas_NotifyLeaveTable = 0x1002;
+  Texas_NotifyUserSit = 0x1003;  //1.成功，2.座位有人，3.钱不够，4.系统其他错误，5.玩家已经有座位，6，找不到玩家，7.ip限制
+  Texas_NotifyUserStand = 0x1004;
+  Texas_NotifyStartChipin = 0x1005;
+  Texas_NotifyEndChipin = 0x1006;
+  Texas_NotifyTableInfo = 0x1007;
+  Texas_NotifyShowCard = 0x1008;
+  Texas_NotifyChat = 0x1009;
+  Texas_NotifyGameStart = 0x1010;    //广播开始一局游戏
+  Texas_NotifyDealFlop = 0x1011;
+  Texas_NotifyDealTurn = 0x1012;
+  Texas_NotifyDealRiver = 0x1013;
+  Texas_NotifyStartDealCard = 0x1014;
+  Texas_NotifyDealHoleCard = 0x1015;
+  Texas_NotifySyncSeatInfo = 0x1016;
+  Texas_NotifyGameResult = 0x1017;
+  Texas_NotifyUpdatePots = 0x1018;
+  Texas_NotifyUserPutAnte = 0x1019;
+  Texas_NotifyUserInvalidAction = 0x1020;
+  Texas_NotifySyncCardType = 0x1021;
+  Texas_NotifyUserBuyin = 0x1022;
+  Texas_NotifyStartMatch = 0x1023;    //广播房主开启了游戏
+  Texas_NotifyMatchOver = 0x1024;
+  Texas_NotifyBuyinHistory = 0x1025;
+  Texas_NotifyGameLog = 0x1026;
+  Texas_NotifyRegisterAutoAction = 0x1027;
+  Texas_NotifyEnterInsuranceMode = 0x1028;
+  Texas_NotifyUserBuyInsurance = 0x1029;    //收到此命令的购买
+  Texas_NotifyUserEndBuyInsurance = 0x1030;    //指定sid的玩家完成购买保险操作/超时
+  Texas_NotifyUserInsurancePayment = 0x1031;    //保险爆了会发出这条消息，直接赔钱
+  Texas_NotifyUserDisableInsurance = 0x1032;    //收到此命令代表Outs大于14张或0张，保险不激活
+  Texas_NotifyAllSeatsInfo = 0x1033;
+  Texas_NotifyMatchWillClose = 0x1034;
+  Texas_NotifyExtendThinkingTimeResult = 0x1035;  //请求延时的用户会收到此命令
+  Texas_NotifyUpdateThinkingTime = 0x1036;
+  Texas_NotifyChangeMuckOption = 0x1037;
+  Texas_NotifyShowCardResp = 0x1038;
+  Texas_NotifyChangeInsuranceNotifyOption = 0x1039;
+  Texas_NotifyLikeAMatchResp = 0x1040;
+  Texas_NotifyUnlikeAMatchResp = 0x1041;
+  Texas_NotifyRespKickUser = 0x1042;
+  Texas_NotifyProcessBuyinRequest = 0x1043;
+  Texas_NotifyUpdateMatchCloseTime = 0x1044;
+  Texas_NotifySyncInteractiveItemConfig = 0x1045;
+  Texas_NotifySendInteractiveItemResp = 0x1046;
+  Texas_NotifyUserSendInteractiveItem = 0x1047;
+  Texas_NotifyUserUpdateMatchConfig = 0x1048;
+  Texas_NotifyUserMatchCloseTimeRemind = 0x1049;
+  Texas_NotifyRaiseBlind = 0x1050;
+  Texas_NotifyUserOut = 0x1051;
+  Texas_NotifySNGConfig = 0x1052;
+  Texas_NotifySNGChipRank = 0x1053;
+  Texas_NotifySNGMatchBoard = 0x1054;
+  Texas_NotifyStartMatchResult = 0x1055;  //通知开启比赛结果
+  Texas_NotifyBuyDeposit = 0x1056;   //返回增加保证金结果
+  Texas_NotifyDepositChange = 0x1057;   //每次结算保证金的变化
+  Texas_NotifyDepositOver = 0x1058;   //比赛结束保证金的剩余情况
+  Texas_NotifyShowPublicCards = 0x1059;   //通知玩家可以执行看公共牌操作 PBNotifyShowPublicCards
+  Texas_RespShowPublicCards = 0x1060;   //回复看公共牌 PBRespShowPublicCards
+  Texas_NotifyWhoShowPublicCards = 0x1061;   //广播房间所有人，谁看了公共牌 PBNotifyWhoShowPublicCards
+  Texas_NotifyShowAllHands = 0x1062;   //通知玩家可以执行看所有人手牌操作 PBNotifyShowAllHands
+  Texas_RespShowAllHands = 0x1063;   //回复看所有人手牌 PBResphowAllHands
+  Texas_RespRecordNum = 0x1064;   //回复记录费的具体数值 PBRespRecordNum
+  Texas_RespPrepareAddDeposit = 0x1065; // 准备增加保证金
+  Texas_RespPrepareCheckout = 0x1066; // 准备结算离桌
+  Texas_RespCheckout = 0x1067; // 结算离桌
+  Texas_RespPrivateInfo = 0x1068; // 请求私人信息
+  Texas_NotifyLogout = 0x1069; // 通知玩家退出游戏到登录界面
+
+  //异常逻辑回包
+  Texas_NotifyUesrNotJoinTable = 0x2001;
+}
+
+// 短牌服新加 added by ty
+enum PBMainCmdShortSubCmd{
+  //以下由客户端发给服务端
+  Short_ReqJoinTable = 0x0001;
+  Short_ReqLeaveTable = 0x0002;
+  Short_ReqSit = 0x0003;
+  Short_ReqStand = 0x0004;
+  Short_ReqChipin = 0x0005;
+  Short_ReqTabelInfo = 0x0006;
+  Short_ReqShowCard = 0x0007;
+  Short_ReqChat = 0x0008;
+  Short_ReqBuyin = 0x0009;
+  Short_ReqStartMatch = 0x000A;
+  Short_ReqBuyinHistory = 0x000B;
+  Short_ReqGameLog = 0x000C;
+  Short_ReqRegisterAutoAction = 0x000D;
+  Short_ReqBuyInsurance = 0x000E;
+  Short_ReqCloseMatch = 0x000F;
+  Short_ReqExtendThinkingTime = 0x0010;
+  Short_ReqChangeMuckOption = 0x0011;
+  Short_ReqChangeInsuranceNotifyOption = 0x0012;
+  Short_ReqLikeAMatch = 0x0013;
+  Short_ReqUnlikeAMatch = 0x0014;
+  Short_ReqKickUser = 0x0015;
+  Short_ReqProcessBuyinRequest = 0x0016;
+  Short_ReqSendInteractiveItem = 0x0017;
+  Short_ReqSNGConfig = 0x0018;
+  Short_ReqSNGChipRank = 0x0019;
+  Short_ReqSNGMatchBoard = 0x0020;
+  Short_ReqBuyDeposit = 0x0021; // 增加保证金
+
+  Short_ReqShowPublicCards = 0x0022; // 请求看公共牌 PBReqShowPublicCards
+  Short_ReqShowAllHands = 0x0023; // 请求看所有人手牌 PBReqShowAllHands
+  Short_ReqRecordNum = 0x0024; // 请求记录费的具体数值 PBReqRecordNum
+  Short_ReqPrepareAddDeposit = 0x0025; // 准备增加保证金
+
+  Short_ReqPrepareCheckout = 0x0026; // 准备结算离桌
+  Short_ReqCheckout = 0x0027; // 结算离桌
+
+  Short_ReqPrivateInfo = 0x0028; // 请求私人信息
+
+  //以下是服务器发给客户端（含单播及广播）
+  Short_NotifyJoinTable = 0x1001;
+  Short_NotifyLeaveTable = 0x1002;
+  Short_NotifyUserSit = 0x1003;  //1.成功，2.座位有人，3.钱不够，4.系统其他错误，5.玩家已经有座位，6，找不到玩家，7.ip限制
+  Short_NotifyUserStand = 0x1004;
+  Short_NotifyStartChipin = 0x1005;
+  Short_NotifyEndChipin = 0x1006;
+  Short_NotifyTableInfo = 0x1007;
+  Short_NotifyShowCard = 0x1008;
+  Short_NotifyChat = 0x1009;
+  Short_NotifyGameStart = 0x1010;    //广播开始一局游戏
+  Short_NotifyDealFlop = 0x1011;
+  Short_NotifyDealTurn = 0x1012;
+  Short_NotifyDealRiver = 0x1013;
+  Short_NotifyStartDealCard = 0x1014;
+  Short_NotifyDealHoleCard = 0x1015;
+  Short_NotifySyncSeatInfo = 0x1016;
+  Short_NotifyGameResult = 0x1017;
+  Short_NotifyUpdatePots = 0x1018;
+  Short_NotifyUserPutAnte = 0x1019;
+  Short_NotifyUserInvalidAction = 0x1020;
+  Short_NotifySyncCardType = 0x1021;
+  Short_NotifyUserBuyin = 0x1022;
+  Short_NotifyStartMatch = 0x1023;    //广播房主开启了游戏
+  Short_NotifyMatchOver = 0x1024;
+  Short_NotifyBuyinHistory = 0x1025;
+  Short_NotifyGameLog = 0x1026;
+  Short_NotifyRegisterAutoAction = 0x1027;
+  Short_NotifyEnterInsuranceMode = 0x1028;
+  Short_NotifyUserBuyInsurance = 0x1029;    //收到此命令的购买
+  Short_NotifyUserEndBuyInsurance = 0x1030;    //指定sid的玩家完成购买保险操作/超时
+  Short_NotifyUserInsurancePayment = 0x1031;    //保险爆了会发出这条消息，直接赔钱
+  Short_NotifyUserDisableInsurance = 0x1032;    //收到此命令代表Outs大于14张或0张，保险不激活
+  Short_NotifyAllSeatsInfo = 0x1033;
+  Short_NotifyMatchWillClose = 0x1034;
+  Short_NotifyExtendThinkingTimeResult = 0x1035;  //请求延时的用户会收到此命令
+  Short_NotifyUpdateThinkingTime = 0x1036;
+  Short_NotifyChangeMuckOption = 0x1037;
+  Short_NotifyShowCardResp = 0x1038;
+  Short_NotifyChangeInsuranceNotifyOption = 0x1039;
+  Short_NotifyLikeAMatchResp = 0x1040;
+  Short_NotifyUnlikeAMatchResp = 0x1041;
+  Short_NotifyRespKickUser = 0x1042;
+  Short_NotifyProcessBuyinRequest = 0x1043;
+  Short_NotifyUpdateMatchCloseTime = 0x1044;
+  Short_NotifySyncInteractiveItemConfig = 0x1045;
+  Short_NotifySendInteractiveItemResp = 0x1046;
+  Short_NotifyUserSendInteractiveItem = 0x1047;
+  Short_NotifyUserUpdateMatchConfig = 0x1048;
+  Short_NotifyUserMatchCloseTimeRemind = 0x1049;
+  Short_NotifyRaiseBlind = 0x1050;
+  Short_NotifyUserOut = 0x1051;
+  Short_NotifySNGConfig = 0x1052;
+  Short_NotifySNGChipRank = 0x1053;
+  Short_NotifySNGMatchBoard = 0x1054;
+  Short_NotifyStartMatchResult = 0x1055;  //通知开启比赛结果
+  Short_NotifyBuyDeposit = 0x1056;   //返回增加保证金结果
+  Short_NotifyDepositChange = 0x1057;   //每次结算保证金的变化
+  Short_NotifyDepositOver = 0x1058;   //比赛结束保证金的剩余情况
+
+  Short_NotifyShowPublicCards = 0x1059;   //通知玩家可以执行看公共牌操作 PBNotifyShowPublicCards
+  Short_RespShowPublicCards = 0x1060;   //回复看公共牌 PBRespShowPublicCards
+  Short_NotifyWhoShowPublicCards = 0x1061;   //广播房间所有人，谁看了公共牌 PBNotifyWhoShowPublicCards
+  Short_NotifyShowAllHands = 0x1062;   //通知玩家可以执行看所有人手牌操作 PBNotifyShowAllHands
+  Short_RespShowAllHands = 0x1063;   //回复看所有人手牌 PBResphowAllHands
+  Short_RespRecordNum = 0x1064;   //回复记录费的具体数值 PBRespRecordNum
+  Short_RespPrepareAddDeposit = 0x1065; // 准备增加保证金
+  Short_RespPrepareCheckout = 0x1066; // 准备结算离桌
+  Short_RespCheckout = 0x1067; // 结算离桌
+  Short_RespPrivateInfo = 0x1068; // 请求私人信息
+  Short_NotifyLogout = 0x1069; // 通知玩家退出游戏到登录界面
+
+  //异常逻辑回包
+  Short_NotifyUesrNotJoinTable = 0x2001;
+}
+
+enum PBMainCmdMatchListSubCmd{
+  ML_ReqMatchList = 0x0001;
+  ML_RespMatchList = 0x0002;
+  ML_ReqCreateMatch = 0x0003;
+  ML_RespCreateMatch = 0x0004;
+  ML_ReqMatchIndex = 0x0005;  //请求比赛 idx
+  ML_RespMatchIndex = 0x0006;
+  ML_ReqClubMatchList = 0x0007;
+  ML_RespClubMatchList = 0x0008;
+  ML_ReqQuickJoinMatch = 0x0009;
+  ML_RespQuickJoinMatch = 0x000A;
+  ML_ReqMatchListByGroup = 0x000B;
+  ML_RespMatchListByGroup = 0x000C;
+  ML_ReqJoinGroupMatch = 0x000D;
+  ML_RespJoinGroupMatch = 0x000E;
+  ML_ReqGetCreateMatchConfig = 0x000F;
+  ML_RespGetCreateMatchConfig = 0x0010;
+  ML_ReqCreateSNG = 0x0011;
+  ML_RespCreateSNG = 0x0012;
+  ML_ReqCreateShort = 0x0013;  // 创建短牌
+  ML_RespCreateShort = 0x0014;
+  // 查询房间内是否有需要玩家处理的消息
+  ML_ReqFetchMsg = 0x1001;  //获取需要用户处理的消息
+  ML_RespFetchMsg = 0x1002;  //返回需要用户处理的消息
+}
+
+enum PBMainCmdGLogSubCmd{
+  GLog_ReqUserMatchRecord = 0x0001;
+  GLog_RespUserMatchRecord = 0x0002;
+  GLog_ReqMatchDetail = 0x0003;
+  GLog_RespMatchDetail = 0x0004;
+  GLog_ReqMatchLog = 0x0005;
+  GLog_RespMatchLog = 0x0006;
+  GLog_ReqFetchFavMatchLogs = 0x0007;
+  GLog_RespFetchFavMatchLogs = 0x0008;
+  GLog_ReqFavMatchLogDetail = 0x0009;
+  GLog_RespFavMatchLogDetail = 0x000A;
+  GLog_ReqDeleteFavMatchLog = 0x000B;
+  GLog_RespDeleteFavMatchLog = 0x000C;
+  GLog_ReqFavMatchLog = 0x000D;  // 在战绩中进行收藏
+  GLog_RespFavMatchLog = 0x000E;  // 返回战绩中收藏结果
+  GLog_ReqQueryFavMatchCount = 0x000F;
+  GLog_RespQueryFavMatchCount = 0x0010;
+  GLog_ReqQueryUserGameData = 0x0011;
+  GLog_RespQueryUserGameData = 0x0012;
+  GLog_ReqClubMatchRecord = 0x0013; // 请求俱乐部牌局列表
+  GLog_ReqClubMatchSuperStat = 0x0014; // 请求俱乐部牌局超级统计
+  GLog_RespClubMatchSuperStat = 0x0015;
+  GLog_RespClubMatchRecord = 0x0016;
+  GLog_ReqUnionMatchRecord = 0x0017; // 俱乐部查看联盟牌局记录 PBGLogReqClubMatchRecord
+  GLog_RespUnionMatchRecord = 0x0018; // PBGLogRespUserMatchRecord
+  GLog_ReqUnionMatchDetail = 0x0019; // 俱乐部查看联盟牌局记录详情 PBGLogReqMatchDetail
+  GLog_RespUnionMatchDetail = 0x0020; // PBGLogRespMatchDetail
+  GLog_ReqUnionMatchSuperStat = 0x0021; // 请求联盟牌局超级统计 PBGLogReqUnionMatchSuperStat
+  GLog_RespUnionMatchSuperStat = 0x0022; // PBGLogRespMatchDetail
+  GLog_ReqUnionMatchSummary = 0x0023; // 请求联盟牌局概况 PBGLogReqUnionMatchSummary
+  GLog_RespUnionMatchSummary = 0x0024; // PBGLogRespUnionMatchSummary
+  GLog_ReqClubMatchSummary = 0x0025; // 请求俱乐部牌局概况 PBGLogReqClubMatchSummary
+  GLog_RespClubMatchSummary = 0x0026; // PBGLogRespClubMatchSummary
+  GLog_UserPokerDataReq = 0x0027; // 请求用户德州数据: 总手数、vpip(入池率)、pfr(翻牌前加注率)
+  GLog_UserPokerDataResp = 0x0028;
+  GLog_KeepHandReq = 0x0029; // [收藏/取消]收藏一手牌局
+  GLog_KeepHandResp = 0x0030;
+  GLog_FavoriteHandsReq = 0x0031; // 获取收藏的牌局
+  GLog_FavoriteHandsResp = 0x0032;
+  GLog_ViewFavoriteHandReq = 0x0033; // 查看已收藏的牌局
+  GLog_ViewFavoriteHandResp = 0x0034;
+  GLog_ShowFavoriteHandsReq = 0x0035; // 强制亮牌
+  GLog_ShowFavoriteHandsResp = 0x0036;
+  GLog_ShowFavPublicCardsReq = 0x0037; // 发发看
+  GLog_ShowFavPublicCardsResp = 0x0038;
+
+  GLog_FishHandResultReq = 0x0039; // 请求钓鱼近 N 手结果([渔夫/鲨鱼]胜、平及牌型, 走势图用)
+  GLog_FishHandResultResp = 0x0040;
+
+  GLog_FishHandStatReq = 0x0041; // 近 1000 手数据
+  GLog_FishHandStatResp = 0x0042;
+}
+
+enum PBMainCmdNotifySubCmd{
+  Notify_SyncNotification = 0x0001;
+  Notify_SyncNotificationOnLogin = 0x0002;
+  Notify_ReqFetchNotifys = 0x0003;
+  Notify_RespFetchNotifys = 0x0004;
+
+  Notify_ReqBulletin = 0x0005; // 请求公告
+  Notify_RespBulletin = 0x0006;
+}
+
+enum PBMainCmdHunTexasSubCmd{
+  //以下由客户端发给服务端
+  HunTexas_ReqJoinTable = 0x0001;
+  HunTexas_ReqLeaveTable = 0x0002;
+  HunTexas_ReqSit = 0x0003;
+  HunTexas_ReqStand = 0x0004;
+  HunTexas_ReqTabelInfo = 0x0005;
+  HunTexas_ReqChipin = 0x0006;
+  HunTexas_ReqChat = 0x0007;
+  HunTexas_ReqHistory = 0x0008;
+  HunTexas_ReqOnlooker = 0x0009;
+
+  //以下是服务器发给客户端（含单播及广播）
+  HunTexas_NotifyJoinTable = 0x1001;
+  HunTexas_NotifyLeaveTable = 0x1002;
+  HunTexas_NotifyUserSit = 0x1003;  //1.成功，2.座位有人，3.钱不够，4.系统其他错误，5.玩家已经有座位，6，找不到玩家，7.ip限制
+  HunTexas_NotifyUserStand = 0x1004;
+  HunTexas_NotifyTableInfo = 0x1005;
+  HunTexas_NotifyUserChipin = 0x1006;  //反馈用户下注结果
+  HunTexas_SyncOtherChipin = 0x1007;  //同步其他玩家下注
+  HunTexas_NotifyPrepare = 0x1008;  //通知玩家准备
+  HunTexas_NotifyDealCard = 0x1009;  //通知开始发牌
+  HunTexas_NotifyStartBetting = 0x1010;  //通知开始下注
+  HunTexas_NotifyOpenCard = 0x1011;  //通知开牌
+  HunTexas_NotifyPayBet = 0x1012;  //通知结算
+  HunTexas_NotifyUserChat = 0x1013;  //通知聊天
+  HunTexas_SyncSeatUserChipin = 0x1014;  //同步座位上的玩家下注
+  HunTexas_SyncBonusPot = 0x1015;  //同步彩池信息
+  HunTexas_SyncSeatInfo = 0x1016;  //更新玩家座位信息
+  HunTexas_SyncPlayerNum = 0x1017;  //更新无座玩家数字
+  HunTexas_RespHistory = 0x1018;  //返回历史胜负
+  HunTexas_RespOnlooker = 0x1019;  //返回旁观用户信息
+
+  //列表功能
+  HunTexas_ReqQuickJoin = 0x2001;
+  HunTexas_RespQuickJoin = 0x2002;
+}
+
+// 聊天服字命令字
+enum PBMainCmdChatSubCmd{
+  Chat_RegisterChannelReq = 0x0001;  //注册频道请求
+  Chat_RegisterChannelResp = 0x0002;  //注册频道回复
+
+  Chat_UnRegisterChannelReq = 0x0003;  //退出频道请求
+  Chat_UnRegisterChannelResp = 0x0004;  //退出频道回复
+
+  Chat_SendChatReq = 0x0005;  //发送文字或语音聊天请求
+  Chat_SendChatResp = 0x0006;  //发送文字或语音聊天回复
+  Chat_SendChatPush = 0x0007;  //发送文字或语音聊天通知
+
+  Chat_SendInteractivePropReq = 0x0008;  //发送互动表情请求
+  Chat_SendInteractivePropResp = 0x0009;  //发送互动表情回复
+  Chat_SendInteractivePropPush = 0x000A;  //发送互动表情通知
+}
+
+//对应Poker 客户端与服务器的交互
+// xxReq: 客户端请求
+// xxResp: 服务器回复客户端请求 
+// xxPush: 服务器通知客户端
+enum Poker {
+  CmdLoginReq = 0x0001; //玩家登陆桌子请求
+  CmdLoginResp = 0x0002; //玩家登陆桌子回复
+
+  CmdLogoutReq = 0x0003; //离开房间
+  CmdLogoutResp = 0x0004;
+
+  CmdPlayInfoReq = 0x0005; //获取正在玩牌的信息(登陆后处于玩牌状态需要)
+  CmdPlayInfoResp = 0x0006;
+
+  CmdSitdownReq = 0x0007; //玩家坐下请求
+  CmdSitdownResp = 0x0008;
+
+  CmdStandupReq = 0x0009; //玩家站起请求
+  CmdStandupResp = 0x000A;
+
+  CmdActionReq = 0x000B; //玩家请求下注
+  CmdActionResp = 0x000C;
+
+  CmdShowHandsReq = 0x000D; //亮手牌设置请求
+  CmdShowHandsResp = 0x000E; //
+
+  CmdBuyInsReq = 0x000F; //请求购买保险(insurance)
+  CmdBuyInsResp = 0x0010; //回复购买保险
+
+  CmdSetLeaveStatusReq = 0x0011; //设置离开状态
+  CmdSetLeaveStatusResp = 0x0012; //回复离开状态
+
+  CmdHandHistoryReq = 0x0013;  // 请求牌局历史
+  CmdHandHistoryResp = 0x0014; // 响应牌局历史
+
+  CmdGetOnlookerListReq = 0x0015;  // 请求玩家获取旁观者列表
+  CmdGetOnlookerListResp = 0x0016; //
+
+  CmdShowPublicCardsReq = 0x0017; // 请求看公共牌
+  CmdShowPublicCardsResp = 0x0018;
+
+  CmdShowAllHandsReq = 0x0019;  // 请求看所有人手牌
+  CmdShowAllHandsResp = 0x001A; //
+
+  CmdGetRoomFeeReq = 0x001B; // 请求房间费明细
+  CmdGetRoomFeeResp = 0x001C; // GetRoomFeeResp
+
+  CmdExtendTimeReq = 0x001D; //请求加时
+  CmdExtendTimeResp = 0x001E; //加时回复
+
+  CmdKeepHistoryHandReq = 0x001F; // 收藏历史手牌
+  CmdKeepHistoryHandResp = 0x0020;
+
+  CmdGetPointsReq = 0x0021; //获取当前的积分(已撤回的筹码)
+  CmdGetPointsResp = 0x0022; //
+
+  CmdLoadPoinstReq = 0x0023; //加载积分( 已撤回的筹码 转换成 筹码)
+  CmdLoadPointsResp = 0x0024; //
+
+  //Server主动通知相关
+  CmdLoginPush = 0x1001;   //通知有玩家登陆
+  CmdLogoutPush = 0x1002;   //通知某玩家离开房间
+  CmdSitdownPush = 0x1003;  //通知玩家坐下信息
+  CmdStandupPush = 0x1004;  //通知玩家站起
+  CmdGameReadyPush = 0x1005;   //游戏准备开始倒计时
+  CmdGameStartPush = 0x1006;   //游戏开始,确定button与发手牌
+  CmdAntePush = 0x1007; //通知所有玩家下前注的信息
+  CmdDealPush = 0x1008; //发玩家手牌
+  CmdStartActionPush = 0x1009; //通知玩家开始行动
+  CmdActionPush = 0x100A;  //玩家下注通知
+  CmdRefundPush = 0x100B;  //系统将多余的筹码返回给玩家
+  CmdRoundEndPush = 0x100C;  //回合结束,通知奖池变化
+  CmdFlopPush = 0x100D;   //发翻牌
+  CmdTurnPush = 0x100E;   //发转牌
+  CmdRiverPush = 0x100F;   //发河牌
+  CmdGameOverPush = 0x1010; //游戏结束结算信息
+  CmdShowHandsPush = 0x1011; //亮牌通知
+  CmdPreShowHandsPush = 0x1012; //所有玩家Allin 提前亮手牌
+  CmdBuyinPush = 0x1013;   //玩家买入筹码到帐通知
+  CmdEnterInsPush = 0x1014; //通知玩家进入保险模式
+  CmdStartBuyInsPush = 0x1015; //通知某玩家开始购买保险
+  CmdBuyInsPush = 0x1016; //通知玩家购买保险操作
+  CmdPayInsPush = 0x1017; //通知爆保险时的赔付信息
+  CmdDisableInsPush = 0x1018; //不触发保险通知
+  CmdSetLeaveStatusPush = 0x1019; //推送离开状态
+
+  CmdCanShowPublicCardsPush = 0x101A; //通知玩家可以执行看公共牌操作
+  CmdWhoShowPublicCardsPush = 0x101B; //广播房间所有人，谁看了公共牌
+  CmdCanShowAllHandsPush = 0x101C;   //通知玩家可以执行看所有人手牌操作
+
+  CmdBuyInCountdownPush = 0x101D; // 通知玩家买入倒计时
+  CmdExtendTimePush = 0x101E; //通知某玩家加时操作
+
+  CmdLuckyCardPush = 0x101F; // 牌局内刷新 Lucky Card 推送
+
+  CmdPointChangePush = 0x1020;  //某玩家的积分变化
+
+  CmdPreFaceCheckPush = 0x1021; //下手进行人脸验证
+  CmdFaceCheckStartPush = 0x1022; //通知桌内所有人开始人脸认证
+  CmdFaceCheckEndPush = 0x1023; //通知桌内所有人结束人脸认证
+  CmdFaceCheckLeftChangePush = 0x1024; // 随机人脸抽查剩余人数变化
+  CmdFaceCheckCountdownPush = 0x1025; // 通知玩家人脸检测倒计时
+}
+
+//对应matchMgr.proto 客户端与服务器的交互
+// xxReq: 客户端请求
+// xxResp: 服务器回复客户端请求 
+// xxPush: 服务器通知客户端
+enum MatchMgr {
+  getMatchConfigReq = 0x0001; //获取创建比赛的配置信息
+  getMatchConfigResp = 0x0002; //
+
+  createMatchReq = 0x0003; //请求创建比赛
+  createMatchResp = 0x0004;
+
+  searchMatchReq = 0x0005; //根据(私局)房间号码获取比赛信息
+  searchMatchResp = 0x0006;
+
+  getMatchListReq = 0x0007;  //获取牌局列表信息
+  getMatchListResp = 0x0008;
+
+  matchBalanceReq = 0x0009;  //比赛的盈亏信息(战绩信息、买入历史)
+  matchBalanceResp = 0x000A;
+
+  buyinReq = 0x000B; //买入筹码
+  buyinResp = 0x000C;
+
+  closeMatchReq = 0x000D; //解散比赛
+  closeMatchResp = 0x000E;
+
+  getRealtimeDataReq = 0x000F; // 获取俱乐部在联盟的实时数据
+  getRealtimeDataResp = 0x0010;
+
+  startMatchReq = 0x0011; //比赛开始请求
+  startMatchResp = 0x0012;
+
+  settlementDeTailReq = 0x0013; //获取提前结算明细
+  settlementDeTailResp = 0x0014; //
+
+  settlementReq = 0x0015; //提前结算请求
+  settlementResp = 0x0016; //
+
+  checkPenaltyReq = 0x0017; // 检查用户在该牌局提前结算是否需要扣除盈利（入池标准桌使用）
+  checkPenaltyResp = 0x0018;
+
+  //Server主动通知相关
+  matchOverPush = 0x1001;   //比赛结算信息
+  settlementPush = 0x1002; //真正提前结算通知玩家的结算结果
+
+  closeMatchPush = 0x1003; //房主解散比赛通知比赛的其它玩家
+  closeMatchRemindPush = 0x1004; //比赛结束倒计时提醒
+
+  startMatchPush = 0x1005; // 通知所有玩家比赛开始
+}

@@ -1,0 +1,28 @@
+syntax = "proto2";
+package pbcmd;
+option go_package = "poker/pb/pbcmd;pbcmd";
+import "cmd.proto";
+
+message PBReqGetFoundOnlineList{ // 获取发现列表
+    required PBCommParam    comm    = 1;
+}
+
+message PBFoundOnlineList{
+    optional string             title               = 1; // 标题
+    optional uint32             type                = 2; // 类型(0:图文 1:内跳 2:图文轮播 3:内跳轮播 4:外链 5:外链轮播)
+    optional string             banner              = 3; // banner图片地址
+    optional string             content             = 4; // 图片地址或者富文本内容
+    optional string             link                = 5; // 链接地址
+    optional uint32             onlinetime          = 6; // 上线时间
+    optional uint32             offlinetime         = 7; // 下线时间
+    optional uint32             status              = 8; // 状态(0:下线 1:上线)
+    optional uint32             order               = 9; // 排序优先级
+    optional uint32             updatedat           = 10; // 更新时间
+    optional uint32             createdat           = 11; // 创建时间
+}
+
+message PBRespGetFoundOnlineList{
+    required PBCommResult           ret                 = 1;
+    repeated PBFoundOnlineList      list                = 2; // 发现列表内容
+    repeated PBFoundOnlineList      match               = 3; // 牌局页发现列表内容
+}

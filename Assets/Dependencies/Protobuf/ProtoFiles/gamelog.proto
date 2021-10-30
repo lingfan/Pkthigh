@@ -1,0 +1,570 @@
+syntax = "proto2";
+package pbcmd;
+option go_package = "poker/pb/pbcmd;pbcmd";
+import "cmd.proto";
+import "texas.proto";
+import "common.proto";
+
+// 请求用户战绩列表
+message PBGLogReqUserMatchRecord{
+    required uint32 page      = 1; // 从 1 开始
+    optional uint32 kind      = 2; // 玩法类型，1 德州，2 短牌
+    optional uint32 matchType = 3; // 1 官方时间币场，101 官方练习币场, 202 积分私局
+    optional bool private     = 4; // 私局
+    optional uint32 coinType  = 5; // 币种: 0 时间币, 1 扑克币
+}
+
+// 请求俱乐部牌局列表
+message PBGLogReqClubMatchRecord {
+    optional uint32 page    = 1; // 从1开始
+    optional uint32 clubId  = 2; // 俱乐部 Id
+    optional uint32 kind    = 3; // 玩法类型，1 德州，2 短牌
+
+    // 联盟牌局列表参数
+    optional uint32 unionId     = 4; // 联盟 Id
+    optional uint32 queryType   = 5; // 0全部 1今日 2昨日 3本周 4上周 5本月 6上月
+    optional uint32 coinType    = 6; // 币种: 0 时间币, 1 扑克币
+}
+
+//用户战绩列表信息单元-普通场
+message PBGLogMatchRecordUnit{
+    required uint32 time            = 1;
+    required string name            = 2; // 牌局名称
+    required int64  balance         = 3;
+    required uint32 creatorUID      = 4;
+    required uint32 cid             = 5;
+    required uint64 sb              = 6;
+    required uint64 bb              = 7;
+    required uint32 gameDuration    = 8;  // 游戏时长
+    required uint32 matchID         = 9;
+    optional uint32 matchType       = 10;
+    optional uint32 kind            = 11; // 玩法类型，1 德州，2 短牌
+    optional uint64 ante            = 12; // 前注
+    optional bool hasStraddle       = 13;
+    optional string clubName        = 14; // 俱乐部名称
+    optional string clubIcon        = 15; // 俱乐部头像
+    optional string icon            = 16; // 个人头像
+    optional bool hasIPLimit        = 17; // 定位限制
+    optional bool hasGPSLimit       = 18; // ip 限制
+    optional bool showAllHands      = 19; // 是否强制亮手牌
+    optional bool hasInsurance      = 20; // 保险功能是否打开
+    optional bool friendLimit       = 21; // 防伙牌
+    optional uint32 unionId         = 22; // 联盟ID
+    optional string unionName       = 23; // 联盟名称
+    optional bool closeChat         = 24; // 关闭聊天: true 关闭、false 开启
+    optional bool luckyCard         = 25; // 是否有 Lucky Card
+    optional VpipConf vpipConf      = 26; // 入池标准 vpipConf.vpip = 0 表示普通桌
+    optional uint32 vpip            = 27; // 入池率(万分比)
+    optional uint32 penaltyRate     = 28; // 没收比例(万分比)
+    optional uint32 unloadTimes     = 29; // 自动卸码倍数
+    optional uint32 coinType        = 30; // 币种: 0 时间币, 1 扑克币
+    optional bool faceVip           = 31; // 是否人脸认证
+}
+
+//用户战绩列表信息单元-SNG
+message PBGLogSNGMatchRecordUnit{
+    optional uint32 time            = 1;
+    optional string name            = 2;
+    optional uint32 creatorUID      = 3;
+    optional uint32 cid             = 4;
+    optional uint32 gameDuration    = 5;    //游戏时长
+    optional uint32 matchID         = 6;
+    optional uint64 startChips      = 7;
+    optional uint32 rank            = 8;
+    optional PBSNGPrize prize       = 9;
+    optional uint32 maxSeats        = 10;
+    optional uint64 registerFee     = 11;
+    optional uint32 matchType       = 12;
+}
+
+// 返回用户战绩列表
+message PBGLogRespUserMatchRecord{
+    repeated PBGLogMatchRecordUnit list = 1;
+    repeated PBGLogSNGMatchRecordUnit sngList = 2; // 弃用
+    repeated PBGLogMatchRecordUnit shortList  = 3; // 弃用
+    optional uint32 total    = 4; // 总数
+    optional uint32 page     = 5; // 页码
+    optional uint32 pagesize = 6; // 页面大小
+    optional uint32 coinType = 7; // 币种: 0 时间币, 1 扑克币
+}
+
+//请求战绩详情
+message PBGLogReqMatchDetail{
+    required uint32 matchID         = 1;
+    required uint32 matchType       = 2;
+    required uint32 matchKind       = 3;    // 玩法类型，1-德州，2-短牌
+    optional uint32 clubID          = 4;    // 俱乐部ID
+    optional uint32 coinType        = 5; // 币种: 0 时间币, 1 扑克币
+}
+
+// 返回战绩详情
+message PBGLogRespMatchDetail{
+    required PBCommResult ret       = 1;
+    optional uint32 matchID         = 2;
+    optional string name            = 3;
+    optional uint64 sb              = 4;
+    optional uint64 bb              = 5;
+    optional uint64 ante            = 6;
+    optional uint32 gameDuration    = 7;
+    optional PBNotifyMatchOver info = 8;
+    optional uint32 maxSeats        = 9;
+    optional PBNotifySNGMatchOver sngInfo = 10;
+    optional uint32 matchType = 11;
+    optional bool hasStraddle = 12;
+    optional uint32 matchCount = 13; // 超级统计总局数
+    optional uint32 coinType   = 14; // 币种: 0 时间币, 1 扑克币
+    optional uint32 kind = 15; // 游戏类型: 1 德州, 2 短牌
+}
+
+//请求牌局记录
+message PBGLogReqMatchLog{
+    required uint32 matchID         = 1;
+    required uint32 pos             = 2; //start from 0
+    optional uint32 matchType       = 3; //比赛类型
+}
+
+//牌局记录详情
+message PBGLogMatchLogUnit{
+    required uint32  index          = 1;
+    repeated uint32 boardCards      = 2;
+    repeated PBGameLogUnit logs     = 3;
+    optional int64  insurancePot    = 4;
+    required uint32 dealerSid       = 5;
+    optional uint32 fid             = 6;
+    optional uint64 sb              = 7;    //小盲注
+    optional uint64 bb              = 8;    //大盲注
+    optional uint64 ante            = 9;    //前注
+}
+//返回牌局记录
+message PBGLogRespMatchLog{
+    repeated PBGLogMatchLogUnit logs = 1;
+    required uint32 mid = 2;
+}
+
+message PBGLogReqFetchFavMatchLogs{
+}
+
+// "我的收藏"的单个牌局的概要信息
+message PBGLogFavMatchLogUnit{
+    required uint32 fid             = 1;    //收藏的记录id
+    required uint32 ftime            = 2;    //收藏的时间
+    required string name            = 3;    //牌局名称
+    required bool   hasInsurance    = 4;
+    optional uint32 iconID          = 5;    //官方场图标
+    optional uint32 cid             = 6;    //俱乐部id
+    optional uint32 mid             = 7;    //比赛id
+    optional uint32 stime           = 8;    //牌局开始时间
+    optional uint32 maxSeats        = 9;    //桌子座位数
+    optional uint64 gid             = 10;   //牌局id
+    optional uint64 sb              = 11;   //小盲注
+    optional uint64 bb              = 12;   //大盲注
+    optional uint64 ante            = 13;   //前注
+    optional uint32 matchType       = 14;   //比赛类型
+}
+
+message PBGLogRespFetchFavMatchLogs{
+    required PBCommResult ret           = 1;
+    repeated PBGLogFavMatchLogUnit logs = 2;
+}
+
+message PBGLogReqFavMatchLogDetail{
+    required uint32 fid             = 1;
+}
+
+// "我的收藏"的单个牌局的详细信息
+message PBGLogRespFavMatchLogDetail{
+    required PBCommResult ret       = 1;
+    optional PBGLogMatchLogUnit logs     = 2;
+}
+
+// "我的战绩" 解除收藏
+message PBGLogReqDeleteFavMatchLog{
+    required uint32 fid = 1;
+}
+message PBGLogRespDeleteFavMatchLog{
+    required PBCommResult ret       = 1;
+}
+
+// "我的战绩" 添加收藏
+message PBGLogReqFavMatchLog{
+    required uint32 matchID = 1;
+    required uint64 gid     = 2;
+    optional uint32 matchType = 3;
+}
+message PBGLogRespFavMatchLog{
+    required PBCommResult   ret = 1;
+    required uint32         fid = 2;
+}
+// "我的收藏"查询收藏数量
+message PBGLogReqQueryFavMatchCount{}
+
+message PBGLogRespQueryFavMatchCount{
+    required PBCommResult   ret     = 1;
+    required uint32         count   = 2;
+    required uint32         limit   = 3;
+}
+
+message PBUserGameData{
+    required uint32     totalHands       = 1;
+    required uint32     vpipCount        = 2;
+    required uint32     pfrCount         = 3;
+    optional int64      balance          = 4;
+    optional int64      timeCoinGain     = 5; // 时间币盈亏
+    optional int64      practiceCoinGain = 6; // 练习币盈亏
+    optional int64      pointGain        = 7; // 积分盈亏
+    optional int64      pkcGain          = 8; // 扑克币盈亏
+}
+
+message PBUserSNGData{
+    required uint32     totalCount  = 1;
+    required uint32     firstCount  = 2;
+    required uint32     secondCount = 3;
+    optional uint32     thirdCount  = 4;
+}
+
+//查询用户的玩牌数据
+message PBGLogReqQueryUserGameData{
+    required uint32 uid   = 1;
+    optional uint32 type  = 2; // 比赛类型
+    optional uint32 kind  = 3; // 玩法类型，1-德州，2-短牌
+    optional bool private = 4; // 私局
+    optional uint32 coinType = 5; // 币种: 0 时间币, 1 扑克币
+}
+message PBGLogRespQueryUserGameData{
+    required PBCommResult   ret     = 1;    //1，成功，2，用户不存在
+    optional PBUserGameData data    = 2;    //普通场数据结构
+    optional PBUserSNGData  sngData = 3;    //SNG数据结构
+    optional uint32         type    = 4;
+    optional uint32 coinType        = 5; // 币种: 0 时间币, 1 扑克币
+}
+
+message PBGLogReqClubMatchSuperStat {
+    repeated uint32 mids   = 1; // 合并统计的牌局id列表（全选时为空）
+    optional uint32 clubId = 2; // 俱乐部ID（全选时需要）
+    optional uint32 kind   = 3; // 玩法类型 1:德州 2:短牌
+    optional uint32 coinType = 4; // 币种: 0 时间币, 1 扑克币
+}
+
+message PBGLogReqUnionMatchSuperStat {
+    repeated uint32 mids    = 1;    // 合并统计的牌局id列表
+    optional uint32 clubId  = 2;    // 俱乐部ID
+    optional uint32 unionId = 3;    // 联盟ID
+    optional uint32 queryType = 4;  // 0全部 1今日 2昨日 3本周 4上周 5本月 6上月
+    optional uint32 kind      = 5; // 玩法类型 1:德州 2:短牌
+    optional uint32 coinType  = 6; // 币种: 0 时间币, 1 扑克币
+}
+
+// 请求联盟统计概况
+message PBGLogReqUnionMatchSummary {
+    optional uint32 clubId      = 1; // 俱乐部 Id
+    optional uint32 unionId     = 2; // 联盟 Id
+    optional uint32 queryType   = 3; // 0全部 1今日 2昨日 3本周 4上周 5本月 6上月
+    optional uint32 kind        = 4; // 玩法类型 1:德州 2:短牌 3:钓鱼 4:奥马哈
+    optional uint32 coinType    = 5; // 币种: 0 时间币, 1 扑克币
+}
+message PBGLogRespUnionMatchSummary {
+    optional MatchSummary matchSummary = 1; // 联盟收益概况
+    optional uint32 coinType           = 2; // 币种: 0 时间币, 1 扑克币
+    optional uint32 kind               = 3; // 玩法类型 1:德州 2:短牌 3:钓鱼 4:奥马哈
+    optional FishMatchSummary fishMatchSummary = 4; // 钓鱼收益概况
+}
+
+// 钓鱼收益概况
+message FishMatchSummary {
+    message MatchDetail {
+        optional uint32 uid = 1;            // 用户ID
+        optional string nick = 2;           // 昵称
+        optional uint64 contribution = 3;   // 贡献
+    }
+
+    optional uint64 totalGain = 1; // 总收益
+    repeated MatchDetail matchDetail = 2; // 收益详情
+}
+
+// 请求俱乐部牌局概况
+message PBGLogReqClubMatchSummary {
+    optional uint32 clubId      = 1; // 俱乐部 Id
+    optional uint32 kind        = 2; // 玩法类型 1:德州 2:短牌
+    optional uint32 coinType    = 3; // 币种: 0 时间币, 1 扑克币
+}
+
+message PBGLogRespClubMatchSummary {
+    optional int64 totalTimeCoinGain             = 1; // 时间币总收益
+    optional uint64 roomFeeTimeCoinGain          = 2; // 房间费时间币收益
+    optional int64 privateInsuranceTimeCoinGain  = 3; // 组局保险时间币收益
+    optional uint64 itemTimeCoinGain             = 4; // 道具时间币收益
+    optional int64 systemInsuranceTimeCoinGain   = 5; // 系统保险时间币收益
+    optional int64 freeHandingFeeRebate          = 6; // 提现免手续费返利
+    optional uint32 coinType                     = 7; // 币种: 0 时间币, 1 扑克币
+}
+
+// 用户近三十天数据
+/*
+ * 入池率 = 入池次数/(手数-无效次数)
+ * 翻牌前加注率 = 翻牌前加注次数/(手数-无效次数)
+ */
+message UserPokerData{
+    optional uint32 handNum    = 1; // 手数
+    optional uint32 invalidNum = 2; // 无效次数
+    optional uint32 vpipNum    = 3; // 入池次数
+    optional uint32 pfrNum     = 4; // 翻牌前加注次数
+}
+
+/*
+ * 当 mid 不传时，获取用户近三十日数据
+ * 当 mid 有值时，获取用户本局数据
+ */
+message UserPokerDataReq {
+    optional uint32 userId    = 1;
+    optional uint32 gameKind  = 2; // 游戏类型: 1 德州, 2 短牌
+    optional uint32 matchType = 3; // 见 common.proto:PBMatchType
+    optional uint32 unionId   = 4;
+    optional uint32 clubId    = 5;
+    optional uint32 ante      = 6;
+    optional uint32 sb        = 7;
+    optional uint32 straddle  = 8; // 抓头: 0 默认, 1 开启, 2 关闭
+    optional uint32 mid       = 9; // 牌局 id(可不传)
+    optional uint32 cost      = 10; // 查看他人入池数据费用 为 0 表示不付费
+    optional uint32 coinType  = 11; // 币种: 0 时间币, 1 扑克币
+}
+
+message UserPokerDataResp {
+    optional int32 code    = 1; // 1 成功, 2 隐藏且不提示, 3 隐藏且提示余额不足, 4 隐藏且提示内部错误
+    optional uint32 userId = 2;
+    optional UserPokerData data = 3;
+    optional uint64 leftMoney   = 4; // 剩余币(当 code 为 1 时有效)
+    optional uint32 coinType    = 5; // 币种: 0 时间币, 1 扑克币
+}
+
+// 子命令字 cmd.proto:GLog_KeepHandReq
+// [收藏/取消收藏]一手牌局
+message KeepHandReq {
+    optional uint32 userId     = 1;
+    optional int32 matchId     = 2;
+    optional int32 handId      = 3;
+    optional bool keep         = 4; // true: 收藏, false: 取消收藏
+    optional uint32 coinType   = 5; // 币种: 0 时间币, 1 扑克币
+}
+
+// 子命令字 cmd.proto:GLog_KeepHandResp
+message KeepHandResp {
+    optional int32 code        = 1; // 1 成功
+    optional uint32 userId     = 2;
+    optional int32 matchId     = 3;
+    optional int32 handId      = 4;
+    optional bool keep         = 5; // true: 收藏, false: 取消收藏
+    optional uint32 coinType   = 6; // 币种: 0 时间币, 1 扑克币
+}
+
+// 获取收藏的牌局
+message FavoriteHandsReq {
+    optional uint32 userId = 1;
+    optional int32 page    = 2; // 页码
+    optional uint32 coinType = 3; // 币种: 0 时间币, 1 扑克币
+}
+
+message FavoriteHandsResp {
+    optional int32 code         = 1; // 1 成功
+    optional uint32 userId      = 2;
+    optional int32 total        = 3; // 总数
+    optional int32 page         = 4; // 页码
+    optional int32 pagesize     = 5; // 页面大小
+    repeated FavoriteHand hands = 6; // 牌局列表
+    optional uint32 coinType    = 7; // 币种: 0 时间币, 1 扑克币
+}
+
+/*
+ * import "matchMgr.proto" 中的 MatchInfo 在 js 中会出现
+ * unresolvable type reference in Message.Field .pbcmd.FavoriteHand.match: MatchInfo
+ * 暂未解决，先记录一下
+ */
+message FavoriteHand {
+    optional int32 matchId    = 1;
+    optional int32 handId     = 2; // 手数
+    optional MatchInfo2 match = 3; // 牌局信息 见 matchMgr.proto:MatchInfo
+    optional double balance   = 4; // 盈亏
+}
+
+// 比赛信息
+message MatchInfo2 {
+    optional string name     = 1; // 比赛名称
+    optional uint64 ante     = 2; // 前注
+    optional uint64 sb       = 3; // 小盲
+    optional uint64 bb       = 4; // 大盲
+    optional bool straddle   = 5; // 是否开启抓头
+    optional int32 gameKind  = 6; // 游戏类型: 1 德州、2 短牌
+    optional int32 showAllHandsFee = 7; // 强制亮牌费用
+    optional uint32 startTime = 8; // 比赛开始的时间戳 0:表示尚未开始
+    optional MatchProp2 prop  = 9; // 比赛的额外属性
+    optional bool luckyCard   = 10; // 是否有 Lucky Card
+    optional bool closeChat   = 11; // 关闭聊天: true 关闭、false 开启
+    optional VpipConf vpipConf= 12; // 入池标准 vpipConf.vpip = 0 表示普通桌
+    optional uint64 showPublicCardsFee = 13; // 发发看的费用
+    optional uint32 unloadTimes        = 14; // 自动卸码倍数
+}
+
+message MatchProp2 {
+    optional int32 category     = 1; // 1 私局, 2 俱乐部局, 3 联盟局, 4 超盟局
+    optional string clubName    = 2; // 俱乐部名称
+    optional string clubIcon    = 3; // 俱乐部图标
+    optional string creatorIcon = 4; // 创建者的头像
+}
+
+// 查看已收藏的牌局
+message ViewFavoriteHandReq {
+    optional uint32 userId = 1;
+    optional int32 matchId = 2;
+    optional int32 handId  = 3; // 手数
+    optional uint32 coinType = 4; // 币种: 0 时间币, 1 扑克币
+}
+
+message ViewFavoriteHandResp {
+    optional int32 code           = 1; // 1 成功
+    optional uint32 userId        = 2;
+    optional int32 matchId        = 3;
+    optional int32 handId         = 4; // 手数
+    optional bool showAllHands    = 5; // 是否已强制亮牌(如果没有, 需要显示"强制亮牌"按钮)
+    optional HandHistory2 history = 6; // 手牌历史详情 见 poker.proto:HandHistory
+    optional int32  showState     = 7; // 看哪个游戏状态的公共牌, 参看 proto.proto GSTATE 3：翻牌（3张） 4:转牌(1张) 5:和牌(1张) (其它状态都不可看牌)
+    optional uint32 coinType      = 8; // 币种: 0 时间币, 1 扑克币
+}
+
+message HandHistory2 {
+    optional int64 handTime    = 1;	// 手牌开始时间
+    optional int64 insurance   = 2;	// 本手保险盈亏
+    repeated uint32	boardcards = 3;	// 公共牌
+    repeated RoundProc2	rounds = 4;	// 每轮流程信息
+    repeated HandPlayerInfo2 players = 5; // 参与玩家信息
+    optional uint64 showdownPot = 6;// 牌局结束时的底池
+}
+
+// 每一轮(preflop\flop\turn\river)流程信息
+message RoundProc2 {
+    optional int32 gstate    = 1; // 阶段，preflop-2,flop-3,turn-4,river-5, showndown-6
+    optional int64 roundTime = 2; // 每一轮开始时间
+    optional uint64	totalPot = 3; // 本轮总底池
+    repeated ActionProc2 actions = 4; // 本轮所有玩家操作流程
+}
+
+// 每一轮所有玩家的操作
+message ActionProc2 {
+    optional uint32	uid       = 1; // 玩家id
+    optional int32 actionTips = 2; // 当前操作名词提示
+    optional uint32	raiseFreq = 3; // 加注次数，从第3次开始显示3B,第4次显示4B,以此类推
+    optional uint64	chips     = 4; // 操作筹码数量
+    optional uint64	totalPot  = 5; // 操作后总底池数
+}
+
+// 单个玩家在一手牌中的输赢信息
+message HandPlayerInfo2 {
+    optional uint32	uid       = 1; // 玩家id
+    repeated uint32	holeCards = 2; // 玩家手牌，2张
+    optional int32 handValue  = 3; // 成牌类型
+    optional int64 result     = 4; // 本手牌输赢
+    optional int64 insurance  = 5; // 本手牌玩家保险
+    optional string	position  = 6; // 玩家位置信息
+    optional string	payload   = 7; // 玩家信息
+}
+
+// 强制亮牌
+// 子命令字 cmd.proto:GLog_ShowFavoriteHandsReq
+message ShowFavoriteHandsReq {
+    optional uint32 userId = 1;
+    optional int32 matchId = 2;
+    optional int32 handId  = 3; // 手数
+    optional uint32 coinType = 4; // 币种: 0 时间币, 1 扑克币
+}
+
+// 子命令字 cmd.proto:GLog_ShowFavoriteHandsResp
+message ShowFavoriteHandsResp {
+    optional int32 code         = 1; // 1:成功 2:不可看牌 3:时间币不够 4:扑克币不足
+    optional uint32 userId      = 2;
+    optional int32 matchId      = 3;
+    optional int32 handId       = 4; // 手数
+    repeated ShowHands2 hands   = 5; // 所有玩家的手牌 见 poker.proto:ShowHands
+    optional uint64 remainMoney = 6; // 操作后剩余金币 失败时无此信息
+    optional uint32 coinType    = 7; // 币种: 0 时间币, 1 扑克币
+}
+
+message ShowHands2 {
+    optional uint32 userId = 1;
+    repeated int32 cards   = 2; // 手牌数组 0:表示背面
+}
+
+//请求看收藏牌局的公共牌
+message ShowFavPublicCardsReq {
+    optional int32 matchId = 1;
+    optional int32 handId  = 2; // 手数
+    optional uint32 coinType = 3; // 币种: 0 时间币, 1 扑克币
+}
+
+//回复看收藏牌局公共牌 (成功看完后自行在原有的state上+1)
+message ShowFavPublicCardsResp{
+    optional int32 code         = 1; // 是否成功 1:成功 2:不可看牌 3:时间币不够
+    repeated int32 cards        = 2; // 公共牌
+    optional int32 state        = 3; // 发哪个游戏状态的牌, 参看 poker.proto GSTATE 3：翻牌（3张） 4:转牌(1张) 5:和牌(1张)
+    optional uint64 remainMoney = 4; // 操作后剩余金币 失败时无此信息
+    optional int32 matchId      = 5; //
+    optional int32 handId       = 6; // 手数
+    optional uint32 coinType    = 7; // 币种: 0 时间币, 1 扑克币
+}
+
+/*
+    CardType 定义
+	1  高牌
+	2  一对
+	3  两对
+	4  三条
+	5  顺子
+	6  同花
+	7  葫芦
+	8  四条(金刚)
+	9  同花顺
+	10 皇家同花顺
+*/
+message HandResult {
+    optional uint32 winner   = 1; // 赢家: 0 平、1 鲨鱼、2 渔夫
+    optional uint32 cardType = 2; // 赢家牌型, 见 CardType 定义
+    optional bool is22OrHighWin = 3; // 是否是对2或者高牌赢
+    optional bool isPair2s = 4; // 渔夫赢的情况下是否是对2
+}
+
+// 请求钓鱼近 N 手结果([渔夫/鲨鱼]胜、平及牌型, 绘制大路、珠盘路用)
+message FishHandResultReq {
+    optional uint32 num = 1; // 数量, 玩家登录房间成功后 num 传 12
+    optional uint32 mid = 2; // 牌局 id
+}
+
+message FishHandResultResp {
+    repeated HandResult list = 1;
+    optional uint32 mid      = 2; // 牌局 id
+}
+
+// 钓鱼近 1000 手数据
+message FishHandStatReq {
+    optional uint32 mid = 1; // 牌局 id
+}
+
+/*
+    鲨鱼赢、平局、渔夫赢、渔夫对二或高牌赢次数
+    任一手牌 3 个区域手数
+    获胜牌型 5 个区域手数
+*/
+message FishHandStatResp {
+    optional uint32 sharkWin     = 1; // 鲨鱼赢次数
+    optional uint32 tie          = 2; // 平局次数
+    optional uint32 fisherWin    = 3; // 渔夫赢次数
+    optional uint32 fisherPairTwoEtcWin = 4; // 渔夫对二或高牌赢次数
+
+    optional uint32 onePair  = 5; // 手牌是对子的次数
+    optional uint32 flushEtc = 6; // 手牌是同花/连牌/同花连牌的次数
+    optional uint32 pairA    = 7; // 手牌是对 A 的次数
+
+    optional uint32 highCardEtc = 8; // 获胜牌型是高牌/对子的次数
+    optional uint32 twoPair  = 9; // 获胜牌型是两对的次数
+    optional uint32 threeKindEtc = 10; // 获胜牌型是三条/顺子/同花的次数
+    optional uint32 fullHouse = 11; // 获胜牌型是葫芦的次数
+    optional uint32 kingKong  = 12; // 获胜牌型是金刚的次数
+
+    optional uint32 mid = 13; // 牌局 id
+}

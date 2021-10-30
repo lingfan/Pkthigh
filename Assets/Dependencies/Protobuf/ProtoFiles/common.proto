@@ -1,0 +1,231 @@
+syntax = "proto2";
+package pbcmd;
+option go_package = "poker/pb/pbcmd;pbcmd";
+
+message PBPlayer {
+    required uint32 uid                    = 1;
+    optional string name                   = 2;
+    optional string country                = 3;    //<国家 直译
+    optional int32  gender                 = 4;    //<性别 直译
+    optional string nick                   = 5;    //<第三方平台使用的昵称，作为提示
+    optional string icon                   = 6;    //<头像缩略图
+    optional string bigicon                = 7;    //<头像清晰图
+    optional uint64 money                  = 8;    //<资产金额
+    optional bool   isOffline              = 9;    // 是否离线
+    optional uint32 vip                    = 10;   // vip等级
+    optional uint64 diamond                = 11;   // 练习币
+}
+
+//比赛名次+奖励
+message PBMatchPrize{
+    required uint32 rank = 1;
+    optional uint64 chips = 2;
+    optional uint64 point = 3;
+}
+
+//聊天消息
+message PBChatMsg {
+    optional string faceid     = 1;
+    optional string text       = 2;
+    optional bytes  voice      = 3;
+    optional uint32 voiceTotal = 4;
+    optional uint32 voiceIndex = 5;
+    optional string voiceId    = 6;
+    optional uint32 voiceLength = 7;
+    optional uint32 voiceSecond = 8;
+}
+
+enum PBMatchType{
+    MatchTypeOfficalCash           = 1;   // 官方时间币场
+    MatchTypeUserCreateCash        = 2;   // 时间币自建局
+    MatchTypeOfficalSNG            = 3;
+    MatchTypeUserCreateSNG         = 4;
+    MatchTypeHunTexas              = 5;
+
+    MatchTypeOfficialExercise      = 101; // 官方练习币场
+    MatchTypeUserCreateExercise    = 102; // 练习币自建局
+
+    MatchTypeUserCreatePoint       = 202; // 积分自建局
+
+    MatchTypeUserCreatePKC         = 302; // 扑克币自建局
+}
+
+//消息的类型
+enum MSGTYPE {
+    HEARTBEAT = 0;   //心跳包
+    REQUEST   = 1;   //client --> server  请求包
+    RESPONSE  = 2;   //server --> client  回复包
+    NOTIFY    = 3;   //client --> server  客户端通知服务器的消息，无需服务器回复
+    PUSH      = 4;   //server --> client  服务器推送消息给客户端
+}
+
+message Msg {
+    optional MSGTYPE  msgType     = 1;
+    optional int32    status      = 2;  //消息的状态码(用于response) 0:成功 >0:错误状态码借鉴 http status
+    optional string   service     = 3;  //哪个服务(Account、Custom、Texas)
+    optional string   method      = 4;  //方法名(Login, Buyin)
+    optional string   metadata    = 5;  //额外的附带数据类http query  key1=value1&key2=value2()
+    optional bytes    payload     = 6;  //具体的数据
+}
+
+// 用户信息
+message UserInfo {
+    optional int32 userId = 1;
+    optional string icon  = 2; // 头像
+    optional string name  = 3; // 名称
+}
+
+// 俱乐部信息
+message ClubInfo {
+    optional int32 clubId                  = 1;
+    optional string icon                   = 2;
+    optional string name                   = 3;
+    optional string desc                   = 4;
+    optional int32 maxUserNum              = 5;
+    optional int32 userNum                 = 6;  // 用户数量
+    optional UserInfo ownerInfo            = 7;  // 拥有者信息
+    optional int64 createdAt               = 8;
+    optional int32 setting                 = 9;
+    optional int32 matchNum                = 10; // 牌局数量
+    optional int32 maxAdminNum             = 11;
+    optional int32 insurancePayMethod      = 12; // 保险赔付方式
+    optional int64 insurancePayLimit       = 13; // 保险赔付限额
+    optional int64 clubBalance             = 14; // 俱乐部基金时间币余额
+    optional int32 myLevel                 = 15; // 自己在俱乐部的等级, 见 userLevel
+    optional int64 renameFee               = 16; // 改名费, 微小币
+    optional int32 roomFeeRebateRatio      = 17; // 房间费返利比例分子, 分母为 10000
+    optional int32 insuranceRebateRatio    = 18; // 保险返利比例分子, 分母为 10000
+    optional int32 minRoomFeeRebateRatio   = 19; // 最小房间费返利比例分子
+    optional int32 maxRoomFeeRebateRatio   = 20; // 最大房间费返利比例分子
+    optional int32 minInsuranceRebateRatio = 21; // 最小保险返利比例分子
+    optional int32 maxInsuranceRebateRatio = 22; // 最大保险返利比例分子
+    optional int64 joinAt                  = 23; // 用户加入俱乐部的时间
+    optional int64 pkcBalance              = 24; // 俱乐部扑克币余额
+}
+
+// 俱乐部用户信息
+message ClubUserInfo {
+    optional UserInfo info       = 1;
+    optional int32 level         = 2; // 级别, 见 userLevel
+    optional int32 sex           = 3;
+    optional int64 loginAt       = 4; // 登录时间
+    optional int64 joinAt        = 5; // 加入时间
+    optional string remark       = 6; // 备注
+    optional int64 currentCredit = 7; // 当前的信任额度
+    optional int64 totalCredit   = 8; // 信任额度
+}
+
+// 联盟用户信息
+message UnionUserInfo {
+    optional UserInfo info = 1;
+    optional int32 level   = 2; // 级别, 见 userLevel
+    optional int64 addedAt = 3; // 被添加时间
+}
+
+enum joinOption {
+    agree  = 1; // 同意
+    refuse = 2; // 拒绝
+}
+
+enum userLevel {
+    owner  = 100; // 拥有者
+    admin  = 10;  // 管理员
+    member = 1;   // 成员
+}
+
+enum editInfoType {
+    editIcon = 1; // 编辑头像
+    editName = 2; // 编辑名称
+    editDesc = 3; // 编辑介绍
+}
+
+// 俱乐部用户级别
+message ClubUserLevel {
+    optional int32 userId = 1;
+    optional int32 level  = 2; // 级别, 见 userLevel
+    optional int32 clubId = 3;
+}
+
+// 联盟管理员级别
+message UnionAdminLevel {
+    optional int32 userId       = 1;
+    optional int32 level        = 2; // 级别, 见 userLevel
+    optional int32 unionId      = 3;
+    optional int32 unionType    = 4; // 联盟类型, 见 unionTypeDef
+    optional bool createTable   = 5; // 是否可以开桌
+}
+
+enum unionTypeDef {
+    superUnion  = 1; // 超级联盟
+    union       = 2; // 联盟
+}
+
+// 联盟信息
+message UnionInfo {
+    optional int32 unionId      = 1;
+    optional int32 unionType    = 2; // 联盟类型, 见 unionTypeDef
+    optional string name        = 3;
+    optional string desc        = 4;
+    optional UserInfo ownerInfo = 5; // 拥有者信息
+    optional int64 unionBalance = 6; // 联盟基金时间币余额
+    optional int32 clubNum      = 7; // 加入该联盟的俱乐部数量(当 unionType = union)
+    optional int32 maxAdminNum  = 8; // 联盟的管理员最大数量
+    optional int32 userNum      = 9; // 联盟下俱乐部的所有玩家数量
+    optional double todayGain   = 10; // (俱乐部)时间币今日收益
+    optional double pastGain    = 11; // (俱乐部)时间币历史收益
+    optional double notOffered  = 12; // (联盟对俱乐部)时间币未下发
+    optional double notRepaid   = 13; // (俱乐部对联盟)时间币未还款
+    optional int32 clubInsuranceProp  = 14; // (俱乐部)保险分成比例, 分母为 10000
+    optional int32 clubRoomFeeProp    = 15; // (俱乐部)房间费分成比例, 分母为 10000
+    optional int32 positiveProfitProp = 16; // 战绩正盈利分成比例, 分母为 10000
+    optional int32 negativeProfitProp = 17; // 战绩负盈利分成比例, 分母为 10000
+    optional int32 displayId          = 18;
+    optional int32 contributionProp   = 19; // 贡献盈利分成比例, 分母为 10000
+    optional int64 pkcBalance         = 20; // 联盟基金扑克币余额
+    optional int64 pkcTodayGain  = 21; // (俱乐部)扑克币今日收益
+    optional int64 pkcPastGain   = 22; // (俱乐部)扑克币历史收益
+    optional int64 pkcNotOffered = 23; // (联盟对俱乐部)扑克币未下发
+    optional int64 pkcNotRepaid  = 24; // (俱乐部对联盟)扑克币未还款
+}
+
+// 账单信息
+message BillInfo {
+    optional int32 id          = 1; // 账单 id
+    optional int32 clubId      = 2;
+    optional int32 unionId     = 3;
+    optional int64 timestamp   = 4;
+    optional double amount     = 5;
+    optional double offered    = 6; // 已下发
+    optional double notOffered = 7; // 未下发
+    optional double offseted   = 8; // 已平账
+    optional double repaid     = 9; // 已还款
+    optional double notRepaid  = 10; // 未还款
+}
+
+message MatchSummary {
+    optional double buyinFeeGain  = 1; // 带入费收益
+    optional double profitFeeGain = 2; // 战绩费收益
+    optional double potFeeGain    = 3; // 底池费收益
+    optional double insuranceGain = 4; // 保险费收益
+    optional double luckycardGain = 5; // luckyCard 收益
+    optional double fishGain      = 6; // 钓鱼收益
+}
+
+message MatchProfit {
+    optional uint32 totalPosProfit  = 1; // 正盈利总和
+    optional uint32 totalNegProfit  = 2; // 负盈利总和
+}
+
+// 入池标准
+message VpipConf {
+    optional uint32 vpip        = 1; // 入池率(万分比)
+    optional uint32 penaltyRate = 2; // 没收比例(万分比)
+}
+
+// 新手引导标记信息
+enum UserGuideMark {
+    texas                   = 1;    //德州
+    fish                    = 2;    //钓鱼
+    list                    = 3;    //牌局列表
+    wallet                  = 4;    //钱包
+}

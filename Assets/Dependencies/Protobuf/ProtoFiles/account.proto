@@ -1,0 +1,729 @@
+syntax = "proto2";
+package pbcmd;
+option go_package = "poker/pb/pbcmd;pbcmd";
+import "cmd.proto";
+import "common.proto";
+
+enum PBAccountVipType{
+    Account_VipSilver       = 0;        //银卡
+    Account_VipGold         = 10;       //金卡
+    Account_VipBlack        = 20;       //黑卡
+}
+
+message PBUserInfo{
+    required uint32     uid                 = 1;    //用户ID
+    optional string     name                = 2;    //姓名/昵称
+    optional string     head                = 3;    //头像url
+    optional uint64     money               = 4;    //金币数
+    optional uint32     status              = 5;    //状态
+    optional uint32     sex                 = 6;    //性别:0保密,1男,2女
+    optional uint32     diamond             = 7;    //钻石数 20190508 修改为练习币
+    optional uint32     ctime               = 8;    //注册时间
+    optional uint32     area                = 9;    //地区编号
+    optional string     brief               = 10;   //个性签名(简介)
+    optional uint32     vip                 = 11;   //VIP等级: 0银卡, 10金卡, 20黑卡
+    optional string     areaIcon            = 12;   //地区图标ID
+    optional string     areaName            = 13;   //地区名称
+    optional uint32     ip                  = 14;   //登录IP
+    optional uint32     atime               = 15;   //活跃(登录)时间
+    optional uint32     viptime             = 16;   //VIP到期时间
+    optional uint64     point               = 17;   //积分数
+    optional uint64     unionId             = 18;   //联盟ID 0 或 联盟ID
+    optional uint64     unionUserLevel      = 19;   //联盟等级 值参考 unionUserLevelDef
+    optional PBUserUnionInfo userUnionInfo  = 20;   //用户联盟信息
+    repeated uint64     guideInfo           = 21;   //用户新手引导信息
+
+}
+message PBUserUnionInfo {
+    optional uint32     unionId        = 18;   //联盟ID 0 或 联盟ID
+    optional uint32     userLevel      = 19;   //联盟等级 值参考 unionUserLevelDef
+    optional bool       isSuperUnion   = 20;   //是否超级联盟
+    optional bool       createTable    = 21;   //联盟当前账号是否允许开桌
+}
+enum unionUserLevelDef {
+    union_owner  = 100; // 拥有者
+    union_admin  = 10;  // 管理员
+}
+
+message PBReqAccountLogin{
+    required PBCommParam    comm    = 1;
+    optional string sign            = 2; // 签名
+}
+
+message PBRespAccountLogin{
+    required PBCommResult   ret         = 1;
+    optional PBUserInfo     userInfo    = 2;    //用户信息
+    optional uint32         needInit    = 3;    //需要初始化用户资料标记:1手机号登录,2平台账号重名
+    optional uint32         firstLogin  = 4;    //是否第一次登录
+    optional PBMatchIndex   matchIndex  = 5;    //断线重连(自动进房间)用
+
+    optional uint32         nameCost    = 6;    //修改昵称消耗钻石数量
+    optional uint32         nameCostClub= 7;    //修改俱乐部名称需要消耗多少钻石
+
+    optional string         cdnUrl      = 8;    //CDN根地址
+    optional string         imgSmall    = 9;    //小图后缀
+    optional string         imgLarge    = 10;   //大图后缀
+
+    optional uint32         switch      = 11;   //关掉哪些功能:0x0001竞猜,0x0002扑克圏,0x0004审核中,0x0008禁止投资/竞猜(隐藏按钮)
+
+    optional uint64         minMoney    = 12;   //金币临界(破产救济)
+    optional uint32         minDiamond  = 13;   //钻石临界(破产救济) 20190508 修改为练习币
+
+    optional string         origin      = 14;   // json字符串，origin信息
+    optional string         customerService     = 15;   // 客服地址
+}
+
+message PBReqAccountOssParam{
+    required PBCommParam    comm        = 1;
+}
+
+message PBRespAccountOssParam{
+    required PBCommResult   ret         = 1;
+    optional string         api         = 2;    //上传文件请求地址
+    optional string         name        = 3;    //文件名表单项名字,客户端填充其值(值如md5文件内容后的串+文件扩展名)
+    optional string         json        = 4;    //传给OSS服务的额外参数列表,解析该JSON后组装成表单项列表(k=v)
+    optional string         file        = 5;    //文件域表单项的名字(注意:文件域表单项必须为表单的最后一项)
+    optional uint32         expire      = 6;    //本次获取到的参数的过期时间戳
+}
+
+message PBReqAccountInfo{
+    required PBCommParam    comm    = 1;
+    repeated uint32         uids    = 2;    //UID列表
+}
+
+message PBRespAccountInfo{
+    required PBCommResult   ret     = 1;
+    repeated PBUserInfo     list    = 2;
+}
+
+message PBReqAccountMoney{
+    required PBCommParam    comm    = 1;
+}
+
+message PBRespAccountMoney{
+    required PBCommResult   ret     = 1;
+    optional PBUserInfo     info    = 2;
+}
+
+message PBReqAccountModifyInfo{
+    required PBCommParam    comm    = 1;
+    optional string         name    = 2;    //昵称
+    optional string         head    = 3;    //头像
+    optional uint32         sex     = 4;    //性别
+    optional string         pwd     = 5;    //加密后的密码
+    optional string         brief   = 6;    //个性签名(简介)
+}
+
+message PBRespAccountModifyInfo{
+    required PBCommResult   ret     = 1;
+    optional PBUserInfo     user    = 2;    //最新用户信息
+}
+
+message PBReqAccountMobileCode{ // 获取验证码，短信或邮件
+    required PBCommParam    comm    = 1;
+    required string         number  = 2;    // phone::+86:15818708414 email::pcphper@163.com
+}
+
+message PBRespAccountMobileCode{
+    required PBCommResult   ret     = 1;
+}
+
+message PBReqAccountMobileAuth{
+    required PBCommParam    comm    = 1;
+    required string         number  = 2;
+    required int32          type    = 3;    //验证类型:1手机注册, 2手机登录 3邮箱注册 4邮箱登录
+    optional string         code    = 4;    //手机或邮箱验证码,由type决定传否
+    optional string         pwd     = 5;    //由type决定传否
+    optional string         InvitationCode = 6; // H5注册时的邀请码
+}
+
+message PBRespAccountMobileAuth{
+    required PBCommResult   ret     = 1;
+    optional uint32         uid     = 2;
+    optional string         token   = 3;
+}
+
+message PBReqAccountMobileSecret{
+    required PBCommParam    comm    = 1;
+    required string         number  = 2;
+}
+
+message PBRespAccountMobileSecret{
+    required PBCommResult   ret     = 1;
+    optional string         secret  = 2;
+}
+
+message PBReqAccountMobileRepwd{
+    required PBCommParam    comm    = 1;
+    required string         number  = 2;
+    optional string         code    = 3;
+    required string         pwd     = 4;
+}
+
+message PBRespAccountMobileRepwd{
+    required PBCommResult   ret     = 1;
+}
+
+message PBReqAccountCheckCode{
+    required PBCommParam    comm    = 1;
+    required string         number  = 2;
+    required string         code    = 3;
+}
+
+message PBRespAccountCheckCode{
+    required PBCommResult   ret     = 1;
+}
+
+message PBReqAccountAuth{                       //通用登录验证请求
+    required PBCommParam    comm        = 1;
+    optional string         code        = 2;    //例如Oppo的token, Vivo的authtoken等
+    optional string         openid      = 3;    //例如Oppo的ssoid等
+}
+
+message PBRespAccountAuth{                      //通用登录验证响应
+    required PBCommResult   ret     = 1;
+    optional uint32         uid     = 2;
+    optional string         token   = 3;
+}
+
+message PBReqAccountWeixinAuth{
+    required PBCommParam    comm    = 1;
+    optional string         code    = 2;    //用户授权码,优先级低于rtoken,传其一
+    optional string         rtoken  = 3;    //RefreshToken优先级高于code,传其一
+}
+
+message PBRespAccountWeixinAuth{
+    required PBCommResult   ret     = 1;
+    optional uint32         uid     = 2;
+    optional string         token   = 3;
+    optional string         rtoken  = 4;
+    optional uint32         expire  = 5;
+}
+
+message PBReqAccountUserProps{
+    required PBCommParam    comm    = 1;
+}
+
+message PBRespAccountUserProps{
+    required PBCommResult   ret     = 1;
+    repeated PBAccountProp  list    = 2;
+}
+
+message PBReqAccountSetDeviceToken{
+    required PBCommParam    comm    = 1;
+    required string         token   = 2;
+}
+
+message PBRespAccountSetDeviceToken{
+    required PBCommResult   ret     = 1;
+}
+
+message PBAccountProp{
+    required uint32     pid     = 1;
+    optional string     name    = 2;    //名称
+    optional string     pic     = 3;    //图片
+    optional uint32     num     = 4;    //数量
+    optional uint32     expire  = 5;    //到期时间
+    optional string     desc    = 6;    //描述
+    optional uint32     type    = 7;    //类型: 1互动道具, 2VIP卡, 3兑换券类
+    optional string     giftCode= 8;    //兑换码
+}
+
+message PBReqAccountFeedback{
+    required PBCommParam    comm    = 1;
+    required string         contact = 2;    //联系方式
+    optional string         content = 3;    //反馈内容
+    repeated string         pics    = 4;    //图片
+}
+
+message PBRespAccountFeedback{
+    required PBCommResult   ret     = 1;
+}
+
+message PBReqAccountSetLocation{
+    required PBCommParam    comm    = 1;
+    required string         locX    = 2;    //经度
+    required string         locY    = 3;    //纬度
+}
+
+message PBRespAccountSetLocation{
+    required PBCommResult   ret     = 1;
+}
+
+message PBReqAccountGetAvcSign{
+    required PBCommParam    comm    = 1;
+}
+
+message PBRespAccountGetAvcSign{
+    required PBCommResult   ret         = 1;
+    optional string         sign        = 2;
+    optional uint32         expire      = 3;
+}
+
+message PBReqAccountPrelogin{
+    required PBCommParam    comm    = 1;
+}
+
+message PBRespAccountPrelogin{
+    required PBCommResult   ret         = 1;
+    optional string         pkgVer      = 2;    //版本号
+    optional string         pkgUrl      = 3;    //包地址
+    optional string         patchUrl    = 4;    //资源根地址
+    optional string         patchVer    = 5;    //热更新版本号
+    optional string         pkgSize     = 6;    //包大小
+    optional string         pkgDesc     = 7;    //包描述
+    optional string         patchType   = 8;    //更新类型:1可选,2静默,3强制
+    optional string         customerService     = 9;   // 客服地址
+    optional string         pkgDescEn   = 10;   //包描述英文
+}
+
+message PBReqAccountBlackList{
+    required PBCommParam    comm    = 1;
+    optional string         offset  = 2;
+}
+
+message PBRespAccountBlackList{
+    required PBCommResult   ret     = 1;
+    repeated PBUserInfo     list    = 2;
+    optional string         offset  = 3;
+}
+
+message PBReqAccountBlackEdit{
+    required PBCommParam    comm    = 1;
+    required uint32         type    = 2;    //类型:1添加,2移除
+    required uint32         uid     = 3;    //对谁操作
+}
+
+message PBRespAccountBlackEdit{
+    required PBCommResult   ret     = 1;
+}
+
+message PBReqAccountBlackCount{
+    required PBCommParam    comm    = 1;
+}
+
+message PBRespAccountBlackCount{
+    required PBCommResult   ret     = 1;
+    optional uint32         count   = 2;
+}
+
+message PBReqAccountHuaweiAuth{                 //华为登录,参数详见Game开发者指导书.pdf
+    required PBCommParam    comm        = 1;
+    optional string         playerId    = 2;
+    optional string         displayName = 3;
+    optional uint32         isAuth      = 4;
+    optional string         gameAuthSign= 5;
+    optional string         ts          = 6;
+    optional string         playerLevel = 7;
+}
+
+message PBRespAccountHuaweiAuth{
+    required PBCommResult   ret     = 1;
+    optional uint32         uid     = 2;
+    optional string         token   = 3;
+}
+
+message PBKickUser{
+    required uint32     code    = 1;    //1 代表用户重复登入 2 代表用户未进行登录就发包
+    optional string     reason  = 2;
+}
+
+message PBReqAccountVhkdapiVhkdwebViewControl{ // 查询webview开关
+    required PBCommParam    comm      = 1;
+}
+
+message PBRespAccountVhkdapiVhkdwebViewControl{
+    required PBCommResult   ret       = 1;
+}
+
+message PBReqAccountVhkdapiDigitalMoneyMallControl{ // 查询数字货币商城开关
+    required PBCommParam    comm      = 1;
+}
+
+message PBRespAccountVhkdapiDigitalMoneyMallControl{
+    required PBCommResult   ret       = 1;
+}
+
+message PBReqAccountVhkdapiGetBTCExchangeRate{ // 查询BTC和VHKD的汇率
+    required PBCommParam    comm      = 1;
+    required string         Symbol    = 2; // 资产类型 例："BTC" 或 "VHKD"
+}
+
+message PBRespAccountVhkdapiGetBTCExchangeRate{
+    required PBCommResult   ret       = 1;
+    required string         rate      = 2; // json数组 rate.bids.price 是兑换为买游戏币的价格，rate.asks.price 是兑换为数字货币的价格
+}
+
+message PBReqAccountVhkdapiActVHKDToBTC{ // 挂单 VHKD => BTC 用户点击确认按钮请求的接口
+    required PBCommParam    comm        = 1;
+    required string         oid         = 2; // oid 返回的列表里有oid
+    required string         pin         = 3; // PIN
+    required string         token       = 4; // Token
+
+}
+
+message PBRespAccountVhkdapiActVHKDToBTC{
+    required PBCommResult   ret       = 1;
+}
+
+message PBReqAccountVhkdapiGetConfig{ // vhkd or btc 获取兑换最大最小值限制
+    required PBCommParam    comm      = 1;
+}
+
+message PBRespAccountVhkdapiGetConfig{
+    required PBCommResult   ret         = 1;
+    required string         configList  = 2; // 配置列表，json字符串
+}
+
+message PBReqAccountVhkdapiGiveMoney{ // 用户间金币赠送
+    required PBCommParam    comm            = 1;
+    required string         recipientuid    = 2; // 接收人UID
+    required string         money           = 3; // 赠送的金币数量
+    required string         pwd             = 4; // 二级密码 密文
+}
+
+message PBRespAccountVhkdapiGiveMoney{
+    required PBCommResult   ret       = 1;
+}
+
+message PBReqAccountGetRecordLog{ // 获取用户间游戏币赠送记录
+    required PBCommParam    comm            = 1;
+    optional uint32         page            = 2; // 页数
+    optional uint32         limit           = 3; // 条数
+    optional uint32         coinType        = 4; // 币种，0 时间币，1 微小币
+}
+
+message PBRespAccountGetRecordLog{
+    required PBCommResult                           ret     = 1;
+    optional string                                 list    = 2;
+    repeated PBRespAccountGivemoneyRecord           data    = 3;
+}
+
+// ftpay
+
+message PBReqFtpayGetPayList{ // ftpay获取支付方式
+    required PBCommParam    comm            = 1;
+}
+
+message PBRespFtpayGetPayList{
+    required PBCommResult   ret         = 1;
+    optional string         list        = 2; // pay_id，支付方式名称，支付类型，icon图标，注释
+}
+
+message PBReqFtpayPaySubmitAct{ // ftpay提交支付请求
+    required PBCommParam    comm            = 1;
+    optional uint32         payId           = 2; // 支付方式id，从 PBRespFtpayGetPayList 获取
+    optional uint32         money           = 3; // 金额
+    optional string         cardNo          = 4; // 银行卡号，选填，当支付方式为银联快捷时必填
+}
+
+message PBRespFtpayPaySubmitAct{
+    required PBCommResult   ret             = 1;
+    optional string         showUrl         = 2; // 支付页url
+}
+
+message PBReqFtpayGetBaId{ // ftpay用户发起提现申请-获取收款银行ID
+    required PBCommParam    comm            = 1;
+}
+
+message PBRespFtpayGetBaId{
+    required PBCommResult   ret             = 1;
+    optional string         ids             = 2;
+}
+
+message PBReqFtpayLaunchWithdraw{ // ftpay用户发起提现申请
+    required PBCommParam    comm            = 1;
+    optional uint32         money           = 2; // 代付金额，单位元，整数
+    optional string         realname        = 3; // 真实姓名
+    optional string         idcard          = 4; // 身份证号
+    optional string         batype          = 5; // 收款银行ID，例：1002
+    optional string         baname          = 6; // 收款账号
+    optional string         baaddr          = 7; // 开户支行
+    optional string         phoneNo         = 8; // 手机号码
+    required string         pwd             = 9; // 二级密码 密文
+}
+
+message PBRespFtpayLaunchWithdraw{
+    required PBCommResult   ret             = 1;
+}
+
+message PBReqCheckPIN{ // 验证PIN
+    required PBCommParam    comm            = 1;
+    required string         token           = 2; // md5('UID' + 用户uid + 用户输入的pin)
+}
+
+message PBRespCheckPIN{
+    required PBCommResult   ret             = 1;
+}
+
+message PBReqGetFlowList{ // 获取流水列表
+    required PBCommParam    comm            = 1;
+    optional uint32         page            = 2; // 分页信息，第几页，默认1
+    optional uint32         limit           = 3; // 限制条数，默认20
+    optional uint32         type            = 4; // 查找类型，1 充值记录，2 提现记录，3 合并查询（合并查询只查询成功记录）
+    optional uint32         coinType        = 5; // 币种，0 时间币，1 微小币
+}
+
+message PBRespGetFlowList{
+    required PBCommResult   ret              = 1;
+    optional string         list             = 2; // 列表 moneytype为1的时候moneyoption就是区域，最大最小值，为2的时候，是选项
+}
+
+message PBReqFtpayGetHistoryCardInfo{ // ftpay获取用户上一次提现的银行卡信息
+    required PBCommParam    comm            = 1;
+}
+
+message PBRespFtpayGetHistoryCardInfo{
+    required PBCommResult   ret             = 1;
+    optional string         realname        = 2; // 真实姓名
+    optional string         idcard          = 3; // 身份证号
+    optional string         batype          = 4; // 收款银行ID，例：1002
+    optional string         batypename      = 5; // 银行名称
+    optional string         baname          = 6; // 收款账号
+    optional string         baaddr          = 7; // 开户支行
+    optional string         phoneNo         = 8; // 手机号码
+}
+
+
+// VGPay api
+
+message PBReqAccountVhkdapiVhkdLogIn{ // vgpay注册 or 登陆
+    required PBCommParam    comm    = 1;
+    required string         number  = 2; // 手机号码或邮箱
+    required string         pwd     = 3; // 明文密码
+    required string         type    = 4; // 号码类型，'phone' 手机 'email' 邮箱
+    optional string         countryCode = 5;
+    optional string         areaCode    = 6;
+}
+message PBRespAccountVhkdapiVhkdLogIn{
+    required PBCommResult   ret         = 1;
+    optional string         loginData   = 2; // json字符串
+}
+
+message PBReqAccountVhkdapiVhkdSetPin{ // 设置PIN
+    required PBCommParam    comm    = 1;
+    required string         pin     = 2; // 用户输入的pin码
+    optional string         code    = 3; // 用户输入的验证码 不需要验证码验证则传'no'
+    optional string         number  = 4; // 用户的账号 phone::+86:15818708414 email::pcphper@163.com 不需要验证码验证则传'no'
+
+    // required string         Token   = 3; // 用户vhkd凭证 (废弃)
+}
+
+message PBRespAccountVhkdapiVhkdSetPin{
+    required PBCommResult   ret     = 1;
+}
+
+message PBReqAccountVhkdapiVhkdGetAssets{ // vhkd查询用户资产
+    required PBCommParam    comm    = 1;
+    required string         UserId  = 2; // 用户vhkd返回的UserID
+    required string         Token   = 3; // 用户vhkd凭证
+}
+
+message PBRespAccountVhkdapiVhkdGetAssets{
+    required PBCommResult   ret         = 1;
+    optional string         assetsData  = 2; // json字符串
+}
+
+message PBReqAccountVhkdapiGetFlowList{ // 查询vgpay与金币兑换记录
+    required PBCommParam    comm       = 1;
+}
+
+message PBRespAccountVhkdapiGetFlowList{
+    required PBCommResult   ret         = 1;
+    optional string         listData    = 2; // json字符串
+}
+
+message PBReqAccountVhkdapiVhkdIsHasPin{ // 查询 pin
+    required PBCommParam    comm      = 1;
+}
+
+message PBRespAccountVhkdapiVhkdIsHasPin{
+    required PBCommResult   ret       = 1;
+    required string         pin       = 2; // PIN
+}
+
+message PBReqAccountVGPayUpdateAssets{ // 游戏币 <=> 数字货币 兑换
+    required PBCommParam    comm    		= 1;
+    optional string         Token  			= 2; // VGPay凭证
+    optional uint32         Money   		= 3; // 游戏币数量
+    optional string         DCNum   		= 4; // 数字货币数量
+    optional uint32         Type   			= 5; // 兑换类型 1：买游戏币(数字货币 => 游戏币) 2：卖游戏币(游戏币 => 数字货币)
+    optional string         AssetsID   		= 6; // 数字货币资产ID AssetsID
+    optional string         AssetsName      = 7; // 数字货币资产类型名称 AssetsName
+    optional string         Accuracy   	    = 8; // 数字货币资产精度 Accuracy
+}
+
+message PBRespAccountVGPayUpdateAssets{
+    required PBCommResult   ret         = 1;
+}
+
+message PBReqAccountVGPayGetAddress{ // 获取充币地址
+    required PBCommParam    comm    		= 1;
+    optional string         AssetsID  		= 2; // 资产ID (请求用户资产列表里有资产ID)
+    optional string         Token   		= 3; // VGPay凭证
+}
+
+message PBRespAccountVGPayGetAddress{
+    required PBCommResult   ret         = 1;
+    optional string   		data        = 2; // json
+}
+
+message PBReqAccountVGPayGetWithdrawConfig{ // 获取提币配置
+    required PBCommParam    comm    		= 1;
+    optional string         AssetsID  		= 2; // 资产ID (请求用户资产列表里有资产ID)
+    optional string         Token   		= 3; // VGPay凭证
+}
+
+message PBRespAccountVGPayGetWithdrawConfig{
+    required PBCommResult   ret         = 1;
+    optional string   		data        = 2; // json
+}
+
+message PBReqAccountVGPayApplyTransactionOut{ // 提交提币申请
+    required PBCommParam    comm                = 1;
+    optional string         Token               = 2; // VGPay凭证
+    optional string         CoinID              = 3; // 资产ID (请求用户资产列表里有资产ID)
+    optional string         CoinAddress         = 4; // 提币地址
+    optional string         ApplyQuantity       = 5; // 提币数量
+    required string         pwd                 = 6; // 二级密码 密文
+}
+
+message PBRespAccountVGPayApplyTransactionOut{
+    required PBCommResult   ret         = 1;
+}
+
+message PBReqAccountVGPayGetAssetsRecordPageList{ // 获取冲提币记录
+    required PBCommParam    comm                    = 1;
+    optional string         Token                   = 2; // VGPay凭证
+    optional string         AssetsID                = 3; // 资产ID (请求用户资产列表里有资产ID) (非必填)
+    optional uint32         AssetsRecordType        = 4; // 资产数据类型(1充币，2充值，3提币，4提现，5系统赠送，6转入，7转出) (非必填)
+}
+
+message PBRespAccountVGPayGetAssetsRecordPageList{
+    required PBCommResult   ret         = 1;
+    optional string         list        = 2; // json
+}
+
+message PBReqAccountVGPayVhkdToMoney{ // VHKD 自动兑换为 Money
+    required PBCommParam    comm                    = 1;
+    optional string         Token                   = 2; // VGPay凭证
+    optional string         Oid                     = 3; // 订单ID,推送里的字符串就是OID
+}
+
+message PBRespAccountVGPayVhkdToMoney{
+    required PBCommResult   ret         = 1;
+}
+
+message PBReqGetPayStatus{ // 获取支付通道状态
+    required PBCommParam    comm                    = 1;
+}
+
+message PBPayStatusList{
+    optional uint32         payId                   = 1; // 支付通道ID
+    optional string         name                    = 2; // 通道名称
+    optional uint32         status                  = 3; // 通道状态1通道可用,2通道不在可用时间,3通道维护
+    optional string         msg                     = 4; // 描述
+}
+
+message PBRespGetPayStatus{
+    required PBCommResult          ret              = 1;
+    repeated PBPayStatusList       list             = 2; // 列表内容
+}
+
+message PBReqAccountIsChargeChangeName{ // 判断本次改名是否需要收费
+    required PBCommParam    comm                    = 1;
+}
+
+message PBRespAccountIsChargeChangeName{
+    required PBCommResult   ret               = 1;
+    optional uint32         money             = 2; // 本次改名需要的费用
+}
+
+message PBReqFtpayGetLaunchWithdrawFee{ // 用户发起提现金申请
+    required PBCommParam    comm                    = 1;
+    optional uint32         money                   = 2; // 提现金额，单位元，大于100的整数
+}
+
+message PBRespFtpayGetLaunchWithdrawFee{
+    required PBCommResult   ret          = 1;
+    optional string         limits       = 2; // 拥有的免手续费额度
+    optional string         realmoney    = 3; // 真实到账金额
+    optional string         fee          = 4; // 本次手续费
+    optional string         decrlimits   = 5; // 本次消耗的额度
+}
+
+message PBReqGetAutoHeadImg{ // 获取随机默认头像
+    required PBCommParam    comm                    = 1;
+}
+
+message PBRespGetAutoHeadImg{
+    required PBCommResult   ret          = 1;
+    optional string         url          = 2; // 随机默认头像地址
+}
+
+message PBReqCheckPayDisable{ // 验证当前渠道版本是否处于支付禁用中
+    required PBCommParam    comm                    = 1;
+}
+
+message PBRespCheckPayDisable{
+    required PBCommResult   ret          = 1;
+}
+
+message PBReqGetVGPayConf{ // 获取VGPay配置
+    required PBCommParam comm = 1;
+}
+
+message PBVGPaySwitch{
+    optional string	payment		= 1; // 充值开关[off, on]
+    optional string	withdraw 	= 2; // 提现开关[off, on]
+}
+
+message PBVGPayReferralLink{
+	optional uint32 id 		= 1;
+	optional string type 	= 2; // 类型[充值, 提现]
+	optional string nameCn 	= 3; // 中文名称
+	optional string nameEn 	= 4; // 英文名称
+    optional string icon    = 5; // 图标
+	optional string iconEn 	= 6; // 英文图标
+	optional string linkCn 	= 7; // 中文链接
+	optional string linkEn 	= 8; // 英文链接
+	optional string switch 	= 9; // 开关[off, on]
+}
+
+message PBVGPayDescription{
+	optional uint32 id 				= 1;
+	optional string type 			= 2; // 类型[充值, 提现]
+	optional string guideCn 		= 3; // 中文引导图
+	optional string guideEn 		= 4; // 英文引导图
+	optional string descriptionCn 	= 6; // 中文说明
+	optional string descriptionEn 	= 7; // 英文说明
+	optional string switch 			= 8; // 开关[off, on]
+}
+
+message PBRespGetVGPayConf{
+    required PBCommResult   		ret 			= 1;
+    optional PBVGPaySwitch			switch 			= 2; // 开关
+    repeated PBVGPayReferralLink	referralLink 	= 3; // 推荐链接
+    repeated PBVGPayDescription		description 	= 4; // 说明文字
+}
+
+message PBReqAccountCheckIpLimit{ // 验证当前渠道版本是否处于支付禁用中
+    required PBCommParam    comm     = 1;
+    optional uint32         area     = 2; // 国家地区编号
+}
+
+message PBRespAccountCheckIpLimit{
+    required PBCommResult   ret      = 1;
+}
+
+message PBRespAccountGivemoneyRecord{
+    required uint32 senduid         = 1;  // 赠送人UID
+    required string senduname       = 2;  // 赠送人昵称
+    required string senduhead       = 3;  // 赠送人头像
+    required uint32 receiveuid      = 4;  // 接收人UID
+    required string receiveuname    = 5;  // 接收人昵称
+    required string receiveuhead    = 6;  // 接收人头像
+    required uint64 money           = 7;  // 数量
+    required string coinType        = 8;
+    required string time            = 9;  // 时间
+}

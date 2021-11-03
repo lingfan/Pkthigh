@@ -77,47 +77,47 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Network
 
 
 
-        public static IEnumerator HeartBeatEnumerator()
-        {
-            DateTime last = DateTime.Now;
-
-            while (true)
-            {
-                yield return new WaitForSeconds(TIMER_HEARTBEAT);
-                var request = new PBHearBeat();
-                request.Timestamp = (ulong)DateTime.UtcNow.Ticks;
-                yield return EnumeratorSend<PBHearBeat, PBHearBeat>(
-                    PBMainCmd.MCmd_HeartBeat, PBMainCmdHeartBeatSubCmd.HB_Send,
-                    request, null, 0,
-                    null,
-                    (resp) =>
-                    {
-                        last = DateTime.UtcNow;
-                        Debug.Log("HeartBeat");
-                        Debug.Log(resp);
-                        //spanHeartBeat = DateTime.UtcNow - new DateTime((long)request.Timestamp);
-                        //if (spanHeartBeat.TotalSeconds > TIMEOUT_HEARTBEAT)
-                        //{
-                        //    OnHeartBeatTimeout?.Invoke(null, request);
-                        //}
-                    },
-                    (clienCtx) =>
-                    {
-                        //heartbeat timeout. should reconnect.
-                        //OnHeartBeatTimeout?.Invoke(null, request);
-                    });
-                spanHeartBeat = DateTime.UtcNow - last;
-                if (spanHeartBeat.TotalSeconds > TIMEOUT_HEARTBEAT)
-                {
-                    OnHeartBeatTimeout?.Invoke(null, request);
-                }
-                if (spanHeartBeat.TotalSeconds > TIMEOUT_HEARTBEAT_MAX_TOLERANT)
-                {
-                    OnHeartBeatTimeoutMaxTolerant?.Invoke(null, request);
-                }
-            }
-
-        }
+        // public static IEnumerator HeartBeatEnumerator()
+        // {
+        //     DateTime last = DateTime.Now;
+        //
+        //     while (true)
+        //     {
+        //         yield return new WaitForSeconds(TIMER_HEARTBEAT);
+        //         var request = new PBHearBeat();
+        //         request.Timestamp = (ulong)DateTime.UtcNow.Ticks;
+        //         yield return EnumeratorSend<PBHearBeat, PBHearBeat>(
+        //             PBMainCmd.MCmd_HeartBeat, PBMainCmdHeartBeatSubCmd.HB_Send,
+        //             request, null, 0,
+        //             null,
+        //             (resp) =>
+        //             {
+        //                 last = DateTime.UtcNow;
+        //                 Debug.Log("HeartBeat");
+        //                 Debug.Log(resp);
+        //                 //spanHeartBeat = DateTime.UtcNow - new DateTime((long)request.Timestamp);
+        //                 //if (spanHeartBeat.TotalSeconds > TIMEOUT_HEARTBEAT)
+        //                 //{
+        //                 //    OnHeartBeatTimeout?.Invoke(null, request);
+        //                 //}
+        //             },
+        //             (clienCtx) =>
+        //             {
+        //                 //heartbeat timeout. should reconnect.
+        //                 //OnHeartBeatTimeout?.Invoke(null, request);
+        //             });
+        //         spanHeartBeat = DateTime.UtcNow - last;
+        //         if (spanHeartBeat.TotalSeconds > TIMEOUT_HEARTBEAT)
+        //         {
+        //             OnHeartBeatTimeout?.Invoke(null, request);
+        //         }
+        //         if (spanHeartBeat.TotalSeconds > TIMEOUT_HEARTBEAT_MAX_TOLERANT)
+        //         {
+        //             OnHeartBeatTimeoutMaxTolerant?.Invoke(null, request);
+        //         }
+        //     }
+        //
+        // }
 
 
         public static byte[] HexToByteArray(string hex)

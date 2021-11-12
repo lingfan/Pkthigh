@@ -70,11 +70,10 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Game
             var mainCmd = PBMainCmd.MCmd_Account;
             var subCmd = PBMainCmdAccountSubCmd.Account_ReqMobileSecret;
 
-            Log.Print(NetworkManager.Instance);
 
             NetworkManager.Instance.Send<PBReqAccountMobileSecret, PBRespAccountMobileSecret>(mainCmd, subCmd, req, (resp) =>
             {
-                Log.PrintError(resp.PBBody.secret);
+            
 
             });
 

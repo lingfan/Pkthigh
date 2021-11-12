@@ -79,31 +79,21 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Network
             try
             {
                 //OnMessage 
+
                 JWebSocket
-                    socket = new JWebSocket(URL_ENDPOINT_TEST_DEV2, config);
+                    socket = new JWebSocket(URL_ENDPOINT_TEST_DEV2,
+                        config, (obj, eventArgs) =>
+                        {
+                            PBMainCmd mainCmd = (PBMainCmd)Enum.ToObject(typeof(PBMainCmd), StringifyHelper.GetHeader(eventArgs.RawData).mainCmd);
 
-                //JWebSocket
-                //    socket = new JWebSocket(URL_ENDPOINT_TEST_DEV2,
-                //        config, (obj, eventArgs) =>
-                //        {
-                //            // PBHeader pbHeader = StringifyHelper.GetHeader(eventArgs.RawData);
-                //            // PBMainCmd mainCmd = (PBMainCmd) Enum.ToObject(typeof(PBMainCmd), pbHeader.mainCmd);
-                //            // if (mainCmd == PBMainCmd.MCmd_HeartBeat)
-                //            // {
-                //            //     Loom.QueueOnMainThread((obj) => { UIManager.instance.Show(nameof(Tabs)); }, null);
-                //            // }
+                            Log.Print("reciveMessage " + mainCmd);
+                        });
 
-                //            PBMainCmd mainCmd = (PBMainCmd)Enum.ToObject(typeof(PBMainCmd), StringifyHelper.GetHeader(eventArgs.RawData).mainCmd);
-
-                //            Log.Print("reciveMessage " + mainCmd);
-                //        });
-
-                socket.OnConnect((e) => { Log.Print("服务端连接成功"); });
+                socket.OnConnect((e) => { Log.Print("websocket connected"); });
 
                 socket.OnOpen((e) =>
                 {
                     Log.Print("websocket open");
-                    //Loom.RunAsync(() => { onOpened.Invoke(); });
                     Loom.QueueOnMainThread((e) =>
                     {
                         onOpened.Invoke();
@@ -113,12 +103,12 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Network
 
                 socket.OnError(e => { Log.PrintError(e); });
 
-                socket.OnClose((e) => { Log.Print("服务端连接关闭 close"); });
+                socket.OnClose((e) => { Log.Print("websocket close"); });
 
-                socket.OnDisconnect((e) => { Log.Print("服务端连接关闭 disconnect"); });
+                socket.OnDisconnect((e) => { Log.Print("websocket disconnect"); });
 
                 //断线重连事件
-                socket.OnReconnect(() => { Log.Print("断开连接后重连成功"); });
+                socket.OnReconnect(() => { Log.Print("websocket reconnect"); });
 
                 webSocket = socket;
             }
@@ -133,27 +123,30 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Network
         }
 
         public void Send<TRequest, TResponse>(PBMainCmd mainCmd, Enum subCmd, TRequest pbBody,
-    Action<PBPacket<TResponse>> action = null,
+        Action<PBPacket<TResponse>> action = null,
+           Action<PbcmdHelper.PbSocketEvent> onError = null,
     PBMatchIndex idx = default
 ) where TRequest : class where TResponse : class
         {
-            webSocket.Send(mainCmd, subCmd, pbBody, action, idx);
+            webSocket.Send(mainCmd, subCmd, pbBody, action, onError, idx);
         }
 
         public void SendAysnc<TRequest, TResponse>(PBMainCmd mainCmd, Enum subCmd, TRequest pbBody,
     Action<bool> onComplete,
     Action<PBPacket<TResponse>> action = null,
+           Action<PbcmdHelper.PbSocketEvent> onError = null,
     PBMatchIndex idx = default
 ) where TRequest : class where TResponse : class
         {
-            webSocket.SendAysnc(mainCmd, subCmd, pbBody, onComplete, action, idx);
+            webSocket.SendAysnc(mainCmd, subCmd, pbBody, onComplete, action, onError, idx);
         }
 
         public async Task<bool> SendAysnc<TRequest, TResponse>(PBMainCmd mainCmd, Enum subCmd, TRequest pbBody,
             Action<PBPacket<TResponse>> action = null,
+            Action<PbcmdHelper.PbSocketEvent> onError = null,
             PBMatchIndex idx = default) where TRequest : class where TResponse : class
         {
-            var result = await webSocket.SendAysnc(mainCmd, subCmd, pbBody, action, idx);
+            var result = await webSocket.SendAysnc(mainCmd, subCmd, pbBody, action, onError,idx);
             return result;
         }
 

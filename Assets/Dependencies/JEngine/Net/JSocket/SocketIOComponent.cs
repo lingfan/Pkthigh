@@ -120,6 +120,9 @@ namespace JEngine.Net
         private object ackQueueLock;
         private Queue<AckMessage> ackQueue;
 
+
+        private Action<object, MessageEventArgs> onMessageHotUpdate;
+
         #endregion
 
 #if SOCKET_IO_DEBUG
@@ -128,21 +131,16 @@ namespace JEngine.Net
 
         #region Unity interface
 
-        public void Init(string url, JSocketConfig config = null, Action<object, MessageEventArgs> onMessage = null)
+        public void Init(string url, JSocketConfig config, Action<object, MessageEventArgs> onMessage)
         {
             if (config == null)
             {
                 config = JSocketConfig.Default();
             }
 
-            if (onMessage == null)
-            {
-                OnMessage = _OnMessage;
-            }
-            else
-            {
-                OnMessage = (sender, e) => onMessage(sender, e);
-            }
+            OnMessage = _OnMessage;
+
+            onMessageHotUpdate = onMessage;
 
             this.url = url;
             this.config = config;
@@ -219,12 +217,13 @@ namespace JEngine.Net
             {
                 return;
             }
-            
+
             if (DateTime.Now.Subtract(ackList[0].time).TotalSeconds < config.ackExpirationTime)
             {
                 return;
             }
-
+            //invoke timeout action
+            ackList[0].InvokeTimeout();
             ackList.RemoveAt(0);
         }
 
@@ -290,7 +289,7 @@ namespace JEngine.Net
 
                         break;
                     default:
-                        HandleMessage(e, pbHeader);
+                        HandleMessage(sender, e, pbHeader);
                         break;
                 }
             }
@@ -344,69 +343,97 @@ namespace JEngine.Net
 
 
         /// <summary>
-        /// send packet to server
+        /// send packet to server sycn
+        /// </summary>
+        /// <param name="mainCmd">PBMainCmd type</param>
+        /// <param name="subCmd">subcmd type</param>
+        /// <param name="pbBody">request body</param>
+        /// <param name="action">response from server call action,can be null</param>
+        /// <param name="onError">send with error,can be null</param>
+        /// <param name="idx">PBMatchIndex </param>
+        /// <typeparam name="TRequest"> pb request type </typeparam>
+        /// <typeparam name="TResponse">pb response type </typeparam>
+        public void Emit<TRequest, TResponse>(PBMainCmd mainCmd, Enum subCmd, TRequest pbBody,
+            Action<PBPacket<TResponse>> action = null, Action<PbcmdHelper.PbSocketEvent> onError = null,
+            PBMatchIndex idx = default
+        ) where TRequest : class where TResponse : class
+        {
+            PBHeader pbHeader = new PBHeader()
+            {
+                mainCmd = (uint) mainCmd,
+                subCmd = Convert.ToUInt32(subCmd),
+                encrypt = config.encrypt,
+                clientCtx = (uint) ++packetId,
+                idx = idx
+            };
+            PBPacket<TRequest> pbPacket = new PBPacket<TRequest>(pbHeader, pbBody);
+            EmitPbPacket(pbPacket, onError);
+            if (action != null)
+            {
+                Ack ack = new Ack(packetId, (ev) =>
+                {
+                    var data = new PBPacket<TResponse>(ev.RawData);
+                    action.Invoke(data);
+                }, onError);
+                ackList.Add(ack);
+            }
+        }
+
+        /// <summary>
+        /// send data to server async
+        /// </summary>
+        /// <param name="mainCmd"></param>
+        /// <param name="subCmd"></param>
+        /// <param name="pbBody"></param>
+        /// <param name="onComplete"></param>
+        /// <param name="action"></param>
+        /// <param name="onError"></param>
+        /// <param name="idx"></param>
+        /// <typeparam name="TRequest"></typeparam>
+        /// <typeparam name="TResponse"></typeparam>
+        public void EmitAsync<TRequest, TResponse>(PBMainCmd mainCmd, Enum subCmd, TRequest pbBody,
+            Action<bool> onComplete,
+            Action<PBPacket<TResponse>> action = null,
+            Action<PbcmdHelper.PbSocketEvent> onError = null,
+            PBMatchIndex idx = default
+        ) where TRequest : class where TResponse : class
+        {
+            PBHeader pbHeader = new PBHeader()
+            {
+                mainCmd = (uint) mainCmd,
+                subCmd = Convert.ToUInt32(subCmd),
+                encrypt = config.encrypt,
+                clientCtx = (uint) ++packetId,
+                idx = idx
+            };
+            PBPacket<TRequest> pbPacket = new PBPacket<TRequest>(pbHeader, pbBody);
+            EmitPbPacketAsync(pbPacket, onComplete, onError);
+            if (action != null)
+            {
+                Ack ack = new Ack(packetId, (ev) =>
+                {
+                    var data = new PBPacket<TResponse>(ev.RawData);
+                    action.Invoke(data);
+                }, onError);
+                ackList.Add(ack);
+            }
+        }
+
+        /// <summary>
+        /// send data to server async/await
         /// </summary>
         /// <param name="mainCmd"></param>
         /// <param name="subCmd"></param>
         /// <param name="pbBody"></param>
         /// <param name="action"></param>
+        /// <param name="onError"></param>
         /// <param name="idx"></param>
-        /// <typeparam name="T"></typeparam>
-        public void Emit<TRequest, TResponse>(PBMainCmd mainCmd, Enum subCmd, TRequest pbBody,
-            Action<PBPacket<TResponse>> action = null,
-            PBMatchIndex idx = default
-        ) where TRequest : class where TResponse : class
-        {
-            PBHeader pbHeader = new PBHeader()
-            {
-                mainCmd = (uint) mainCmd,
-                subCmd = Convert.ToUInt32(subCmd),
-                encrypt = config.encrypt,
-                clientCtx = (uint) ++packetId,
-                idx = idx
-            };
-            PBPacket<TRequest> pbPacket = new PBPacket<TRequest>(pbHeader, pbBody);
-            EmitPbPacket(pbPacket);
-            if (action != null)
-            {
-                Ack ack = new Ack(packetId, (ev) =>
-                {
-                    var data = new PBPacket<TResponse>(ev.RawData);
-                    action.Invoke(data);
-                });
-                ackList.Add(ack);
-            }
-        }
-
-        public void EmitAsync<TRequest, TResponse>(PBMainCmd mainCmd, Enum subCmd, TRequest pbBody,
-            Action<bool> onComplete,
-            Action<PBPacket<TResponse>> action = null,
-            PBMatchIndex idx = default
-        ) where TRequest : class where TResponse : class
-        {
-            PBHeader pbHeader = new PBHeader()
-            {
-                mainCmd = (uint) mainCmd,
-                subCmd = Convert.ToUInt32(subCmd),
-                encrypt = config.encrypt,
-                clientCtx = (uint) ++packetId,
-                idx = idx
-            };
-            PBPacket<TRequest> pbPacket = new PBPacket<TRequest>(pbHeader, pbBody);
-            EmitPbPacketAsync(pbPacket, onComplete);
-            if (action != null)
-            {
-                Ack ack = new Ack(packetId, (ev) =>
-                {
-                    var data = new PBPacket<TResponse>(ev.RawData);
-                    action.Invoke(data);
-                });
-                ackList.Add(ack);
-            }
-        }
-
+        /// <typeparam name="TRequest"></typeparam>
+        /// <typeparam name="TResponse"></typeparam>
+        /// <returns></returns>
         public async Task<bool> EmitAsync<TRequest, TResponse>(PBMainCmd mainCmd, Enum subCmd, TRequest pbBody,
             Action<PBPacket<TResponse>> action = null,
+            Action<PbcmdHelper.PbSocketEvent> onError = null,
             PBMatchIndex idx = default
         ) where TRequest : class where TResponse : class
         {
@@ -419,14 +446,14 @@ namespace JEngine.Net
                 idx = idx
             };
             PBPacket<TRequest> pbPacket = new PBPacket<TRequest>(pbHeader, pbBody);
-            var result = await EmitPbPacketAsync(pbPacket);
+            var result = await EmitPbPacketAsync(pbPacket, onError);
             if (action != null)
             {
                 Ack ack = new Ack(packetId, (ev) =>
                 {
                     var data = new PBPacket<TResponse>(ev.RawData);
                     action.Invoke(data);
-                });
+                }, onError);
                 ackList.Add(ack);
             }
 
@@ -514,7 +541,8 @@ namespace JEngine.Net
         /// send PbPacket sync
         /// </summary>
         /// <param name="packet"></param>
-        private void EmitPbPacket<T>(PBPacket<T> packet) where T : class
+        private void EmitPbPacket<T>(PBPacket<T> packet, Action<PbcmdHelper.PbSocketEvent> onError = null)
+            where T : class
         {
 #if SOCKET_IO_DEBUG
             debugMethod.Invoke("[SocketIO] " + packet);
@@ -525,6 +553,7 @@ namespace JEngine.Net
             }
             catch (SocketIOException ex)
             {
+                onError?.Invoke(PbcmdHelper.PbSocketEvent.Error);
 #if SOCKET_IO_DEBUG
                 debugMethod.Invoke(ex.ToString());
 #endif
@@ -536,7 +565,8 @@ namespace JEngine.Net
         /// </summary>
         /// <param name="packet"></param>
         /// <param name="onComplete"></param>
-        private void EmitPbPacketAsync<T>(PBPacket<T> packet, Action<bool> onComplete) where T : class
+        private void EmitPbPacketAsync<T>(PBPacket<T> packet, Action<bool> onComplete,
+            Action<PbcmdHelper.PbSocketEvent> onError = null) where T : class
         {
 #if SOCKET_IO_DEBUG
             debugMethod.Invoke("[SocketIO] " + packet);
@@ -547,6 +577,7 @@ namespace JEngine.Net
             }
             catch (SocketIOException ex)
             {
+                onError?.Invoke(PbcmdHelper.PbSocketEvent.Error);
 #if SOCKET_IO_DEBUG
                 debugMethod.Invoke(ex.ToString());
 #endif
@@ -557,8 +588,11 @@ namespace JEngine.Net
         /// send PbPacket async
         /// </summary>
         /// <param name="packet"></param>
-        /// <param name="onComplete"></param>
-        private async Task<bool> EmitPbPacketAsync<T>(PBPacket<T> packet) where T : class
+        /// <param name="onError"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        private async Task<bool> EmitPbPacketAsync<T>(PBPacket<T> packet,
+            Action<PbcmdHelper.PbSocketEvent> onError = null) where T : class
         {
 #if SOCKET_IO_DEBUG
             debugMethod.Invoke("[SocketIO] " + packet);
@@ -577,6 +611,7 @@ namespace JEngine.Net
             }
             catch (SocketIOException ex)
             {
+                onError?.Invoke(PbcmdHelper.PbSocketEvent.Error);
 #if SOCKET_IO_DEBUG
                 debugMethod.Invoke(ex.ToString());
 #endif
@@ -597,7 +632,7 @@ namespace JEngine.Net
         }
 
 
-        public void HandleMessage(MessageEventArgs eventArgs, PBHeader pbHeader)
+        public void HandleMessage(object sender, MessageEventArgs eventArgs, PBHeader pbHeader)
         {
             for (int i = 0; i < ackList.Count; i++)
             {
@@ -613,6 +648,8 @@ namespace JEngine.Net
 
                 return;
             }
+
+            onMessageHotUpdate?.Invoke(sender, eventArgs);
 
             //TODO 事件队列
             // if (packet.socketPacketType == SocketPacketType.EVENT)

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using pbcmd;
@@ -11,6 +12,14 @@ public class PbcmdHelper : MonoBehaviour
     public const string localAccount = "LocalAccount";
 
     #region enums
+    
+    
+
+    public enum PbSocketEvent
+    {
+        Timeout,
+        Error,
+    }
 
     public enum Lerpable
     {

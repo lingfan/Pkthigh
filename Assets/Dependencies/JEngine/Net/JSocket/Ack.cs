@@ -42,17 +42,24 @@ namespace JEngine.Net
         public DateTime time;
 
         private Action<MessageEventArgs> action;
+        private Action<PbcmdHelper.PbSocketEvent> onError;
 
-        public Ack(int packetId, Action<MessageEventArgs> action)
+        public Ack(int packetId, Action<MessageEventArgs> action, Action<PbcmdHelper.PbSocketEvent> onError = null)
         {
             this.packetId = packetId;
             time = DateTime.Now;
             this.action = action;
+            this.onError = onError;
         }
 
         public void Invoke(MessageEventArgs ev)
         {
-            action.Invoke(ev);
+            action?.Invoke(ev);
+        }
+
+        public void InvokeTimeout()
+        {
+            onError?.Invoke(PbcmdHelper.PbSocketEvent.Timeout);
         }
 
         public override string ToString()

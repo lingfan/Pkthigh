@@ -32,60 +32,37 @@ namespace ILRuntime.Runtime.Generated
             args = new Type[]{typeof(System.String), typeof(System.Action<JEngine.Net.SocketIOEvent>)};
             method = type.GetMethod("On", flag, null, args, null);
             app.RegisterCLRMethodRedirection(method, On_2);
-            args = new Type[]{typeof(System.String), typeof(System.Action<JEngine.Net.SocketIOEvent>)};
-            method = type.GetMethod("Off", flag, null, args, null);
-            app.RegisterCLRMethodRedirection(method, Off_3);
-            args = new Type[]{};
-            method = type.GetMethod("get_socket", flag, null, args, null);
-            app.RegisterCLRMethodRedirection(method, get_socket_4);
-            args = new Type[]{typeof(System.String)};
-            method = type.GetMethod("Emit", flag, null, args, null);
-            app.RegisterCLRMethodRedirection(method, Emit_5);
-            args = new Type[]{typeof(System.String), typeof(System.Action<global::JSONObject>)};
-            method = type.GetMethod("Emit", flag, null, args, null);
-            app.RegisterCLRMethodRedirection(method, Emit_6);
-            args = new Type[]{typeof(System.String), typeof(System.String)};
-            method = type.GetMethod("Emit", flag, null, args, null);
-            app.RegisterCLRMethodRedirection(method, Emit_7);
-            args = new Type[]{typeof(System.String), typeof(global::JSONObject)};
-            method = type.GetMethod("Emit", flag, null, args, null);
-            app.RegisterCLRMethodRedirection(method, Emit_8);
-            args = new Type[]{typeof(System.String), typeof(global::JSONObject), typeof(System.Action<global::JSONObject>)};
-            method = type.GetMethod("Emit", flag, null, args, null);
-            app.RegisterCLRMethodRedirection(method, Emit_9);
-            args = new Type[]{typeof(System.String), typeof(System.Action<System.Boolean>)};
-            method = type.GetMethod("EmitAsync", flag, null, args, null);
-            app.RegisterCLRMethodRedirection(method, EmitAsync_10);
-            args = new Type[]{typeof(System.String), typeof(System.Action<global::JSONObject>), typeof(System.Action<System.Boolean>)};
-            method = type.GetMethod("EmitAsync", flag, null, args, null);
-            app.RegisterCLRMethodRedirection(method, EmitAsync_11);
-            args = new Type[]{typeof(System.String), typeof(System.String), typeof(System.Action<System.Boolean>)};
-            method = type.GetMethod("EmitAsync", flag, null, args, null);
-            app.RegisterCLRMethodRedirection(method, EmitAsync_12);
-            args = new Type[]{typeof(System.String), typeof(global::JSONObject), typeof(System.Action<System.Boolean>)};
-            method = type.GetMethod("EmitAsync", flag, null, args, null);
-            app.RegisterCLRMethodRedirection(method, EmitAsync_13);
-            args = new Type[]{typeof(System.String), typeof(global::JSONObject), typeof(System.Action<global::JSONObject>), typeof(System.Action<System.Boolean>)};
-            method = type.GetMethod("EmitAsync", flag, null, args, null);
-            app.RegisterCLRMethodRedirection(method, EmitAsync_14);
+            Dictionary<string, List<MethodInfo>> genericMethods = new Dictionary<string, List<MethodInfo>>();
+            List<MethodInfo> lst = null;                    
+            foreach(var m in type.GetMethods())
+            {
+                if(m.IsGenericMethodDefinition)
+                {
+                    if (!genericMethods.TryGetValue(m.Name, out lst))
+                    {
+                        lst = new List<MethodInfo>();
+                        genericMethods[m.Name] = lst;
+                    }
+                    lst.Add(m);
+                }
+            }
+            args = new Type[]{typeof(pbcmd.PBReqAccountMobileSecret), typeof(pbcmd.PBRespAccountMobileSecret)};
+            if (genericMethods.TryGetValue("Emit", out lst))
+            {
+                foreach(var m in lst)
+                {
+                    if(m.MatchGenericParameters(args, typeof(void), typeof(pbcmd.PBMainCmd), typeof(System.Enum), typeof(pbcmd.PBReqAccountMobileSecret), typeof(System.Action<Module.Network.PBSocket.PBPacket<pbcmd.PBRespAccountMobileSecret>>), typeof(pbcmd.PBMatchIndex)))
+                    {
+                        method = m.MakeGenericMethod(args);
+                        app.RegisterCLRMethodRedirection(method, Emit_3);
+
+                        break;
+                    }
+                }
+            }
             args = new Type[]{typeof(System.String), typeof(JEngine.Net.JSocketConfig), typeof(System.Action<System.Object, WebSocketSharp.MessageEventArgs>)};
             method = type.GetMethod("Init", flag, null, args, null);
-            app.RegisterCLRMethodRedirection(method, Init_15);
-            args = new Type[]{typeof(System.String)};
-            method = type.GetMethod("EmitAsync", flag, null, args, null);
-            app.RegisterCLRMethodRedirection(method, EmitAsync_16);
-            args = new Type[]{typeof(System.String), typeof(System.Action<global::JSONObject>)};
-            method = type.GetMethod("EmitAsync", flag, null, args, null);
-            app.RegisterCLRMethodRedirection(method, EmitAsync_17);
-            args = new Type[]{typeof(System.String), typeof(System.String)};
-            method = type.GetMethod("EmitAsync", flag, null, args, null);
-            app.RegisterCLRMethodRedirection(method, EmitAsync_18);
-            args = new Type[]{typeof(System.String), typeof(global::JSONObject)};
-            method = type.GetMethod("EmitAsync", flag, null, args, null);
-            app.RegisterCLRMethodRedirection(method, EmitAsync_19);
-            args = new Type[]{typeof(System.String), typeof(global::JSONObject), typeof(System.Action<global::JSONObject>)};
-            method = type.GetMethod("EmitAsync", flag, null, args, null);
-            app.RegisterCLRMethodRedirection(method, EmitAsync_20);
+            app.RegisterCLRMethodRedirection(method, Init_4);
 
             field = type.GetField("config", flag);
             app.RegisterCLRFieldGetter(field, get_config_0);
@@ -151,300 +128,42 @@ namespace ILRuntime.Runtime.Generated
             return __ret;
         }
 
-        static StackObject* Off_3(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
+        static StackObject* Emit_3(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
         {
             ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
             StackObject* ptr_of_this_method;
-            StackObject* __ret = ILIntepreter.Minus(__esp, 3);
+            StackObject* __ret = ILIntepreter.Minus(__esp, 6);
 
             ptr_of_this_method = ILIntepreter.Minus(__esp, 1);
-            System.Action<JEngine.Net.SocketIOEvent> @callback = (System.Action<JEngine.Net.SocketIOEvent>)typeof(System.Action<JEngine.Net.SocketIOEvent>).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)8);
+            pbcmd.PBMatchIndex @idx = (pbcmd.PBMatchIndex)typeof(pbcmd.PBMatchIndex).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
             __intp.Free(ptr_of_this_method);
 
             ptr_of_this_method = ILIntepreter.Minus(__esp, 2);
-            System.String @ev = (System.String)typeof(System.String).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
+            System.Action<Module.Network.PBSocket.PBPacket<pbcmd.PBRespAccountMobileSecret>> @action = (System.Action<Module.Network.PBSocket.PBPacket<pbcmd.PBRespAccountMobileSecret>>)typeof(System.Action<Module.Network.PBSocket.PBPacket<pbcmd.PBRespAccountMobileSecret>>).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)8);
             __intp.Free(ptr_of_this_method);
 
             ptr_of_this_method = ILIntepreter.Minus(__esp, 3);
-            JEngine.Net.SocketIOComponent instance_of_this_method = (JEngine.Net.SocketIOComponent)typeof(JEngine.Net.SocketIOComponent).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            instance_of_this_method.Off(@ev, @callback);
-
-            return __ret;
-        }
-
-        static StackObject* get_socket_4(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
-        {
-            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
-            StackObject* ptr_of_this_method;
-            StackObject* __ret = ILIntepreter.Minus(__esp, 1);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 1);
-            JEngine.Net.SocketIOComponent instance_of_this_method = (JEngine.Net.SocketIOComponent)typeof(JEngine.Net.SocketIOComponent).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            var result_of_this_method = instance_of_this_method.socket;
-
-            object obj_result_of_this_method = result_of_this_method;
-            if(obj_result_of_this_method is CrossBindingAdaptorType)
-            {    
-                return ILIntepreter.PushObject(__ret, __mStack, ((CrossBindingAdaptorType)obj_result_of_this_method).ILInstance);
-            }
-            return ILIntepreter.PushObject(__ret, __mStack, result_of_this_method);
-        }
-
-        static StackObject* Emit_5(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
-        {
-            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
-            StackObject* ptr_of_this_method;
-            StackObject* __ret = ILIntepreter.Minus(__esp, 2);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 1);
-            System.String @ev = (System.String)typeof(System.String).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 2);
-            JEngine.Net.SocketIOComponent instance_of_this_method = (JEngine.Net.SocketIOComponent)typeof(JEngine.Net.SocketIOComponent).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            instance_of_this_method.Emit(@ev);
-
-            return __ret;
-        }
-
-        static StackObject* Emit_6(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
-        {
-            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
-            StackObject* ptr_of_this_method;
-            StackObject* __ret = ILIntepreter.Minus(__esp, 3);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 1);
-            System.Action<global::JSONObject> @action = (System.Action<global::JSONObject>)typeof(System.Action<global::JSONObject>).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)8);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 2);
-            System.String @ev = (System.String)typeof(System.String).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 3);
-            JEngine.Net.SocketIOComponent instance_of_this_method = (JEngine.Net.SocketIOComponent)typeof(JEngine.Net.SocketIOComponent).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            instance_of_this_method.Emit(@ev, @action);
-
-            return __ret;
-        }
-
-        static StackObject* Emit_7(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
-        {
-            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
-            StackObject* ptr_of_this_method;
-            StackObject* __ret = ILIntepreter.Minus(__esp, 3);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 1);
-            System.String @str = (System.String)typeof(System.String).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 2);
-            System.String @ev = (System.String)typeof(System.String).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 3);
-            JEngine.Net.SocketIOComponent instance_of_this_method = (JEngine.Net.SocketIOComponent)typeof(JEngine.Net.SocketIOComponent).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            instance_of_this_method.Emit(@ev, @str);
-
-            return __ret;
-        }
-
-        static StackObject* Emit_8(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
-        {
-            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
-            StackObject* ptr_of_this_method;
-            StackObject* __ret = ILIntepreter.Minus(__esp, 3);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 1);
-            global::JSONObject @data = (global::JSONObject)typeof(global::JSONObject).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 2);
-            System.String @ev = (System.String)typeof(System.String).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 3);
-            JEngine.Net.SocketIOComponent instance_of_this_method = (JEngine.Net.SocketIOComponent)typeof(JEngine.Net.SocketIOComponent).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            instance_of_this_method.Emit(@ev, @data);
-
-            return __ret;
-        }
-
-        static StackObject* Emit_9(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
-        {
-            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
-            StackObject* ptr_of_this_method;
-            StackObject* __ret = ILIntepreter.Minus(__esp, 4);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 1);
-            System.Action<global::JSONObject> @action = (System.Action<global::JSONObject>)typeof(System.Action<global::JSONObject>).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)8);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 2);
-            global::JSONObject @data = (global::JSONObject)typeof(global::JSONObject).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 3);
-            System.String @ev = (System.String)typeof(System.String).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
+            pbcmd.PBReqAccountMobileSecret @pbBody = (pbcmd.PBReqAccountMobileSecret)typeof(pbcmd.PBReqAccountMobileSecret).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
             __intp.Free(ptr_of_this_method);
 
             ptr_of_this_method = ILIntepreter.Minus(__esp, 4);
-            JEngine.Net.SocketIOComponent instance_of_this_method = (JEngine.Net.SocketIOComponent)typeof(JEngine.Net.SocketIOComponent).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            instance_of_this_method.Emit(@ev, @data, @action);
-
-            return __ret;
-        }
-
-        static StackObject* EmitAsync_10(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
-        {
-            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
-            StackObject* ptr_of_this_method;
-            StackObject* __ret = ILIntepreter.Minus(__esp, 3);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 1);
-            System.Action<System.Boolean> @onComplete = (System.Action<System.Boolean>)typeof(System.Action<System.Boolean>).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)8);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 2);
-            System.String @ev = (System.String)typeof(System.String).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 3);
-            JEngine.Net.SocketIOComponent instance_of_this_method = (JEngine.Net.SocketIOComponent)typeof(JEngine.Net.SocketIOComponent).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            instance_of_this_method.EmitAsync(@ev, @onComplete);
-
-            return __ret;
-        }
-
-        static StackObject* EmitAsync_11(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
-        {
-            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
-            StackObject* ptr_of_this_method;
-            StackObject* __ret = ILIntepreter.Minus(__esp, 4);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 1);
-            System.Action<System.Boolean> @onComplete = (System.Action<System.Boolean>)typeof(System.Action<System.Boolean>).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)8);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 2);
-            System.Action<global::JSONObject> @action = (System.Action<global::JSONObject>)typeof(System.Action<global::JSONObject>).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)8);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 3);
-            System.String @ev = (System.String)typeof(System.String).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 4);
-            JEngine.Net.SocketIOComponent instance_of_this_method = (JEngine.Net.SocketIOComponent)typeof(JEngine.Net.SocketIOComponent).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            instance_of_this_method.EmitAsync(@ev, @action, @onComplete);
-
-            return __ret;
-        }
-
-        static StackObject* EmitAsync_12(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
-        {
-            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
-            StackObject* ptr_of_this_method;
-            StackObject* __ret = ILIntepreter.Minus(__esp, 4);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 1);
-            System.Action<System.Boolean> @onComplete = (System.Action<System.Boolean>)typeof(System.Action<System.Boolean>).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)8);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 2);
-            System.String @str = (System.String)typeof(System.String).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 3);
-            System.String @ev = (System.String)typeof(System.String).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 4);
-            JEngine.Net.SocketIOComponent instance_of_this_method = (JEngine.Net.SocketIOComponent)typeof(JEngine.Net.SocketIOComponent).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            instance_of_this_method.EmitAsync(@ev, @str, @onComplete);
-
-            return __ret;
-        }
-
-        static StackObject* EmitAsync_13(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
-        {
-            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
-            StackObject* ptr_of_this_method;
-            StackObject* __ret = ILIntepreter.Minus(__esp, 4);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 1);
-            System.Action<System.Boolean> @onComplete = (System.Action<System.Boolean>)typeof(System.Action<System.Boolean>).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)8);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 2);
-            global::JSONObject @data = (global::JSONObject)typeof(global::JSONObject).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 3);
-            System.String @ev = (System.String)typeof(System.String).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 4);
-            JEngine.Net.SocketIOComponent instance_of_this_method = (JEngine.Net.SocketIOComponent)typeof(JEngine.Net.SocketIOComponent).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            instance_of_this_method.EmitAsync(@ev, @data, @onComplete);
-
-            return __ret;
-        }
-
-        static StackObject* EmitAsync_14(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
-        {
-            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
-            StackObject* ptr_of_this_method;
-            StackObject* __ret = ILIntepreter.Minus(__esp, 5);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 1);
-            System.Action<System.Boolean> @onComplete = (System.Action<System.Boolean>)typeof(System.Action<System.Boolean>).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)8);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 2);
-            System.Action<global::JSONObject> @action = (System.Action<global::JSONObject>)typeof(System.Action<global::JSONObject>).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)8);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 3);
-            global::JSONObject @data = (global::JSONObject)typeof(global::JSONObject).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 4);
-            System.String @ev = (System.String)typeof(System.String).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
+            System.Enum @subCmd = (System.Enum)typeof(System.Enum).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
             __intp.Free(ptr_of_this_method);
 
             ptr_of_this_method = ILIntepreter.Minus(__esp, 5);
+            pbcmd.PBMainCmd @mainCmd = (pbcmd.PBMainCmd)typeof(pbcmd.PBMainCmd).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)20);
+            __intp.Free(ptr_of_this_method);
+
+            ptr_of_this_method = ILIntepreter.Minus(__esp, 6);
             JEngine.Net.SocketIOComponent instance_of_this_method = (JEngine.Net.SocketIOComponent)typeof(JEngine.Net.SocketIOComponent).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
             __intp.Free(ptr_of_this_method);
 
-            instance_of_this_method.EmitAsync(@ev, @data, @action, @onComplete);
+            instance_of_this_method.Emit<pbcmd.PBReqAccountMobileSecret, pbcmd.PBRespAccountMobileSecret>(@mainCmd, @subCmd, @pbBody, @action, @idx);
 
             return __ret;
         }
 
-        static StackObject* Init_15(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
+        static StackObject* Init_4(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
         {
             ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
             StackObject* ptr_of_this_method;
@@ -469,146 +188,6 @@ namespace ILRuntime.Runtime.Generated
             instance_of_this_method.Init(@url, @config, @onMessage);
 
             return __ret;
-        }
-
-        static StackObject* EmitAsync_16(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
-        {
-            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
-            StackObject* ptr_of_this_method;
-            StackObject* __ret = ILIntepreter.Minus(__esp, 2);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 1);
-            System.String @ev = (System.String)typeof(System.String).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 2);
-            JEngine.Net.SocketIOComponent instance_of_this_method = (JEngine.Net.SocketIOComponent)typeof(JEngine.Net.SocketIOComponent).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            var result_of_this_method = instance_of_this_method.EmitAsync(@ev);
-
-            object obj_result_of_this_method = result_of_this_method;
-            if(obj_result_of_this_method is CrossBindingAdaptorType)
-            {    
-                return ILIntepreter.PushObject(__ret, __mStack, ((CrossBindingAdaptorType)obj_result_of_this_method).ILInstance);
-            }
-            return ILIntepreter.PushObject(__ret, __mStack, result_of_this_method);
-        }
-
-        static StackObject* EmitAsync_17(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
-        {
-            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
-            StackObject* ptr_of_this_method;
-            StackObject* __ret = ILIntepreter.Minus(__esp, 3);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 1);
-            System.Action<global::JSONObject> @action = (System.Action<global::JSONObject>)typeof(System.Action<global::JSONObject>).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)8);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 2);
-            System.String @ev = (System.String)typeof(System.String).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 3);
-            JEngine.Net.SocketIOComponent instance_of_this_method = (JEngine.Net.SocketIOComponent)typeof(JEngine.Net.SocketIOComponent).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            var result_of_this_method = instance_of_this_method.EmitAsync(@ev, @action);
-
-            object obj_result_of_this_method = result_of_this_method;
-            if(obj_result_of_this_method is CrossBindingAdaptorType)
-            {    
-                return ILIntepreter.PushObject(__ret, __mStack, ((CrossBindingAdaptorType)obj_result_of_this_method).ILInstance);
-            }
-            return ILIntepreter.PushObject(__ret, __mStack, result_of_this_method);
-        }
-
-        static StackObject* EmitAsync_18(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
-        {
-            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
-            StackObject* ptr_of_this_method;
-            StackObject* __ret = ILIntepreter.Minus(__esp, 3);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 1);
-            System.String @str = (System.String)typeof(System.String).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 2);
-            System.String @ev = (System.String)typeof(System.String).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 3);
-            JEngine.Net.SocketIOComponent instance_of_this_method = (JEngine.Net.SocketIOComponent)typeof(JEngine.Net.SocketIOComponent).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            var result_of_this_method = instance_of_this_method.EmitAsync(@ev, @str);
-
-            object obj_result_of_this_method = result_of_this_method;
-            if(obj_result_of_this_method is CrossBindingAdaptorType)
-            {    
-                return ILIntepreter.PushObject(__ret, __mStack, ((CrossBindingAdaptorType)obj_result_of_this_method).ILInstance);
-            }
-            return ILIntepreter.PushObject(__ret, __mStack, result_of_this_method);
-        }
-
-        static StackObject* EmitAsync_19(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
-        {
-            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
-            StackObject* ptr_of_this_method;
-            StackObject* __ret = ILIntepreter.Minus(__esp, 3);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 1);
-            global::JSONObject @data = (global::JSONObject)typeof(global::JSONObject).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 2);
-            System.String @ev = (System.String)typeof(System.String).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 3);
-            JEngine.Net.SocketIOComponent instance_of_this_method = (JEngine.Net.SocketIOComponent)typeof(JEngine.Net.SocketIOComponent).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            var result_of_this_method = instance_of_this_method.EmitAsync(@ev, @data);
-
-            object obj_result_of_this_method = result_of_this_method;
-            if(obj_result_of_this_method is CrossBindingAdaptorType)
-            {    
-                return ILIntepreter.PushObject(__ret, __mStack, ((CrossBindingAdaptorType)obj_result_of_this_method).ILInstance);
-            }
-            return ILIntepreter.PushObject(__ret, __mStack, result_of_this_method);
-        }
-
-        static StackObject* EmitAsync_20(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
-        {
-            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
-            StackObject* ptr_of_this_method;
-            StackObject* __ret = ILIntepreter.Minus(__esp, 4);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 1);
-            System.Action<global::JSONObject> @action = (System.Action<global::JSONObject>)typeof(System.Action<global::JSONObject>).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)8);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 2);
-            global::JSONObject @data = (global::JSONObject)typeof(global::JSONObject).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 3);
-            System.String @ev = (System.String)typeof(System.String).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 4);
-            JEngine.Net.SocketIOComponent instance_of_this_method = (JEngine.Net.SocketIOComponent)typeof(JEngine.Net.SocketIOComponent).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            var result_of_this_method = instance_of_this_method.EmitAsync(@ev, @data, @action);
-
-            object obj_result_of_this_method = result_of_this_method;
-            if(obj_result_of_this_method is CrossBindingAdaptorType)
-            {    
-                return ILIntepreter.PushObject(__ret, __mStack, ((CrossBindingAdaptorType)obj_result_of_this_method).ILInstance);
-            }
-            return ILIntepreter.PushObject(__ret, __mStack, result_of_this_method);
         }
 
 

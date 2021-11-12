@@ -23,9 +23,6 @@ namespace ILRuntime.Runtime.Generated
             FieldInfo field;
             Type[] args;
             Type type = typeof(JEngine.Net.JSocketConfig);
-            args = new Type[]{};
-            method = type.GetMethod("Default", flag, null, args, null);
-            app.RegisterCLRMethodRedirection(method, Default_0);
 
             field = type.GetField("eventOpenName", flag);
             app.RegisterCLRFieldGetter(field, get_eventOpenName_0);
@@ -47,25 +44,37 @@ namespace ILRuntime.Runtime.Generated
             app.RegisterCLRFieldGetter(field, get_eventErrorName_4);
             app.RegisterCLRFieldSetter(field, set_eventErrorName_4);
             app.RegisterCLRFieldBinding(field, CopyToStack_eventErrorName_4, AssignFromStack_eventErrorName_4);
+            field = type.GetField("pingInterval", flag);
+            app.RegisterCLRFieldGetter(field, get_pingInterval_5);
+            app.RegisterCLRFieldSetter(field, set_pingInterval_5);
+            app.RegisterCLRFieldBinding(field, CopyToStack_pingInterval_5, AssignFromStack_pingInterval_5);
+            field = type.GetField("pingTimeout", flag);
+            app.RegisterCLRFieldGetter(field, get_pingTimeout_6);
+            app.RegisterCLRFieldSetter(field, set_pingTimeout_6);
+            app.RegisterCLRFieldBinding(field, CopyToStack_pingTimeout_6, AssignFromStack_pingTimeout_6);
+            field = type.GetField("ackExpirationTime", flag);
+            app.RegisterCLRFieldGetter(field, get_ackExpirationTime_7);
+            app.RegisterCLRFieldSetter(field, set_ackExpirationTime_7);
+            app.RegisterCLRFieldBinding(field, CopyToStack_ackExpirationTime_7, AssignFromStack_ackExpirationTime_7);
+            field = type.GetField("reconnectDelay", flag);
+            app.RegisterCLRFieldGetter(field, get_reconnectDelay_8);
+            app.RegisterCLRFieldSetter(field, set_reconnectDelay_8);
+            app.RegisterCLRFieldBinding(field, CopyToStack_reconnectDelay_8, AssignFromStack_reconnectDelay_8);
+            field = type.GetField("encrypt", flag);
+            app.RegisterCLRFieldGetter(field, get_encrypt_9);
+            app.RegisterCLRFieldSetter(field, set_encrypt_9);
+            app.RegisterCLRFieldBinding(field, CopyToStack_encrypt_9, AssignFromStack_encrypt_9);
             field = type.GetField("debug", flag);
-            app.RegisterCLRFieldGetter(field, get_debug_5);
-            app.RegisterCLRFieldSetter(field, set_debug_5);
-            app.RegisterCLRFieldBinding(field, CopyToStack_debug_5, AssignFromStack_debug_5);
+            app.RegisterCLRFieldGetter(field, get_debug_10);
+            app.RegisterCLRFieldSetter(field, set_debug_10);
+            app.RegisterCLRFieldBinding(field, CopyToStack_debug_10, AssignFromStack_debug_10);
 
+            args = new Type[]{};
+            method = type.GetConstructor(flag, null, args, null);
+            app.RegisterCLRMethodRedirection(method, Ctor_0);
 
         }
 
-
-        static StackObject* Default_0(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
-        {
-            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
-            StackObject* __ret = ILIntepreter.Minus(__esp, 0);
-
-
-            var result_of_this_method = JEngine.Net.JSocketConfig.Default();
-
-            return ILIntepreter.PushObject(__ret, __mStack, result_of_this_method);
-        }
 
 
         static object get_eventOpenName_0(ref object o)
@@ -188,12 +197,142 @@ namespace ILRuntime.Runtime.Generated
             return ptr_of_this_method;
         }
 
-        static object get_debug_5(ref object o)
+        static object get_pingInterval_5(ref object o)
+        {
+            return ((JEngine.Net.JSocketConfig)o).pingInterval;
+        }
+
+        static StackObject* CopyToStack_pingInterval_5(ref object o, ILIntepreter __intp, StackObject* __ret, IList<object> __mStack)
+        {
+            var result_of_this_method = ((JEngine.Net.JSocketConfig)o).pingInterval;
+            __ret->ObjectType = ObjectTypes.Float;
+            *(float*)&__ret->Value = result_of_this_method;
+            return __ret + 1;
+        }
+
+        static void set_pingInterval_5(ref object o, object v)
+        {
+            ((JEngine.Net.JSocketConfig)o).pingInterval = (System.Single)v;
+        }
+
+        static StackObject* AssignFromStack_pingInterval_5(ref object o, ILIntepreter __intp, StackObject* ptr_of_this_method, IList<object> __mStack)
+        {
+            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
+            System.Single @pingInterval = *(float*)&ptr_of_this_method->Value;
+            ((JEngine.Net.JSocketConfig)o).pingInterval = @pingInterval;
+            return ptr_of_this_method;
+        }
+
+        static object get_pingTimeout_6(ref object o)
+        {
+            return ((JEngine.Net.JSocketConfig)o).pingTimeout;
+        }
+
+        static StackObject* CopyToStack_pingTimeout_6(ref object o, ILIntepreter __intp, StackObject* __ret, IList<object> __mStack)
+        {
+            var result_of_this_method = ((JEngine.Net.JSocketConfig)o).pingTimeout;
+            __ret->ObjectType = ObjectTypes.Float;
+            *(float*)&__ret->Value = result_of_this_method;
+            return __ret + 1;
+        }
+
+        static void set_pingTimeout_6(ref object o, object v)
+        {
+            ((JEngine.Net.JSocketConfig)o).pingTimeout = (System.Single)v;
+        }
+
+        static StackObject* AssignFromStack_pingTimeout_6(ref object o, ILIntepreter __intp, StackObject* ptr_of_this_method, IList<object> __mStack)
+        {
+            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
+            System.Single @pingTimeout = *(float*)&ptr_of_this_method->Value;
+            ((JEngine.Net.JSocketConfig)o).pingTimeout = @pingTimeout;
+            return ptr_of_this_method;
+        }
+
+        static object get_ackExpirationTime_7(ref object o)
+        {
+            return ((JEngine.Net.JSocketConfig)o).ackExpirationTime;
+        }
+
+        static StackObject* CopyToStack_ackExpirationTime_7(ref object o, ILIntepreter __intp, StackObject* __ret, IList<object> __mStack)
+        {
+            var result_of_this_method = ((JEngine.Net.JSocketConfig)o).ackExpirationTime;
+            __ret->ObjectType = ObjectTypes.Float;
+            *(float*)&__ret->Value = result_of_this_method;
+            return __ret + 1;
+        }
+
+        static void set_ackExpirationTime_7(ref object o, object v)
+        {
+            ((JEngine.Net.JSocketConfig)o).ackExpirationTime = (System.Single)v;
+        }
+
+        static StackObject* AssignFromStack_ackExpirationTime_7(ref object o, ILIntepreter __intp, StackObject* ptr_of_this_method, IList<object> __mStack)
+        {
+            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
+            System.Single @ackExpirationTime = *(float*)&ptr_of_this_method->Value;
+            ((JEngine.Net.JSocketConfig)o).ackExpirationTime = @ackExpirationTime;
+            return ptr_of_this_method;
+        }
+
+        static object get_reconnectDelay_8(ref object o)
+        {
+            return ((JEngine.Net.JSocketConfig)o).reconnectDelay;
+        }
+
+        static StackObject* CopyToStack_reconnectDelay_8(ref object o, ILIntepreter __intp, StackObject* __ret, IList<object> __mStack)
+        {
+            var result_of_this_method = ((JEngine.Net.JSocketConfig)o).reconnectDelay;
+            __ret->ObjectType = ObjectTypes.Integer;
+            __ret->Value = result_of_this_method;
+            return __ret + 1;
+        }
+
+        static void set_reconnectDelay_8(ref object o, object v)
+        {
+            ((JEngine.Net.JSocketConfig)o).reconnectDelay = (System.Int32)v;
+        }
+
+        static StackObject* AssignFromStack_reconnectDelay_8(ref object o, ILIntepreter __intp, StackObject* ptr_of_this_method, IList<object> __mStack)
+        {
+            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
+            System.Int32 @reconnectDelay = ptr_of_this_method->Value;
+            ((JEngine.Net.JSocketConfig)o).reconnectDelay = @reconnectDelay;
+            return ptr_of_this_method;
+        }
+
+        static object get_encrypt_9(ref object o)
+        {
+            return ((JEngine.Net.JSocketConfig)o).encrypt;
+        }
+
+        static StackObject* CopyToStack_encrypt_9(ref object o, ILIntepreter __intp, StackObject* __ret, IList<object> __mStack)
+        {
+            var result_of_this_method = ((JEngine.Net.JSocketConfig)o).encrypt;
+            __ret->ObjectType = ObjectTypes.Integer;
+            __ret->Value = (int)result_of_this_method;
+            return __ret + 1;
+        }
+
+        static void set_encrypt_9(ref object o, object v)
+        {
+            ((JEngine.Net.JSocketConfig)o).encrypt = (System.UInt32)v;
+        }
+
+        static StackObject* AssignFromStack_encrypt_9(ref object o, ILIntepreter __intp, StackObject* ptr_of_this_method, IList<object> __mStack)
+        {
+            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
+            System.UInt32 @encrypt = (uint)ptr_of_this_method->Value;
+            ((JEngine.Net.JSocketConfig)o).encrypt = @encrypt;
+            return ptr_of_this_method;
+        }
+
+        static object get_debug_10(ref object o)
         {
             return ((JEngine.Net.JSocketConfig)o).debug;
         }
 
-        static StackObject* CopyToStack_debug_5(ref object o, ILIntepreter __intp, StackObject* __ret, IList<object> __mStack)
+        static StackObject* CopyToStack_debug_10(ref object o, ILIntepreter __intp, StackObject* __ret, IList<object> __mStack)
         {
             var result_of_this_method = ((JEngine.Net.JSocketConfig)o).debug;
             __ret->ObjectType = ObjectTypes.Integer;
@@ -201,12 +340,12 @@ namespace ILRuntime.Runtime.Generated
             return __ret + 1;
         }
 
-        static void set_debug_5(ref object o, object v)
+        static void set_debug_10(ref object o, object v)
         {
             ((JEngine.Net.JSocketConfig)o).debug = (System.Boolean)v;
         }
 
-        static StackObject* AssignFromStack_debug_5(ref object o, ILIntepreter __intp, StackObject* ptr_of_this_method, IList<object> __mStack)
+        static StackObject* AssignFromStack_debug_10(ref object o, ILIntepreter __intp, StackObject* ptr_of_this_method, IList<object> __mStack)
         {
             ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
             System.Boolean @debug = ptr_of_this_method->Value == 1;
@@ -214,6 +353,16 @@ namespace ILRuntime.Runtime.Generated
             return ptr_of_this_method;
         }
 
+
+        static StackObject* Ctor_0(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
+        {
+            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
+            StackObject* __ret = ILIntepreter.Minus(__esp, 0);
+
+            var result_of_this_method = new JEngine.Net.JSocketConfig();
+
+            return ILIntepreter.PushObject(__ret, __mStack, result_of_this_method);
+        }
 
 
     }

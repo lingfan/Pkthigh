@@ -165,6 +165,11 @@ namespace JEngine.Helper
                     ((Action<System.Int64, System.Int64>)act)(oldVal, newVal);
                 });
             });
+            
+            //register delegate adaptor
+            appdomain.DelegateManager.RegisterMethodDelegate<pbcmd.PBRespAccountMobileSecret>();
+            appdomain.DelegateManager.RegisterMethodDelegate<Module.Network.PBSocket.PBPacket<pbcmd.PBRespAccountMobileSecret>>();
+
         }
     }
 }

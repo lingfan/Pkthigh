@@ -1,4 +1,5 @@
 ﻿#region License
+
 /*
  * Ack.cs
  *
@@ -24,35 +25,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 #endregion
 
 using System;
+using WebSocketSharp;
 
 namespace JEngine.Net
 {
-	public class Ack
-	{
-		public int packetId;
-		public DateTime time;
+    /// <summary>
+    /// 用于消息确认以及回调action
+    /// </summary>
+    public class Ack
+    {
+        public int packetId;
+        public DateTime time;
 
-		private Action<JSONObject> action;
+        private Action<MessageEventArgs> action;
 
-		public Ack(int packetId, Action<JSONObject> action)
-		{
-			this.packetId = packetId;
-			time = DateTime.Now;
-			this.action = action;
-		}
+        public Ack(int packetId, Action<MessageEventArgs> action)
+        {
+            this.packetId = packetId;
+            time = DateTime.Now;
+            this.action = action;
+        }
 
-		public void Invoke(JSONObject ev)
-		{
-			action.Invoke(ev);
-		}
+        public void Invoke(MessageEventArgs ev)
+        {
+            action.Invoke(ev);
+        }
 
-		public override string ToString()
-		{
-			return string.Format("[Ack: packetId={0}, time={1}, action={2}]", packetId, time, action);
-		}
-	}
+        public override string ToString()
+        {
+            return string.Format("[Ack: packetId={0}, time={1}, action={2}]", packetId, time, action);
+        }
+    }
 }
-

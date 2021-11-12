@@ -5,25 +5,22 @@ using HotUpdateScripts.PtkhighHotUpdate.Module.UI.Manager;
 using HotUpdateScripts.PtkhighHotUpdate.Module.UI.View;
 using JEngine.Core;
 using JEngine.Event;
-using System;
+using pbcmd;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace HotUpdateScripts.PtkhighHotUpdate.Module.Game
 {
     public class GameManager : MonoBehaviour
     {
-        public static GameManager instance;
+        public static GameManager Instance;
 
         [HideInInspector] public Dictionary<string, JEvent> registedEvents = new Dictionary<string, JEvent>();
 
 
         void Awake()
         {
-            instance = this;
+            Instance = this;
             UnityEngine.Object.DontDestroyOnLoad(this);
         }
 
@@ -47,8 +44,7 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Game
             //    UIManager.instance.Show(nameof(Tabs));
             //    TestEvent();
             //}).Execute(true);
-
-            NetworkManager.InitSocket();
+            Loom.Initialize();
         }
 
         void TestEvent()
@@ -60,6 +56,29 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Game
             EventManager.DispatchEvent<TabData>(nameof(Tabs), data);
         }
 
+        public void TestLogin()
+        {
+
+            var req = new PBReqAccountMobileSecret()
+            {
+                comm = PbcmdHelper.Instance.getPBCommParam(),
+                number = "",
+            };
+
+
+
+            var mainCmd = PBMainCmd.MCmd_Account;
+            var subCmd = PBMainCmdAccountSubCmd.Account_ReqMobileSecret;
+
+            Log.Print(NetworkManager.Instance);
+
+            NetworkManager.Instance.Send<PBReqAccountMobileSecret, PBRespAccountMobileSecret>(mainCmd, subCmd, req, (resp) =>
+            {
+                Log.PrintError(resp.PBBody.secret);
+
+            });
+
+        }
     }
 
 

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ContentModelStore">
+    <e p="C:\Users\sdosa\AppData\Local\JetBrains\Rider2020.3\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\sdosa\AppData\Local\JetBrains\Rider2020.3\resharper-host\Local\Transient\Rider\v203\SolutionCaches\_HotUpdateScripts.59248563.00" t="ExcludeRecursive" />
+    <e p="D:\WTCompany\Pkthigh\Assets\HotUpdateResources\Dll\Hidden~" t="ExcludeRecursive" />
+    <e p="D:\WTCompany\Pkthigh\HotUpdateScripts" t="IncludeRecursive">
+      <e p="HotUpdateScripts.csproj" t="IncludeRecursive" />
+      <e p="HotUpdateScripts.sln" t="IncludeFlat" />
+      <e p="JEngine" t="Include">
+        <e p="Core" t="Include">
+          <e p="JAction.cs" t="Include" />
+          <e p="JBehaviour.cs" t="Include" />
+          <e p="JExtensions.cs" t="Include" />
+          <e p="JObjectPool.cs" t="Include" />
+          <e p="JPrefab.cs" t="Include" />
+          <e p="JResource.cs" t="Include" />
+          <e p="JSaver.cs" t="Include" />
+          <e p="Singleton.cs" t="Include" />
+        </e>
+        <e p="Event" t="Include">
+          <e p="EventAttributes.cs" t="Include" />
+          <e p="EventEnum.cs" t="Include" />
+          <e p="JEvent.cs" t="Include" />
+        </e>
+        <e p="Net" t="Include">
+          <e p="JWebSocket.cs" t="Include" />
+        </e>
+        <e p="UI" t="Include">
+          <e p="JUI.cs" t="Include" />
+        </e>
+      </e>
+      <e p="obj" t="ExcludeRecursive" />
+      <e p="packages" t="ExcludeRecursive" />
+      <e p="Program.cs" t="Include" />
+      <e p="PtkhighHotUpdate" t="Include">
+        <e p="Module" t="Include">
+          <e p="EventData" t="Include">
+            <e p="TabData.cs" t="Include" />
+          </e>
+          <e p="Events" t="Include">
+            <e p="EventManager.cs" t="Include" />
+          </e>
+          <e p="Game" t="Include">
+            <e p="GameManager.cs" t="Include" />
+          </e>
+          <e p="Network" t="Include">
+            <e p="NetworkManager.cs" t="Include" />
+          </e>
+          <e p="UI" t="Include">
+            <e p="Base" t="Include">
+              <e p="UIBase.cs" t="Include" />
+            </e>
+            <e p="Manager" t="Include">
+              <e p="UIManager.cs" t="Include" />
+            </e>
+            <e p="Model" t="Include" />
+            <e p="UIConstData.cs" t="Include" />
+            <e p="View" t="Include">
+              <e p="DirectoryTreeView.cs" t="Include" />
+              <e p="Notify.cs" t="Include" />
+              <e p="PopupTemplate.cs" t="Include" />
+              <e p="Tabs.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+      </e>
+    </e>
+  </component>
+</project>

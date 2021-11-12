@@ -23,20 +23,20 @@ namespace ILRuntime.Runtime.Generated
             Type[] args;
             Type type = typeof(JEngine.Core.Log);
             args = new Type[]{typeof(System.Object)};
-            method = type.GetMethod("PrintWarning", flag, null, args, null);
-            app.RegisterCLRMethodRedirection(method, PrintWarning_0);
+            method = type.GetMethod("Print", flag, null, args, null);
+            app.RegisterCLRMethodRedirection(method, Print_0);
             args = new Type[]{typeof(System.Object)};
             method = type.GetMethod("PrintError", flag, null, args, null);
             app.RegisterCLRMethodRedirection(method, PrintError_1);
             args = new Type[]{typeof(System.Object)};
-            method = type.GetMethod("Print", flag, null, args, null);
-            app.RegisterCLRMethodRedirection(method, Print_2);
+            method = type.GetMethod("PrintWarning", flag, null, args, null);
+            app.RegisterCLRMethodRedirection(method, PrintWarning_2);
 
 
         }
 
 
-        static StackObject* PrintWarning_0(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
+        static StackObject* Print_0(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
         {
             ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
             StackObject* ptr_of_this_method;
@@ -47,7 +47,7 @@ namespace ILRuntime.Runtime.Generated
             __intp.Free(ptr_of_this_method);
 
 
-            JEngine.Core.Log.PrintWarning(@message);
+            JEngine.Core.Log.Print(@message);
 
             return __ret;
         }
@@ -68,7 +68,7 @@ namespace ILRuntime.Runtime.Generated
             return __ret;
         }
 
-        static StackObject* Print_2(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
+        static StackObject* PrintWarning_2(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
         {
             ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
             StackObject* ptr_of_this_method;
@@ -79,7 +79,7 @@ namespace ILRuntime.Runtime.Generated
             __intp.Free(ptr_of_this_method);
 
 
-            JEngine.Core.Log.Print(@message);
+            JEngine.Core.Log.PrintWarning(@message);
 
             return __ret;
         }

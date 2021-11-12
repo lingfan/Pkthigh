@@ -1885,7 +1885,7 @@ namespace WebSocketSharp
 
         return;
       }
-
+      
       var len = data.LongLength;
       if (len <= FragmentLength)
         send (

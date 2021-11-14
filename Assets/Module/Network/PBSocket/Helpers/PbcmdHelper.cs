@@ -17,6 +17,10 @@ public class PbcmdHelper : MonoBehaviour
 
     public enum PbSocketEvent
     {
+        Open,
+        Connect,
+        Disconnect,
+        Close,
         Timeout,
         Error,
     }
@@ -306,4 +310,7 @@ public class PbcmdHelper : MonoBehaviour
 
         return physicalAddress;
     }
+    
+    
+    
 }

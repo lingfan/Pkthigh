@@ -115,6 +115,11 @@ namespace JEngine.Net
             socket.On(socket.config.eventErrorName, socketIOEvent);
         }
 
+        public void OnHeartBeatTimeout(Action<SocketIOEvent> socketIOEvent)
+        {
+            socket.On(socket.config.eventHeartBeatTimeoutName, socketIOEvent);
+        }
+
         public void Send<TRequest, TResponse>(PBMainCmd mainCmd, Enum subCmd, TRequest pbBody,
             Action<PBPacket<TResponse>> action = null,
             Action<PbcmdHelper.PbSocketEvent> onError = null,

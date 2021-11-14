@@ -55,6 +55,7 @@ namespace JEngine.Net
         public string eventDisconnectName = "disconnect";
         public string eventErrorName = "error";
         public string eventCloseName = "close";
+        public string eventHeartBeatTimeoutName = "heartBeatTimeout";
 
         public static JSocketConfig Default()
         {
@@ -104,9 +105,9 @@ namespace JEngine.Net
         private Thread pingThread;
         private WebSocket ws;
 
-        private Encoder encoder;
-        public Decoder decoder;
-        private Parser parser;
+        // private Encoder encoder;
+        // public Decoder decoder;
+        // private Parser parser;
 
         private Dictionary<string, List<Action<SocketIOEvent>>> handlers;
         private List<Ack> ackList;
@@ -119,6 +120,9 @@ namespace JEngine.Net
 
         private object ackQueueLock;
         private Queue<AckMessage> ackQueue;
+
+        private object heartBeatQueueLock;
+        private Queue<PBPacket<PBHearBeat>> heartBeatQueue;
 
 
         private Action<object, MessageEventArgs> onMessageHotUpdate;
@@ -159,6 +163,9 @@ namespace JEngine.Net
 
             ackQueueLock = new object();
             ackQueue = new Queue<AckMessage>();
+            
+            heartBeatQueueLock = new object();
+            heartBeatQueue = new Queue<PBPacket<PBHearBeat>>();
 
             connected = false;
 
@@ -199,6 +206,18 @@ namespace JEngine.Net
                 }
             }
 
+            lock (heartBeatQueueLock)
+            {
+                if (heartBeatQueue.Count >= 4)
+                {
+                    socket.Connect();
+                    
+                    EmitEvent(config.eventHeartBeatTimeoutName);
+                    
+                    heartBeatQueue.Clear();
+                }
+            }
+
             if (wsConnected != ws.IsConnected)
             {
                 wsConnected = ws.IsConnected;
@@ -222,6 +241,7 @@ namespace JEngine.Net
             {
                 return;
             }
+
             //invoke timeout action
             ackList[0].InvokeTimeout();
             ackList.RemoveAt(0);
@@ -286,7 +306,8 @@ namespace JEngine.Net
                 switch (mainCmd)
                 {
                     case PBMainCmd.MCmd_HeartBeat:
-
+                        //心跳包只检测次数？  
+                        HandHeartBeatMessage();
                         break;
                     default:
                         HandleMessage(sender, e, pbHeader);
@@ -517,6 +538,9 @@ namespace JEngine.Net
                     hearBeat.timestamp = (ulong) ts.TotalMilliseconds;
 
                     PBPacket<PBHearBeat> pbPacket = new PBPacket<PBHearBeat>(header, hearBeat);
+
+                    heartBeatQueue.Enqueue(pbPacket);
+
                     EmitPbPacket(pbPacket);
                     pingStart = DateTime.Now;
 
@@ -631,6 +655,10 @@ namespace JEngine.Net
             EmitEvent(config.eventOpenName);
         }
 
+        public void HandHeartBeatMessage()
+        {
+            heartBeatQueue.Dequeue();
+        }
 
         public void HandleMessage(object sender, MessageEventArgs eventArgs, PBHeader pbHeader)
         {

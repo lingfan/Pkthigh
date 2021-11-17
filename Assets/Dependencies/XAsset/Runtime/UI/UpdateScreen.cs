@@ -34,6 +34,7 @@ namespace libx
     {
         public Button buttonStart;
         public Slider progressBar;
+        public Text progressTipText;
         public Text progressText;
         public Text version;
 
@@ -62,12 +63,13 @@ namespace libx
 
         public void OnMessage(string msg)
         {
-            progressText.text = msg;
+            progressTipText.text = msg;
         }
 
         public void OnProgress(float progress)
         {
             progressBar.value = progress;
+            progressText.text = (int) (progress * 100) + "%";
         }
 
         public void OnVersion(string ver)

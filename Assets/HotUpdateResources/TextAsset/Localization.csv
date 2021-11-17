@@ -1,7 +1,8 @@
 ﻿Key,zh-cn,en-us
-SettingLanguage,设置语言,Language Set
-DemoText,多语言展示,Muti Language Demo
-,,
-,,
-,,
- ,,
+PhoneLoginInput-PhoneAccountInput-HeadText,手机号码,Moblie
+PhoneLoginInput-PhoneAccountInput-Placeholder,输入手机号,Input your phone number
+PhoneLoginInput-PhonePasswordtInput-HeadText,密码,Password
+PhoneLoginInput-PhonePasswordtInput-Placeholder,8-20位数字字母组合,8-20 digit letter combination
+PhoneLoginFoot-LoginButton-Text,登录,Login
+PhoneLoginFoot-ResetPasswordButton-Text,重置密码,Reset Password
+PhoneLoginFoot-RegisterButton-Text,立即注册,Resigter

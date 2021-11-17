@@ -1,5 +1,6 @@
 ﻿using HotUpdateScripts.PtkhighHotUpdate.Module.EventData;
 using HotUpdateScripts.PtkhighHotUpdate.Module.Network;
+using HotUpdateScripts.PtkhighHotUpdate.Module.Setting;
 using HotUpdateScripts.PtkhighHotUpdate.Module.UI.Base;
 using HotUpdateScripts.PtkhighHotUpdate.Module.UI.Manager;
 using HotUpdateScripts.PtkhighHotUpdate.Module.UI.View;
@@ -46,6 +47,16 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Game
             //    TestEvent();
             //}).Execute(true);
             Loom.Initialize();
+        }
+
+
+        public void ChangeLanguage()
+        {
+            string languageSet = JSaver.GetString(SettingConstData.languageSet);
+
+            Debug.Log(languageSet == null);
+
+            Localization.ChangeLanguage("en-us");
         }
 
         void TestEvent()

@@ -90,10 +90,14 @@ namespace JEngine.Core
                 {
                     //某一行
                     string row = allRows[j];
-                    //切割
-                    var cells = Regex.Split(row, pattern);
-                    //添加key-value
-                    p.Add(_getExactValue(cells[0]),_getExactValue(cells[i]));
+                    //去除空白行
+                    if (!row.Trim().Equals(",,"))
+                    {
+                        //切割
+                        var cells = Regex.Split(row, pattern);
+                        //添加key-value
+                        p.Add(_getExactValue(cells[0]),_getExactValue(cells[i]));
+                    }
                 }
                 //添加lang
                 _phrases.Add(lang,p);

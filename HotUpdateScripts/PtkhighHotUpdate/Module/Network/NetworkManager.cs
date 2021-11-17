@@ -73,7 +73,7 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Network
         public void TestLogin()
         {
             //GameManager.Instance.TestLogin();
-            GameManager.Instance.TestRegister();
+            //GameManager.Instance.TestRegister();
         }
 
         public void InitSocket()

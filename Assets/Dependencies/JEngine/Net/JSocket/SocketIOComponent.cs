@@ -300,7 +300,7 @@ namespace JEngine.Net
                 PBHeader pbHeader = StringifyHelper.GetHeader(e.RawData);
                 PBMainCmd mainCmd = (PBMainCmd) Enum.ToObject(typeof(PBMainCmd), pbHeader.mainCmd);
 #if SOCKET_IO_DEBUG
-                Log.Print("[SocketIO]:clientCtx:=" + pbHeader.clientCtx + "|cmd:= " + mainCmd);
+                Log.Print("[SocketIO]:reciveMessage clientCtx:=" + pbHeader.clientCtx + "| cmd:= " + mainCmd);
 #endif
 
                 switch (mainCmd)

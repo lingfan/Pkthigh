@@ -13,6 +13,7 @@ using HotUpdateScripts.PtkhighHotUpdate.Module.UI.View;
 using Module.Network.PBSocket;
 using UnityEngine;
 using HotUpdateScripts.PtkhighHotUpdate.Module.Game;
+using System.Security.Cryptography;
 
 namespace HotUpdateScripts.PtkhighHotUpdate.Module.Network
 {
@@ -26,8 +27,16 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Network
         public const string modulusHex =
             @"BDDDC884D7C025AC87D2DD67BBAA1B9F835D9E46E6E7E3634E3763406D90B8F8EA9CE5327687D3341E1A337DF43E797F2004494A6A0F6C13F3EEF2FE3B755F1EB19DD44C4C191FEEA5DFDC7210F9ED83DC57965AC1D041D5C67A023199E5D6DCA9213D849630769111E638E85932C9136CC7633D757AB1E72FDF6A0A029F1417";
 
-        public static readonly byte[] modulusBytes = HexToByteArray(modulusHex);
+        public static readonly byte[] modulusBytes = PbcmdHelper.HexToByteArray(modulusHex);
         public static readonly byte[] exponentBytes = new byte[] { 1, 0, 1 };
+
+        public static readonly RSAParameters RSAParams = new RSAParameters()
+        {
+            Exponent = exponentBytes,
+            Modulus = modulusBytes,
+        };
+
+        public readonly PBCommParam pBCommParam = PbcmdHelper.getPBCommParam();
 
         /// <summary>
         /// Test endpoint dev1
@@ -63,7 +72,8 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Network
 
         public void TestLogin()
         {
-            GameManager.Instance.TestLogin();
+            //GameManager.Instance.TestLogin();
+            GameManager.Instance.TestRegister();
         }
 
         public void InitSocket()
@@ -85,8 +95,6 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Network
                         config, (obj, eventArgs) =>
                         {
                             PBMainCmd mainCmd = (PBMainCmd)Enum.ToObject(typeof(PBMainCmd), StringifyHelper.GetHeader(eventArgs.RawData).mainCmd);
-
-                            Log.Print("reciveMessage " + mainCmd);
                         });
 
                 socket.OnConnect((e) => { Log.Print("websocket connected"); });
@@ -141,7 +149,7 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Network
             webSocket.SendAysnc(mainCmd, subCmd, pbBody, onComplete, action, onError, idx);
         }
 
-        public async Task<bool> SendAysnc<TRequest, TResponse>(PBMainCmd mainCmd, Enum subCmd, TRequest pbBody,
+        public async Task<bool> SendAysncAwait<TRequest, TResponse>(PBMainCmd mainCmd, Enum subCmd, TRequest pbBody,
             Action<PBPacket<TResponse>> action = null,
             Action<PbcmdHelper.PbSocketEvent> onError = null,
             PBMatchIndex idx = default) where TRequest : class where TResponse : class
@@ -151,18 +159,6 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Network
         }
 
 
-        public static byte[] HexToByteArray(string hex)
-        {
-            if (hex.Length % 2 == 1)
-            {
-                hex = '0' + hex;
-            }
 
-            int NumberChars = hex.Length;
-            byte[] bytes = new byte[NumberChars / 2];
-            for (int i = 0; i < NumberChars; i += 2)
-                bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
-            return bytes;
-        }
     }
 }

@@ -169,6 +169,10 @@ namespace JEngine.Helper
             //register delegate adaptor
             appdomain.DelegateManager.RegisterMethodDelegate<pbcmd.PBRespAccountMobileSecret>();
             appdomain.DelegateManager.RegisterMethodDelegate<Module.Network.PBSocket.PBPacket<pbcmd.PBRespAccountMobileSecret>>();
+            appdomain.DelegateManager.RegisterMethodDelegate<Module.Network.PBSocket.PBPacket<pbcmd.PBRespAccountMobileAuth>>();
+            appdomain.DelegateManager.RegisterMethodDelegate<Module.Network.PBSocket.PBPacket<pbcmd.PBRespAccountLogin>>();
+            appdomain.DelegateManager.RegisterMethodDelegate<Module.Network.PBSocket.PBPacket<pbcmd.PBRespAccountMobileCode>>();
+
 
         }
     }

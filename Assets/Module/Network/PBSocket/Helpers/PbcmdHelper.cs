@@ -2,18 +2,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
+using System.Security.Cryptography;
+using System.Text;
 using pbcmd;
 using UnityEngine;
 
 public class PbcmdHelper : MonoBehaviour
 {
-    public static PbcmdHelper Instance;
-
     public const string localAccount = "LocalAccount";
 
     #region enums
-    
-    
 
     public enum PbSocketEvent
     {
@@ -246,22 +244,20 @@ public class PbcmdHelper : MonoBehaviour
         Left
     }
 
-    #endregion
-
-    void Awake()
+    public enum PasswordType
     {
-        Instance = this;
-        DontDestroyOnLoad(this);
+        Login,
+        Register
     }
 
+    #endregion
+    
 
-    public PBCommParam getPBCommParam()
+    public static PBCommParam getPBCommParam()
     {
         return new PBCommParam()
         {
-            cid = (Application.platform == RuntimePlatform.IPhonePlayer)
-                ? (uint) ClientDeviceType.Android
-                : (uint) ClientDeviceType.iOS,
+            cid = 2,
             uid = 0,
             token = "",
             version = Application.version,
@@ -279,6 +275,67 @@ public class PbcmdHelper : MonoBehaviour
             }
         };
     }
+
+    public static string EncryptPassword(PasswordType type, string rawPassword, string salt, string secret = "",
+        RSAParameters rsaParameters = default)
+    {
+        switch (type)
+        {
+            case PasswordType.Register:
+                return GetMd5Hex(rawPassword + salt);
+            case PasswordType.Login:
+                string md5Hex = GetMd5Hex(rawPassword + salt);
+                return RsaHex(md5Hex + '\b' + secret, rsaParameters);
+        }
+
+        return null;
+    }
+
+
+    public static string RsaHex(string text, RSAParameters rsaParameters)
+    {
+        byte[] rgb = Encoding.ASCII.GetBytes(text);
+        byte[] encryptedData = Rsa(rgb, rsaParameters);
+        return BitConverter.ToString(encryptedData).Replace("-", string.Empty);
+    }
+
+    public static byte[] Rsa(byte[] rgb, RSAParameters rsaParameters)
+    {
+        RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
+        rsa.ImportParameters(rsaParameters);
+        byte[] ret = rsa.Encrypt(rgb, false);
+        return ret;
+    }
+
+    public static string GetMd5Hex(string text)
+    {
+        return BitConverter
+            .ToString(GetMd5Bytes(text))
+            .Replace("-", string.Empty)
+            .ToLower();
+    }
+
+    public static byte[] GetMd5Bytes(string text)
+    {
+        byte[] buffer = Encoding.UTF8.GetBytes(text);
+        byte[] ret = MD5.Create().ComputeHash(buffer);
+        return ret;
+    }
+
+    public static byte[] HexToByteArray(string hex)
+    {
+        if (hex.Length % 2 == 1)
+        {
+            hex = '0' + hex;
+        }
+        int NumberChars = hex.Length;
+        byte[] bytes = new byte[NumberChars / 2];
+        for (int i = 0; i < NumberChars; i += 2)
+            bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
+        return bytes;
+    }
+
+    #region Private function
 
     private static string GetMacAddress()
     {
@@ -310,7 +367,6 @@ public class PbcmdHelper : MonoBehaviour
 
         return physicalAddress;
     }
-    
-    
-    
+
+    #endregion
 }

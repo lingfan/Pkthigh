@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 5136017585693467620}
   - component: {fileID: 5136017585693467643}
-  - component: {fileID: 5136017585693467642}
   - component: {fileID: 5136017585693467621}
   m_Layer: 5
   m_Name: Backgound
@@ -46,18 +45,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5136017585693467623}
   m_CullTransparentMesh: 0
---- !u!114 &5136017585693467642
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5136017585693467623}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4bb38db1beff8c84c8a4abc0aacfb2d1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &5136017585693467621
 MonoBehaviour:
   m_ObjectHideFlags: 0

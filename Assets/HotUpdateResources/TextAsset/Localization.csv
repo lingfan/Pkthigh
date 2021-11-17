@@ -6,3 +6,4 @@ PhoneLoginInput-PhonePasswordtInput-Placeholder,8-20位数字字母组合,8-20 d
 PhoneLoginFoot-LoginButton-Text,登录,Login
 PhoneLoginFoot-ResetPasswordButton-Text,重置密码,Reset Password
 PhoneLoginFoot-RegisterButton-Text,立即注册,Resigter
+PhoneRegisterFoot-RegisterButton-Text,注册,Resigter

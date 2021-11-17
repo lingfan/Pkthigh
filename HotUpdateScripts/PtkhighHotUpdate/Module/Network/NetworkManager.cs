@@ -74,6 +74,7 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Network
         {
             //GameManager.Instance.TestLogin();
             //GameManager.Instance.TestRegister();
+            UIManager.instance.Show(nameof(LoginPage));
         }
 
         public void InitSocket()

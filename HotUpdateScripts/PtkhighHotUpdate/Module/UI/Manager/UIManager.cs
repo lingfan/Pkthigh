@@ -94,15 +94,15 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.UI.Manager
             });
         }
 
-        public GameObject LoadLocal(string uiName)
-        {
-            if (UIMaps.ContainsKey(uiName))
-            {
-                throw new Exception($"UI重复加载警告: uiName={uiName}");
-            }
+        //public GameObject LoadLocal(string uiName)
+        //{
+        //    if (UIMaps.ContainsKey(uiName))
+        //    {
+        //        throw new Exception($"UI重复加载警告: uiName={uiName}");
+        //    }
 
-            return Resources.Load<GameObject>(uiName);
-        }
+        //    return Resources.Load<GameObject>(uiName);
+        //}
 
         /// <summary>
         /// 挂载一个UI
@@ -110,38 +110,48 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.UI.Manager
         /// <param name="ui"></param>
         private void Register(UIBase ui, Action<UIBase> openCall = null, Action<UIBase> closeCall = null)
         {
-            RectTransform parent = layerHidden;
-            //初始化
-            ui.gameObject.layer = LayerMask.NameToLayer("UI");
-            ui.transform.SetParent(parent, false);
-            UIMaps.Add(ui.GetType().Name, ui);
-            ui.gameObject.SetActive(true);
-            ui.Init();
 
-            switch (ui.config.uiLayer)
+            try
             {
-                case Layer.Hidden:
-                    parent = layerHidden;
-                    break;
-                case Layer.Bottom:
-                    parent = layerBottom;
-                    break;
-                case Layer.Medium:
-                    parent = layerMedium;
-                    break;
-                case Layer.Top:
-                    parent = layerTop;
-                    break;
-                case Layer.TopMost:
-                    parent = layerTopMost;
-                    break;
-                default:
-                    throw new Exception($"UI类型设置错误: uiName={ui.GetType().Name}");
+                RectTransform parent = layerHidden;
+                //初始化
+                ui.gameObject.layer = LayerMask.NameToLayer("UI");
+                ui.transform.SetParent(parent, false);
+                UIMaps.Add(ui.GetType().Name, ui);
+                ui.gameObject.SetActive(true);
+                ui.Init();
+
+                switch (ui.config.uiLayer)
+                {
+                    case Layer.Hidden:
+                        parent = layerHidden;
+                        break;
+                    case Layer.Bottom:
+                        parent = layerBottom;
+                        break;
+                    case Layer.Medium:
+                        parent = layerMedium;
+                        break;
+                    case Layer.Top:
+                        parent = layerTop;
+                        break;
+                    case Layer.TopMost:
+                        parent = layerTopMost;
+                        break;
+                    default:
+                        throw new Exception($"UI类型设置错误: uiName={ui.GetType().Name}");
+                }
+                // 初始化完成后设置层级
+                ui.transform.SetParent(parent, false);
+                ui.gameObject.SetActive(false);
+                ui.InitUICallBack(openCall, closeCall);
             }
-            // 初始化完成后设置层级
-            ui.transform.SetParent(parent, false);
-            ui.gameObject.SetActive(false);
-            ui.InitUICallBack(openCall, closeCall);
+            catch (Exception ex)
+            {
+                Log.PrintError(string.Format("页面{0}注册失败,请检查页面脚本以及UIConfig是否已挂载", ui.name)); ;
+            }
+
+
         }
 
 

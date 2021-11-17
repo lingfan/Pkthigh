@@ -10,3 +10,4 @@ obj/*
 *.csproj
 Pkthigh.sln
 HotUpdateScripts/obj/*
+Assets/HotUpdateResources/Dll/HotUpdateScripts.bytes

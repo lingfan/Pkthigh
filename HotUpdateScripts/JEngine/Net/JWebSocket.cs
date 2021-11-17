@@ -115,28 +115,36 @@ namespace JEngine.Net
             socket.On(socket.config.eventErrorName, socketIOEvent);
         }
 
+        public void OnHeartBeatTimeout(Action<SocketIOEvent> socketIOEvent)
+        {
+            socket.On(socket.config.eventHeartBeatTimeoutName, socketIOEvent);
+        }
+
         public void Send<TRequest, TResponse>(PBMainCmd mainCmd, Enum subCmd, TRequest pbBody,
             Action<PBPacket<TResponse>> action = null,
+            Action<PbcmdHelper.PbSocketEvent> onError = null,
             PBMatchIndex idx = default
         ) where TRequest : class where TResponse : class
         {
-            socket.Emit(mainCmd, subCmd, pbBody, action, idx);
+            socket.Emit(mainCmd, subCmd, pbBody, action, onError, idx);
         }
 
         public void SendAysnc<TRequest, TResponse>(PBMainCmd mainCmd, Enum subCmd, TRequest pbBody,
             Action<bool> onComplete,
             Action<PBPacket<TResponse>> action = null,
+            Action<PbcmdHelper.PbSocketEvent> onError = null,
             PBMatchIndex idx = default
         ) where TRequest : class where TResponse : class
         {
-            socket.EmitAsync(mainCmd, subCmd, pbBody, onComplete, action, idx);
+            socket.EmitAsync(mainCmd, subCmd, pbBody, onComplete, action, onError, idx);
         }
 
         public async Task<bool> SendAysnc<TRequest, TResponse>(PBMainCmd mainCmd, Enum subCmd, TRequest pbBody,
             Action<PBPacket<TResponse>> action = null,
+            Action<PbcmdHelper.PbSocketEvent> onError = null,
             PBMatchIndex idx = default) where TRequest : class where TResponse : class
         {
-            var result = await socket.EmitAsync(mainCmd, subCmd, pbBody, action, idx);
+            var result = await socket.EmitAsync(mainCmd, subCmd, pbBody, action, onError, idx);
             return result;
         }
 

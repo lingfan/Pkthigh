@@ -53,9 +53,6 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Network
         /// </summary>
         public const string URL_ENDPOINT_TEST_DEV3 = @"wss://poseidon-ws.teampkt.co/ws";
 
-
-        Action onOpened;
-
         private JWebSocket webSocket;
 
         void Awake()
@@ -66,15 +63,7 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Network
 
         void Start()
         {
-            onOpened += TestLogin;
             InitSocket();
-        }
-
-        public void TestLogin()
-        {
-            //GameManager.Instance.TestLogin();
-            //GameManager.Instance.TestRegister();
-            UIManager.instance.Show(nameof(LoginPage));
         }
 
         public void InitSocket()
@@ -103,11 +92,11 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Network
                 socket.OnOpen((e) =>
                 {
                     Log.Print("websocket open");
+
                     Loom.QueueOnMainThread((e) =>
                     {
-                        onOpened.Invoke();
+                        EventManager.DispatchEvent(EventManager.socketOpen);
                     }, null);
-
                 });
 
                 socket.OnError(e => { Log.PrintError(e); });
@@ -155,7 +144,7 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Network
             Action<PbcmdHelper.PbSocketEvent> onError = null,
             PBMatchIndex idx = default) where TRequest : class where TResponse : class
         {
-            var result = await webSocket.SendAysnc(mainCmd, subCmd, pbBody, action, onError,idx);
+            var result = await webSocket.SendAysnc(mainCmd, subCmd, pbBody, action, onError, idx);
             return result;
         }
 

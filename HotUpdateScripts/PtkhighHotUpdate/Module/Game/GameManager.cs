@@ -47,6 +47,16 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Game
             //    TestEvent();
             //}).Execute(true);
             Loom.Initialize();
+            EventManager.AddEvent(EventManager.socketOpen, OnSocketOpened);
+        }
+
+        public void OnSocketOpened()
+        {
+            JAction action = new JAction();
+            action.Delay(0.5f).Do(() =>
+            {
+                UIManager.instance.Show(nameof(LoginPage));
+            }).Execute(true);
         }
 
 

@@ -1,4 +1,5 @@
 ﻿
+using JEngine.Core;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -13,6 +14,9 @@ public class EventManager
     /// 带返回参数的回调列表,参数类型为T，支持一对多
     /// </summary>
     public static Dictionary<string, List<Delegate>> events = new Dictionary<string, List<Delegate>>();
+
+
+    public const string socketOpen = "socketOpen";
 
     /// <summary>
     /// 通用注册事件方法
@@ -157,6 +161,7 @@ public class EventManager
 
             foreach (var act in actions)
             {
+                Log.Print("Dispatch function：" + act.ToString());
                 act.DynamicInvoke();
             }
         }

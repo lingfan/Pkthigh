@@ -41,6 +41,9 @@ using Task = System.Threading.Tasks.Task;
 
 namespace JEngine.Net
 {
+    /// <summary>
+    /// socket配置类
+    /// </summary>
     public class JSocketConfig
     {
         public bool debug = false;
@@ -63,6 +66,9 @@ namespace JEngine.Net
         }
     }
 
+    /// <summary>
+    /// 挂载在unity中的socket组件
+    /// </summary>
     public class SocketIOComponent : MonoBehaviour
     {
         #region Public Properties
@@ -115,10 +121,11 @@ namespace JEngine.Net
         private int packetId;
         private const int HeartBeatPacketId = 0;
 
-        private object eventQueueLock;
-        private Queue<SocketIOEvent> eventQueue;
 
         private object ackQueueLock;
+        /// <summary>
+        /// 消息确认队列，用于执行回调
+        /// </summary>
         private Queue<AckMessage> ackQueue;
 
         private object heartBeatQueueLock;
@@ -135,6 +142,12 @@ namespace JEngine.Net
 
         #region Unity interface
 
+        /// <summary>
+        /// 初始化
+        /// </summary>
+        /// <param name="url">url</param>
+        /// <param name="config">config</param>
+        /// <param name="onMessage">处理clientCtx没有与之对应请求的消息 </param>
         public void Init(string url, JSocketConfig config, Action<object, MessageEventArgs> onMessage)
         {
             if (config == null)
@@ -149,17 +162,10 @@ namespace JEngine.Net
             this.url = url;
             this.config = config;
 
-            // encoder = new Encoder();
-            // decoder = new Decoder();
-            // parser = new Parser();
-
             handlers = new Dictionary<string, List<Action<SocketIOEvent>>>();
             ackList = new List<Ack>();
             sid = null;
             packetId = 0;
-
-            eventQueueLock = new object();
-            eventQueue = new Queue<SocketIOEvent>();
 
             ackQueueLock = new object();
             ackQueue = new Queue<AckMessage>();
@@ -190,14 +196,6 @@ namespace JEngine.Net
 
         public void Update()
         {
-            lock (eventQueueLock)
-            {
-                while (eventQueue.Count > 0)
-                {
-                    EmitEvent(eventQueue.Dequeue());
-                }
-            }
-
             lock (ackQueueLock)
             {
                 while (ackQueue.Count > 0)
@@ -286,9 +284,10 @@ namespace JEngine.Net
 
             connected = true;
 
+            //启动新线程执行
             socketThread = new Thread(RunSocketThread);
             socketThread.Start(ws);
-
+            
             pingThread = new Thread(RunPingThread);
             pingThread.Start(ws);
         }
@@ -326,6 +325,11 @@ namespace JEngine.Net
             connected = false;
         }
 
+        /// <summary>
+        /// 订阅事件
+        /// </summary>
+        /// <param name="ev"></param>
+        /// <param name="callback"></param>
         public void On(string ev, Action<SocketIOEvent> callback)
         {
             if (!handlers.ContainsKey(ev))
@@ -335,7 +339,11 @@ namespace JEngine.Net
 
             handlers[ev].Add(callback);
         }
-
+        /// <summary>
+        /// 取消订阅
+        /// </summary>
+        /// <param name="ev"></param>
+        /// <param name="callback"></param>
         public void Off(string ev, Action<SocketIOEvent> callback)
         {
             if (!handlers.ContainsKey(ev))
@@ -678,16 +686,6 @@ namespace JEngine.Net
             }
 
             onMessageHotUpdate?.Invoke(sender, eventArgs);
-
-            //TODO 事件队列
-            // if (packet.socketPacketType == SocketPacketType.EVENT)
-            // {
-            //     SocketIOEvent e = parser.Parse(packet.json);
-            //     lock (eventQueueLock)
-            //     {
-            //         eventQueue.Enqueue(e);
-            //     }
-            // }
         }
 
         private void OnError(object sender, ErrorEventArgs e)

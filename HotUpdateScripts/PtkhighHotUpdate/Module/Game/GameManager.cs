@@ -13,6 +13,9 @@ using static PbcmdHelper;
 
 namespace HotUpdateScripts.PtkhighHotUpdate.Module.Game
 {
+    /// <summary>
+    /// 游戏管理类单例
+    /// </summary>
     public class GameManager : MonoBehaviour
     {
         public static GameManager Instance;
@@ -46,12 +49,17 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Game
             //    UIManager.instance.Show(nameof(Tabs));
             //    TestEvent();
             //}).Execute(true);
+            
+            //Loom负责线程调度，某些方法只能在unity主线程中调用
             Loom.Initialize();
+
+            //注册socketOpen事件
             EventManager.AddEvent(EventManager.socketOpen, OnSocketOpened);
         }
 
         public void OnSocketOpened()
         {
+            //JAction 延迟用法
             JAction action = new JAction();
             action.Delay(0.5f).Do(() =>
             {

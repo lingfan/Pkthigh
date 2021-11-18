@@ -132,7 +132,11 @@ namespace JEngine.Core
             _parallel = true;
             return this;
         }
-
+        /// <summary>
+        /// 执行Action，在最后调用，必须
+        /// </summary>
+        /// <param name="onMainThread">是否在Unity主线程执行</param>
+        /// <returns></returns>
         public JAction Execute(bool onMainThread = false)
         {
             _ = Do(onMainThread);

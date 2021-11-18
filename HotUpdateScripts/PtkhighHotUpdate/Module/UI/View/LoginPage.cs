@@ -65,6 +65,8 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.UI.View
                     type = (int)VerifType.PhoneLogin
                 };
 
+                
+
                 var mainCmdAuth = PBMainCmd.MCmd_Account;
                 var subCmdAuth = PBMainCmdAccountSubCmd.Account_ReqMobileAuth;
 
@@ -72,7 +74,7 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.UI.View
                 {
                     Log.Print("收到 auth 回调:" + ReturnCode.codeDesc[respAuth.PBBody.ret.code].chineseSimplified);
                     Log.Print("收到 auth 回调:" + respAuth.PBBody.ret.code);
-
+                   
                     //login
                     var mainCmdLogin = PBMainCmd.MCmd_Account;
                     var subCmdLogin = PBMainCmdAccountSubCmd.Account_ReqLogin;

@@ -84,6 +84,8 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Network
                     socket = new JWebSocket(URL_ENDPOINT_TEST_DEV2,
                         config, (obj, eventArgs) =>
                         {
+                            //clientCtx没有与已发送包对应的消息在此处理
+
                             PBMainCmd mainCmd = (PBMainCmd)Enum.ToObject(typeof(PBMainCmd), StringifyHelper.GetHeader(eventArgs.RawData).mainCmd);
                         });
 
@@ -95,6 +97,7 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Network
 
                     Loom.QueueOnMainThread((e) =>
                     {
+                        //广播socketOpen 事件
                         EventManager.DispatchEvent(EventManager.socketOpen);
                     }, null);
                 });

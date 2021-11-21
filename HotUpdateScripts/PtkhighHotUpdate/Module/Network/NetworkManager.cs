@@ -69,7 +69,7 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Network
         public void InitSocket()
         {
             JSocketConfig config = new JSocketConfig();
-            config.pingInterval = 5.0f;
+            config.pingInterval = 10f;
             config.pingTimeout = 10f;
             config.ackExpirationTime = 10f;
             config.reconnectDelay = 2;
@@ -81,7 +81,7 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Network
                 //OnMessage 
 
                 JWebSocket
-                    socket = new JWebSocket(URL_ENDPOINT_TEST_DEV2,
+                    socket = new JWebSocket(URL_ENDPOINT_TEST_DEV3,
                         config, (obj, eventArgs) =>
                         {
                             //clientCtx没有与已发送包对应的消息在此处理

@@ -105,14 +105,10 @@ namespace ILRuntime.Runtime.Generated
             Module_Network_PBSocket_PBPacket_1_PBRespAccountMobileSecret_Binding.Register(app);
             pbcmd_PBRespAccountMobileSecret_Binding.Register(app);
             pbcmd_PBCommResult_Binding.Register(app);
-            System_Collections_Generic_Dictionary_2_Int32_ILTypeInstance_Binding.Register(app);
             PbcmdHelper_Binding.Register(app);
             pbcmd_PBReqAccountMobileAuth_Binding.Register(app);
             Module_Network_PBSocket_PBPacket_1_PBRespAccountMobileAuth_Binding.Register(app);
             pbcmd_PBRespAccountMobileAuth_Binding.Register(app);
-            pbcmd_PBReqAccountLogin_Binding.Register(app);
-            Module_Network_PBSocket_PBPacket_1_PBRespAccountLogin_Binding.Register(app);
-            pbcmd_PBRespAccountLogin_Binding.Register(app);
             pbcmd_PBReqAccountMobileCode_Binding.Register(app);
             Module_Network_PBSocket_PBPacket_1_PBRespAccountMobileCode_Binding.Register(app);
             pbcmd_PBRespAccountMobileCode_Binding.Register(app);

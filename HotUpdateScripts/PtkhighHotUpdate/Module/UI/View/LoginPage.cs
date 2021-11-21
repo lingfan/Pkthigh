@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 using UnityEngine.UI;
 using static PbcmdHelper;
 
@@ -48,46 +49,67 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.UI.View
             var mainCmdSecret = PBMainCmd.MCmd_Account;
             var subCmdSecret = PBMainCmdAccountSubCmd.Account_ReqMobileSecret;
 
-
             NetworkManager.Instance.Send<PBReqAccountMobileSecret, PBRespAccountMobileSecret>(mainCmdSecret, subCmdSecret, req, (respSecret) =>
             {
-                Log.Print("收到 secret 回调:" + ReturnCode.codeDesc[respSecret.PBBody.ret.code].chineseSimplified);
                 Log.Print("收到 secret 回调:" + respSecret.PBBody.ret.code);
+                Log.Print("收到 secret 回调:" + ReturnCode.Desc(respSecret.PBBody.ret.code));
+
+                if (respSecret.PBBody.ret.code != ReturnCode.Success)
+                {
+
+                }
+
+                switch (respSecret.PBBody.ret.code)
+                {
+                    // 新设备登录
+                    case ReturnCode.Account_NewDevice:
+                        break;
+                    case ReturnCode.Success:
+                        break;
+                    default:
+                        break;
+                }
+
+
                 //auth
-                string encryptedPwd = PbcmdHelper.EncryptPassword(PbcmdHelper.PasswordType.Login, "abcd1234", NetworkManager.salt, respSecret.PBBody.secret, NetworkManager.RSAParams);
+                string encryptedPwd = PbcmdHelper.EncryptPassword(PbcmdHelper.PasswordType.Login, "abcd2222", NetworkManager.salt, respSecret.PBBody.secret, NetworkManager.RSAParams);
 
                 PBReqAccountMobileAuth mobileAuth = new PBReqAccountMobileAuth()
                 {
                     comm = NetworkManager.Instance.pBCommParam,
-                    number = "phone::+86:19988888888",
+                    number = "phone::+86:19966666666",
                     pwd = encryptedPwd,
-                    code = "",
-                    type = (int)VerifType.PhoneLogin
+                    code = null,
+                    type = (int)VerifType.PhoneLogin,
+                    InvitationCode = null,
                 };
 
-                
+
 
                 var mainCmdAuth = PBMainCmd.MCmd_Account;
                 var subCmdAuth = PBMainCmdAccountSubCmd.Account_ReqMobileAuth;
 
                 NetworkManager.Instance.Send<PBReqAccountMobileAuth, PBRespAccountMobileAuth>(mainCmdAuth, subCmdAuth, mobileAuth, (respAuth) =>
                 {
-                    Log.Print("收到 auth 回调:" + ReturnCode.codeDesc[respAuth.PBBody.ret.code].chineseSimplified);
                     Log.Print("收到 auth 回调:" + respAuth.PBBody.ret.code);
-                   
-                    //login
-                    var mainCmdLogin = PBMainCmd.MCmd_Account;
-                    var subCmdLogin = PBMainCmdAccountSubCmd.Account_ReqLogin;
-                    var mobileLogin = new PBReqAccountLogin()
-                    {
-                        comm = NetworkManager.Instance.pBCommParam,
-                    };
+                    Log.Print("收到 auth 回调:" + ReturnCode.Desc(respAuth.PBBody.ret.code));
 
-                    NetworkManager.Instance.Send<PBReqAccountLogin, PBRespAccountLogin>(mainCmdLogin, subCmdLogin, mobileLogin, (respLogin) =>
-                    {
-                        Log.Print("收到 login 回调:" + ReturnCode.codeDesc[respLogin.PBBody.ret.code].chineseSimplified);
-                        Log.Print("收到 login 回调:" + respLogin.PBBody.ret.code);
-                    });
+                    Log.Print(respAuth.ToString());
+                    Log.Print(gameObject.activeSelf + " " + Application.version);
+                    //login
+                    //var mainCmdLogin = PBMainCmd.MCmd_Account;
+                    //var subCmdLogin = PBMainCmdAccountSubCmd.Account_ReqLogin;
+                    //var mobileLogin = new PBReqAccountLogin()
+                    //{
+                    //    comm = NetworkManager.Instance.pBCommParam,
+                    //};
+
+                    //NetworkManager.Instance.Send<PBReqAccountLogin, PBRespAccountLogin>(mainCmdLogin, subCmdLogin, mobileLogin, (respLogin) =>
+                    //{
+                    //    Log.Print("收到 login 回调:" + respLogin.PBBody.ret.code);
+                    //    Log.Print("收到 login 回调:" + ReturnCode.codeDesc[respLogin.PBBody.ret.code].chineseSimplified);
+
+                    //});
                 });
 
             });

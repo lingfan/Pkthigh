@@ -79,7 +79,7 @@ namespace Module.Network.PBSocket
 
         public override string ToString()
         {
-            return " PBHeader: " + StringifyHelper.JSONSerliaze(_PBHeader) + Environment.NewLine + " PBBody: " +
+            return " clientCtx:" + _PBHeader.clientCtx + Environment.NewLine + " PBBody: " +
                    typeof(T).FullName +
                    ":" + StringifyHelper.JSONSerliaze(_PBBody);
         }

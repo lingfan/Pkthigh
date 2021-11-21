@@ -7,3 +7,186 @@ PhoneLoginFoot-LoginButton-Text,登录,Login
 PhoneLoginFoot-ResetPasswordButton-Text,重置密码,Reset Password
 PhoneLoginFoot-RegisterButton-Text,立即注册,Resigter
 PhoneRegisterFoot-RegisterButton-Text,注册,Resigter
+,,
+-1,"非法操作,请重新尝试","Illegal operation, please try again"
+-2,"非法操作,请重新尝试","Illegal operation, please try again"
+1,操作成功,The operation was successful
+5,超过每日最大限额,Exceeded daily maximum limit
+400,协议错误,Agreement error
+403,禁止访问,Access is forbidden
+503,服务器维护，非常抱歉给你带来不便,Server is currently under maintenance
+,,
+100000,操作失败,Operation failed
+100001,登录验证失败,Login verification failed
+100002,用户授权失败,User authorization failed
+100003,创建用户失败,User creation failed
+100004,其他地方登录或者会话不存在或已过期,The session does not exist or has expired
+100005,帐号已被禁用,Account has been disabled
+100006,账户余额不足,Insufficient account balance
+100007,昵称已存在,Nickname already exists
+100008,超过数量限制,Exceeded quantity limit
+100009,"请输入呢称(不低于2位汉字或4位字母,数字组合)",Please enter a nickname (not less than 2 Chinese characters or 4 letters and numbers combination)
+100010,无时间币可领取了,No time currency can be claimed
+100011,帐号或密码错误,Username/Number or password is wrong
+100012,"密码即将过期,立即修改","The password is about to expire, modify it now"
+100013,原密码和新密码相同,The original password is the same as the new password
+100014,此类邮箱暂不支持，请更换其他邮箱,This type of email is not supported. Please change to another email
+100015,此类手机号码暂不支持，请更换其他手机号码,"This type of mobile phone number is not currently supported, please change to another mobile phone number."
+,,
+200001,手机号码格式错误,Invalid mobile phone number
+200002,验证码无效,The verification code is invalid
+200003,密码错误，请核对密码,"The password is wrong, please check the password"
+200004,验证码获取频率过快,The frequency of obtaining the verification code is too fast
+200005,手机号未注册,Mobile phone number is not registered
+200006,数字货币账号注册失败,Digital currency account registration failed
+200007,数字货币账号登陆失败,Digital currency account login failed
+200008,设置pin失败,Setting pin failed
+200009,数字货币余额读取失败，请稍后再试,"The digital currency balance reading failed, please try again later"
+200010,查询失败,Query failed
+200011,余额变动错误,Balance change error/Asset operation parameter error
+200012,余额不足,Insufficient balance
+200013,数字货币账号注册或登陆失败,Digital currency account registration or login failed.digital goodsCoin account registration or login parameters are wrong
+200014,通道维护中，请稍后再试,"Channel under maintenance, please try again later"
+200015,兑换申请提交成功待审核,Application submitted successfully and is pending review
+200016,请求数据错误,Request data error
+200017,邮箱格式错误,Invalid Email format
+200018,手机号码已被绑定,Mobile phone number has been bound
+200019,邮箱已被绑定,Email has been bound
+200020,绑定手机或邮箱失败,Failed to bind mobile phone or email
+200021,修改密码失败,Failed to modify password
+200022,时间币商城 未开启,Timecoin Mall is not open
+200023,账号格式错误,Account format error
+200024,数字货币商城 未开启,The digital currency store is not open
+200030,该邮箱未注册,Email is not registered
+200100,通道维护中，请稍后再试,"Channel under maintenance, please try again later"
+200101,通道维护中，请稍后再试,"Channel under maintenance, please try again later"
+200102,通道维护中，请稍后再试,"Channel under maintenance, please try again later"
+200103,挂单失败,Pending order failed
+200104,查询汇率失败，请稍后再试,"Exchange rate query failed, please try again later"
+200105,挂单失败,Pending order failed
+200106,挂单失败,Pending order failed
+200107,挂单失败,Pending order failed
+200108,您输入的数量超出限制,The amount you entered exceeds the limit
+200109,操作失败,Operation failed
+200110,余额不足,Insufficient balance
+200111,请先前往设置PIN,Please set PIN first
+200112,不能与原PIN码相同,PIN cannot be the same as previous PIN
+200113,兑换失败,Exchange failed
+200114,由于盘口数量不足，已成功兑换{0}时间币,"Due to insufficient market volume, the {0} time currency has been successfully exchanged"
+200200,赠送失败,Transfer failed
+200201,密码验证失败,Password Verification Failed
+200202,赠送失败,Transfer failed
+200203,赠送失败，请联系工作人员,Transfer failed
+200204,赠送失败，请联系工作人员,Transfer failed
+200205,低于最小额度,Amount is below the required minimum
+200206,超出最大额度,Maximum limit exceeded
+200207,您今日累计转账数额已经超过限制,You have reached your daily transfer amount limit
+200300,兑换参数错误,Exchange parameter error
+200301,兑换失败,Exchange failed
+200302,充币地址读取失败，请稍后再试,"The deposit address failed to read, please try again later"
+200303,请求失败,Request failed
+200304,通道维护中，请稍后再试,"The channel is under maintenance, please try again later"
+200305,读取记录失败，请稍后再试,"Failed to read the record, please try again later"
+200306,自动转换时间币失败，请使用手动兑换,"Automatic time currency conversion failed, please use manual exchange instead"
+200400,该账号已注册,Account has been registered
+200401,密码无效,Invalid password
+200402,新设备登录,New device log in
+20412,IP限制,The area of ​​your mobile phone number does not support access to poker time
+20413,IP限制,IP restricted
+,,
+300001,商品不存在,The item does not exist
+300002,创建订单失败,Order creation failed
+300003,支付校验失败,Payment verification failed
+300004,订单不存在,Order does not exist
+300005,订单更新失败,Order update failed
+300006,参数错误,Parameter error
+300007,已下架,Item does not exists
+300008,余额不足,Time currency balance is insufficient
+300009,练习币购买失败,Purchase practice coin failed
+,,
+400001,没有可用的支付方式,No payment method available
+400002,获取支付方式失败,Failed to obtain payment method
+400003,发送支付请求失败,Sending payment request failed
+400004,支付失败,Payment failed
+400005,订单信息创建失败,Order information creation failed
+400006,提现发起失败，请核对信息后重试,"Withdrawal initiation failed, please check the information and try again"
+400007,生成提现订单失败,Generate withdrawal order failed
+400008,暂不支持提现到该银行,Withdrawal to this bank is not currently supported
+400009,请勿重复提交,Do not submit repeatedly
+400010,通道维护中，请等待,"Channel under maintenance, please wait"
+400011,通道维护中，请等待,"Channel under maintenance, please wait"
+400012,"余额不足,提现发起失败","Insufficient balance, withdrawal initiation failed"
+400013,支付通道维护中,Payment channel is under maintenance
+400014,支付通道不在可用时间,Payment channel is not available at the time
+400016,提交失败,Submission failed
+400018,"支付禁用中,请稍后再试或联系客服","Payment disabled,Please try again later or contact customer service"
+400019,"操作过于频繁, 请联系客服","The operation is too frequent, please contact customer service"
+400100,没有二级密码，请先前往设置二级密码,"There is no secondary password, please go to set the secondary password first"
+400101,您的二级密码码处于锁定中，请稍后再试,"PIN Locked, Try again later"
+400102,错误次数过多，已被锁定{0}分钟,"Too many errors,Has been locked for {0} minutes"
+400103,"二级密码验证未通过, 剩余次数: {0}","PIN Error, remaining times: {0}"
+400105,您的验证码处于锁定中，请稍后再试,"Your verification code is locked, please wait and try again"
+400106,错误次数过多，已被锁定 {0} 分钟,"Too many errors, alreadyLocked for {0} minutes"
+400107,"验证码验证未通过, 剩余次数: {0}","Verification code verification failed, remaining times: {0}"
+,,
+1001,俱乐部名称已存在,Club name already exists
+1002,俱乐部创建失败，请稍后重试,"Club creation failed, please try again later"
+1003,俱乐部创建太频繁,The club is created too frequently
+1011,已经加入该俱乐部,has joined the club
+1012,俱乐部人数已满,The club is full
+1013,加入俱乐部失败，请稍后重试,"Failed to join the club, please try again later"
+1021,修改俱乐部头像失败，请稍后重试,"Failed to modify the club profile picture, please try again later"
+1022,修改俱乐部名称失败，请稍后重试,"Failed to modify the club name, please try again later"
+1023,修改俱乐部介绍失败，请稍后重试,"Failed to modify the club introduction, please try again later"
+1024,俱乐部头像不能为空,Club picture cannot be empty
+1031,转入到俱乐部余额失败，请稍后重试,"Failed to transfer to the club balance, please try again later"
+1032,余额不足,Time currency balance is insufficient
+1033,转入到俱乐部余额出错，请稍后重试,"An error occurred when transferring to the club balance, please try again later"
+1034,余额不足,Poker currency balance is insufficient
+1041,俱乐部基金余额不足,The club fund balance is insufficient
+1042,俱乐部基金余额提现出错，请稍后重试,"Club fund balance withdrawal error, please try again later"
+1043,超过每日最大限额,Exceeded daily maximum limit
+1044,俱乐部基金余额提现失败，请稍后重试,"The club fund balance withdrawal failed, please try again later"
+1045,俱乐部基金提取受限，低于{0}(含)的部分不可提取,"Club fund withdrawal is restricted, and the part below {0} (inclusive) cannot be withdrawn"
+1061,修改备注失败，请稍后重试,"Failed to modify the remark, please try again later"
+1081,管理员设置出错，请稍后重试,"Administrator setting error, please try again later"
+1091,免费提现额度返利设置失败，请稍后重试,"The free withdrawal limit rebate setting failed, please try again later"
+1101,俱乐部开关设置失败，请稍后重试,"Club switch setting failed, please try again later"
+1111,俱乐部基金尚有余额，无法解散。请及时前往俱乐部基金处理,The club fund still has a balance and cannot be dissolved. Please go to the club in timeDepartment of Fund Processing
+1112,解散俱乐部失败，请稍后重试,"Failed to dissolve the club, please try again later"
+1113,俱乐部基金不为0，无法解散俱乐部,"The club fund is not 0, the club cannot be dissolved"
+1114,俱乐部有进行中的牌局，无法解散俱乐部,The club has cards in progress and the club cannot be disbanded
+1115,"已加入联盟无法解散俱乐部, 请退出联盟后重试","You have joined the league and cannot disband the club, please exit the league and restart test!"
+1121,用户信任额度不为 0,User credit limit is not 0
+1122,退出俱乐部失败，请稍后重试,"Failed to exit the club, please try again later"
+1123,"俱乐部还款失败, 请稍后重试","The club repayment failed, please try again later"
+1124,"俱乐部还款出错, 请稍后重试","Club repayment error, please try again later"
+1125,俱乐部没有欠款,The club has no debts
+126,"俱乐部全部还款失败, 请稍后重试","All the club repayment failed, please try again later"
+1127,"俱乐部尚有未还欠款, 请处理后重试","The club still has outstanding debts, please deal with it and try again"
+1131,俱乐部不存在,The club does not exist
+1151,设置俱乐部保险赔付方式失败，请稍后重试,"Failed to set club insurance payment method, please try again later"
+1152,设置俱乐部保险赔付限制失败，请稍后重试,"Failed to set club insurance compensation limit, please try again later"
+1161,没有要处理的消息,No message to be processed
+1162,处理用户加入失败，请稍后重试,"Failed to process user join, please try again later"
+3001,联盟不存在,Alliance does not exist
+3002,已经加入联盟,Already joined the alliance
+3003,联盟的俱乐部数量已满,The number of league clubs is full
+3004,加入联盟失败，请稍后重试,"Failed to join the alliance, please try again later"
+3005,修改联盟介绍失败，请稍后重试’,"Failed to modify the alliance introduction, please try again later"
+3006,添加管理员失败，请稍后重试,"Failed to add administrator, please try again later"
+3007,删除管理员失败，请稍后重试,"Failed to delete the administrator, please try again later"
+3008,处理俱乐部加入失败，请稍后重试,"Failed to process club joining, please try again later"
+9,没有要处理的消息,No message to be processed
+3010,删除俱乐部失败，请稍后重试,"Failed to delete the club, please try again later"
+3011,退出联盟失败，请稍后重试,"Failed to exit the alliance, please try again later"
+3012,转入到联盟基金余额失败，请稍后重试,"Failed to transfer to the alliance fund balance, please try again later"
+3013,余额不足,Time currency balance is insufficient
+3014,转入到联盟基金余额出错，请稍后重试,"An error occurred when transferring to the alliance fund balance, please try again later"
+3015,联盟基金余额不足,The alliance fund balance is insufficient
+3016,联盟基金余额提现出错，请稍后重试,"Affiliate fund balance withdrawal error, please try again later"
+3017,超过每日最大限额,Exceeded the daily maximum limit
+3018,联盟基金余额提现失败，请稍后重试,"Alliance fund balance withdrawal failed, please try again later'"
+3019,用户已经是联盟的管理员,The user is already an administrator of the alliance
+3020,加入的联盟数量已达上限,The number of alliances joined has reached the upper limit
+3021,加入失败，请联系联盟主,"Join failed, please contact the alliance owner"

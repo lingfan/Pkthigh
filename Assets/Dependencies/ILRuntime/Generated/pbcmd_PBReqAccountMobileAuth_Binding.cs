@@ -37,6 +37,9 @@ namespace ILRuntime.Runtime.Generated
             args = new Type[]{typeof(System.Int32)};
             method = type.GetMethod("set_type", flag, null, args, null);
             app.RegisterCLRMethodRedirection(method, set_type_4);
+            args = new Type[]{typeof(System.String)};
+            method = type.GetMethod("set_InvitationCode", flag, null, args, null);
+            app.RegisterCLRMethodRedirection(method, set_InvitationCode_5);
 
             args = new Type[]{};
             method = type.GetConstructor(flag, null, args, null);
@@ -135,6 +138,25 @@ namespace ILRuntime.Runtime.Generated
             __intp.Free(ptr_of_this_method);
 
             instance_of_this_method.type = value;
+
+            return __ret;
+        }
+
+        static StackObject* set_InvitationCode_5(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
+        {
+            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
+            StackObject* ptr_of_this_method;
+            StackObject* __ret = ILIntepreter.Minus(__esp, 2);
+
+            ptr_of_this_method = ILIntepreter.Minus(__esp, 1);
+            System.String @value = (System.String)typeof(System.String).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
+            __intp.Free(ptr_of_this_method);
+
+            ptr_of_this_method = ILIntepreter.Minus(__esp, 2);
+            pbcmd.PBReqAccountMobileAuth instance_of_this_method = (pbcmd.PBReqAccountMobileAuth)typeof(pbcmd.PBReqAccountMobileAuth).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
+            __intp.Free(ptr_of_this_method);
+
+            instance_of_this_method.InvitationCode = value;
 
             return __ret;
         }

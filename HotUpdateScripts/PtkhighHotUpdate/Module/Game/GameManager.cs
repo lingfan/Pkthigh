@@ -7,7 +7,9 @@ using HotUpdateScripts.PtkhighHotUpdate.Module.UI.View;
 using JEngine.Core;
 using JEngine.Event;
 using pbcmd;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using static PbcmdHelper;
 
@@ -31,30 +33,30 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.Game
 
         void Start()
         {
-            //JAction jAction = new JAction();
-            //jAction.Delay(1).Do(() =>
-            //{
-            //    UIManager.instance.Show(nameof(Tabs));
-            //}).Delay(2).Do(() =>
-            //{
-            //    UIManager.instance.Show(nameof(PopupTemplate));
-            //}).Delay(2).Do(() =>
-            //{
-            //    UIManager.instance.Close(nameof(PopupTemplate));
-            //}).Delay(2).Do(() =>
-            //{
-            //    UIManager.instance.Show(nameof(DirectoryTreeView));
-            //}).Delay(2).Do(() =>
-            //{
-            //    UIManager.instance.Show(nameof(Tabs));
-            //    TestEvent();
-            //}).Execute(true);
-            
+
             //Loom负责线程调度，某些方法只能在unity主线程中调用
             Loom.Initialize();
 
             //注册socketOpen事件
             EventManager.AddEvent(EventManager.socketOpen, OnSocketOpened);
+
+
+            //JAction jAction = new JAction();
+            //jAction.Delay(1).Do(() =>
+            //{
+            //    UIManager.instance.ShowLoadingMask();
+            //}).Delay(2).Do(() =>
+            //{
+            //    UIManager.instance.HideLoadingMask();
+            //}).Delay(2).Do(() =>
+            //{
+            //    UIManager.instance.ShowLoadingMask();
+            //}).Delay(2).Do(() =>
+            //{
+            //    UIManager.instance.HideLoadingMask();
+            //}).Execute(true);
+
+
         }
 
         public void OnSocketOpened()

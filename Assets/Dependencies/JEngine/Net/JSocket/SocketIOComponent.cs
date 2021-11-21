@@ -33,7 +33,6 @@ using System.Threading.Tasks;
 using JEngine.Core;
 using Module.Network.PBSocket;
 using pbcmd;
-using UnityEditor.VersionControl;
 using UnityEngine;
 using WebSocketSharp;
 using Object = System.Object;
@@ -123,6 +122,7 @@ namespace JEngine.Net
 
 
         private object ackQueueLock;
+
         /// <summary>
         /// 消息确认队列，用于执行回调
         /// </summary>
@@ -169,7 +169,7 @@ namespace JEngine.Net
 
             ackQueueLock = new object();
             ackQueue = new Queue<AckMessage>();
-            
+
             heartBeatQueueLock = new object();
             heartBeatQueue = new Queue<PBPacket<PBHearBeat>>();
 
@@ -209,9 +209,9 @@ namespace JEngine.Net
                 if (heartBeatQueue.Count >= 4)
                 {
                     socket.Connect();
-                    
+
                     EmitEvent(config.eventHeartBeatTimeoutName);
-                    
+
                     heartBeatQueue.Clear();
                 }
             }
@@ -287,7 +287,7 @@ namespace JEngine.Net
             //启动新线程执行
             socketThread = new Thread(RunSocketThread);
             socketThread.Start(ws);
-            
+
             pingThread = new Thread(RunPingThread);
             pingThread.Start(ws);
         }
@@ -299,7 +299,11 @@ namespace JEngine.Net
                 PBHeader pbHeader = StringifyHelper.GetHeader(e.RawData);
                 PBMainCmd mainCmd = (PBMainCmd) Enum.ToObject(typeof(PBMainCmd), pbHeader.mainCmd);
 #if SOCKET_IO_DEBUG
-                Log.Print("[SocketIO]:reciveMessage clientCtx:=" + pbHeader.clientCtx + "| cmd:= " + mainCmd);
+
+                if (mainCmd != PBMainCmd.MCmd_HeartBeat)
+                {
+                    Log.Print("[SocketIO]:reciveMessage clientCtx:=" + pbHeader.clientCtx + "| cmd:= " + mainCmd);
+                }
 #endif
 
                 switch (mainCmd)
@@ -339,6 +343,7 @@ namespace JEngine.Net
 
             handlers[ev].Add(callback);
         }
+
         /// <summary>
         /// 取消订阅
         /// </summary>
@@ -738,7 +743,7 @@ namespace JEngine.Net
 
                 ack = ackList[i];
                 ackList.RemoveAt(i);
-                Loom.RunAsync(() => { ack.Invoke(ackMessage.MessageEventArgs); });
+                ack?.Invoke(ackMessage.MessageEventArgs);
                 return;
             }
         }

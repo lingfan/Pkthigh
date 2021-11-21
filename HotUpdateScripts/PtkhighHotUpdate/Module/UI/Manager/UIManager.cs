@@ -24,31 +24,28 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.UI.Manager
         [SerializeField] private RectTransform layerTopMost;
 
 
+        [SerializeField] private GameObject loadingMask;
+
+
         [SerializeField] private List<GameObject> localUIPrefabs = new List<GameObject>();
 
-
-
-        /// <summary>
-        /// 全局遮罩
-        /// </summary>
-        [SerializeField] private readonly GameObject Mask;
 
         /// <summary>
         /// 所有已加载的页面
         /// </summary>
-        private Dictionary<string, UIBase> UIMaps = new Dictionary<string, UIBase>();
+        [HideInInspector] private Dictionary<string, UIBase> UIMaps = new Dictionary<string, UIBase>();
 
         /// <summary>
         /// 已打开页面栈,使用栈方便做退回功能
         /// </summary>
-        private Stack<UIBase> UIStack = new Stack<UIBase>();
+        [HideInInspector] private Stack<UIBase> UIStack = new Stack<UIBase>();
 
 
 
         /// <summary>
         /// 当前打开的页面
         /// </summary>
-        private UIBase currentUI;
+        [HideInInspector] private UIBase currentUI;
 
 
         void Awake()
@@ -153,7 +150,6 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.UI.Manager
 
 
         }
-
 
 
         public void Show(string uibaseName, bool isSaveShow = false, bool isClearAll = true)
@@ -273,9 +269,21 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.UI.Manager
             return GetUI(uibaseName) != null;
         }
 
-        public void TestReceive(TabData data)
+
+        /// <summary>
+        /// 显示加载遮罩
+        /// </summary>
+        public void ShowLoadingMask()
         {
-            Log.PrintWarning("has receive " + data);
+            loadingMask.SetActive(true);
+        }
+
+        /// <summary>
+        /// 隐藏加载遮罩
+        /// </summary>
+        public void HideLoadingMask()
+        {
+            loadingMask.SetActive(false);
         }
     }
 

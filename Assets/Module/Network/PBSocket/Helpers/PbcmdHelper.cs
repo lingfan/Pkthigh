@@ -257,7 +257,7 @@ public class PbcmdHelper : MonoBehaviour
     {
         return new PBCommParam()
         {
-            cid = 2,
+            cid = 1,
             uid = 0,
             token = "",
             version = Application.version,
@@ -276,6 +276,15 @@ public class PbcmdHelper : MonoBehaviour
         };
     }
 
+    /// <summary>
+    /// Encrypt Password
+    /// </summary>
+    /// <param name="type"> login or register </param>
+    /// <param name="rawPassword"> password </param>
+    /// <param name="salt"> salt </param>
+    /// <param name="secret"> secret ask from server </param>
+    /// <param name="rsaParameters"> rsa parameters </param>
+    /// <returns></returns>
     public static string EncryptPassword(PasswordType type, string rawPassword, string salt, string secret = "",
         RSAParameters rsaParameters = default)
     {

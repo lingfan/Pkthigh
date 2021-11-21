@@ -53,8 +53,9 @@ namespace HotUpdateScripts.PtkhighHotUpdate.Module.UI.View
 
             }, (resp) =>
             {
-                Log.Print("收到 register 回调:" + ReturnCode.codeDesc[resp.PBBody.ret.code].chineseSimplified);
                 Log.Print("收到 register 回调:" + resp.PBBody.ret.code);
+                Log.Print("收到 register 回调:" + ReturnCode.Desc(resp.PBBody.ret.code));
+              
 
             });
         }

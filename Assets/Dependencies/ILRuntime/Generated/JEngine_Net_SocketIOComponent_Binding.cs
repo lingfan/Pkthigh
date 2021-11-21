@@ -74,20 +74,6 @@ namespace ILRuntime.Runtime.Generated
                     }
                 }
             }
-            args = new Type[]{typeof(pbcmd.PBReqAccountLogin), typeof(pbcmd.PBRespAccountLogin)};
-            if (genericMethods.TryGetValue("Emit", out lst))
-            {
-                foreach(var m in lst)
-                {
-                    if(m.MatchGenericParameters(args, typeof(void), typeof(pbcmd.PBMainCmd), typeof(System.Enum), typeof(pbcmd.PBReqAccountLogin), typeof(System.Action<Module.Network.PBSocket.PBPacket<pbcmd.PBRespAccountLogin>>), typeof(System.Action<global::PbcmdHelper.PbSocketEvent>), typeof(pbcmd.PBMatchIndex)))
-                    {
-                        method = m.MakeGenericMethod(args);
-                        app.RegisterCLRMethodRedirection(method, Emit_5);
-
-                        break;
-                    }
-                }
-            }
             args = new Type[]{typeof(pbcmd.PBReqAccountMobileCode), typeof(pbcmd.PBRespAccountMobileCode)};
             if (genericMethods.TryGetValue("EmitAsync", out lst))
             {
@@ -96,7 +82,7 @@ namespace ILRuntime.Runtime.Generated
                     if(m.MatchGenericParameters(args, typeof(void), typeof(pbcmd.PBMainCmd), typeof(System.Enum), typeof(pbcmd.PBReqAccountMobileCode), typeof(System.Action<System.Boolean>), typeof(System.Action<Module.Network.PBSocket.PBPacket<pbcmd.PBRespAccountMobileCode>>), typeof(System.Action<global::PbcmdHelper.PbSocketEvent>), typeof(pbcmd.PBMatchIndex)))
                     {
                         method = m.MakeGenericMethod(args);
-                        app.RegisterCLRMethodRedirection(method, EmitAsync_6);
+                        app.RegisterCLRMethodRedirection(method, EmitAsync_5);
 
                         break;
                     }
@@ -104,7 +90,7 @@ namespace ILRuntime.Runtime.Generated
             }
             args = new Type[]{typeof(System.String), typeof(JEngine.Net.JSocketConfig), typeof(System.Action<System.Object, WebSocketSharp.MessageEventArgs>)};
             method = type.GetMethod("Init", flag, null, args, null);
-            app.RegisterCLRMethodRedirection(method, Init_7);
+            app.RegisterCLRMethodRedirection(method, Init_6);
 
             field = type.GetField("config", flag);
             app.RegisterCLRFieldGetter(field, get_config_0);
@@ -248,46 +234,7 @@ namespace ILRuntime.Runtime.Generated
             return __ret;
         }
 
-        static StackObject* Emit_5(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
-        {
-            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
-            StackObject* ptr_of_this_method;
-            StackObject* __ret = ILIntepreter.Minus(__esp, 7);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 1);
-            pbcmd.PBMatchIndex @idx = (pbcmd.PBMatchIndex)typeof(pbcmd.PBMatchIndex).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 2);
-            System.Action<global::PbcmdHelper.PbSocketEvent> @onError = (System.Action<global::PbcmdHelper.PbSocketEvent>)typeof(System.Action<global::PbcmdHelper.PbSocketEvent>).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)8);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 3);
-            System.Action<Module.Network.PBSocket.PBPacket<pbcmd.PBRespAccountLogin>> @action = (System.Action<Module.Network.PBSocket.PBPacket<pbcmd.PBRespAccountLogin>>)typeof(System.Action<Module.Network.PBSocket.PBPacket<pbcmd.PBRespAccountLogin>>).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)8);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 4);
-            pbcmd.PBReqAccountLogin @pbBody = (pbcmd.PBReqAccountLogin)typeof(pbcmd.PBReqAccountLogin).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 5);
-            System.Enum @subCmd = (System.Enum)typeof(System.Enum).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 6);
-            pbcmd.PBMainCmd @mainCmd = (pbcmd.PBMainCmd)typeof(pbcmd.PBMainCmd).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)20);
-            __intp.Free(ptr_of_this_method);
-
-            ptr_of_this_method = ILIntepreter.Minus(__esp, 7);
-            JEngine.Net.SocketIOComponent instance_of_this_method = (JEngine.Net.SocketIOComponent)typeof(JEngine.Net.SocketIOComponent).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
-            __intp.Free(ptr_of_this_method);
-
-            instance_of_this_method.Emit<pbcmd.PBReqAccountLogin, pbcmd.PBRespAccountLogin>(@mainCmd, @subCmd, @pbBody, @action, @onError, @idx);
-
-            return __ret;
-        }
-
-        static StackObject* EmitAsync_6(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
+        static StackObject* EmitAsync_5(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
         {
             ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
             StackObject* ptr_of_this_method;
@@ -330,7 +277,7 @@ namespace ILRuntime.Runtime.Generated
             return __ret;
         }
 
-        static StackObject* Init_7(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
+        static StackObject* Init_6(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
         {
             ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
             StackObject* ptr_of_this_method;
